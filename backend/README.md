@@ -2,7 +2,7 @@
 
 ## Option A: Local
 
-1. Ensure you have `poetry` installed: `pip install poetry`
+1. Ensure you have `poetry` installed: `curl -sSL https://install.python-poetry.org | python3 -`
 2. cd into `backend/`
 3. Run `poetry install`
 4. Run `uvicorn main:app --host 0.0.0.0 --port 5670 --reload`

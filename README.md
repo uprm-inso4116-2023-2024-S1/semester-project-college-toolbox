@@ -16,7 +16,7 @@ The two commonly hardest steps are:
 2. PostgreSQL [Download](https://www.postgresql.org/download/)
 3. Git Bash or another flavor of Bash
 4. Python
-5. Poetry: `pip install poetry`
+5. Poetry: `curl -sSL https://install.python-poetry.org | python3 -`
 
 #### Local Development
 
@@ -30,7 +30,7 @@ The two commonly hardest steps are:
 1. Run `cd backend`
 2. Run `poetry install`
 3. Run `poetry shell`
-4. Run `uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
+4. Run `uvicorn main:app --host 0.0.0.0 --port 5670 --reload`
 
 ### Deployment
 
