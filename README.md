@@ -6,31 +6,19 @@ Welcome to College Toolbox, your all-in-one web application for managing your co
 
 #### Pre-requisites
 
-1. Go [Download](https://golang.org/dl/)
-2. Ensure Go is added to PATH (verify by opening a new command prompt and seeing if the `go` command is recognized)
-3. Docker [Docker Installation Guide](https://docs.docker.com/get-docker/)
+1. Docker [Docker Installation Guide](https://docs.docker.com/get-docker/)
 Installing Docker is a decently involved process. Be sure to follow every step carefully.
 The two commonly hardest steps are:
 
 - Installing WSL: if you're running Windows, you will need to install WSL. Pick Ubuntu as the Linux distro to install.
 - Enabling Virtualization: To do this you will need to enter your BIOS and find the virtualization settings. You can enter the BIOS by restarting your computer and mashing the F2, F8, F12, or Del key (it depends LOL). Once in the BIOS, you can lookup a tutorial for enabling it for your particular BIOS (mine was the [MSI Click 5](https://liquidsky.com/how-to-enable-virtualization-msi-click-bios-5/))
 
-4. PostgreSQL [Download](https://www.postgresql.org/download/)
-5. Git Bash or another flavor of Bash
+2. PostgreSQL [Download](https://www.postgresql.org/download/)
+3. Git Bash or another flavor of Bash
 
 #### Local Development
 
-(On a bash window)
-
-1. Clone the repo and `cd` into it
-
-2. Run the setup script (this installs all the necessary packages)
-
-3. To run the frontend: `./scripts/run-local-fe`
-
-4. To run the backend: `./scripts/run-local-be`
-
-5. To run the local database: `./scripts/create-db`
+TBA
 
 ### Deployment
 
