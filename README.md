@@ -15,10 +15,22 @@ The two commonly hardest steps are:
 
 2. PostgreSQL [Download](https://www.postgresql.org/download/)
 3. Git Bash or another flavor of Bash
+4. Python
+5. Poetry: `pip install poetry`
 
 #### Local Development
 
-TBA
+##### Frontend
+1. Run `cd frontend`
+2. Run `npm install`
+3. Run `npm run dev`
+
+##### Backend
+
+1. Run `cd backend`
+2. Run `poetry install`
+3. Run `poetry shell`
+4. Run `uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
 
 ### Deployment
 
@@ -55,5 +67,6 @@ Discover a curated list of helpful college websites and resources that cover a w
 Diagram TBA
 
 - Frontend: Astro
-- Backend: Beego
+- Backend: FastAPI
+- ORM: SQLalchemy
 - Database: PostgreSQL
