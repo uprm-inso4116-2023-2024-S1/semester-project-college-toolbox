@@ -21,7 +21,7 @@ The two commonly hardest steps are:
 #### Local Development
 
 ##### Frontend
-1. Run `cd frontend`
+1. Run `cd frontend/college-toolbox`
 2. Run `npm install`
 3. Run `npm run dev`
 
