@@ -1,0 +1,46 @@
+---
+interface Props {
+	title: string;
+	body: string;
+
+}
+
+const {title, body } = Astro.props;
+
+import Card from '../components/Card.astro'
+---
+
+<div class="WackNavBar">
+	<h1>College Toolbox</h1>
+    
+    <!-- Card has to be called in ul, since it is defined as li  -->
+    <ul role="list" class="card-grid">  
+        <Card
+            href="https://drive.google.com/drive/u/0/folders/0AE5Td-pyp64MUk9PVA?pli=1"
+            title="Documentation"
+            body="This is a Card component."
+        />
+        <Card
+            href="https://github.com/uprm-inso4116-2023-2024-S1/semester-project-college-toolbox.git"
+            title="El Github"
+            body="Project Repo."
+        />
+    </ul>
+
+</div>
+<style>
+
+    .wackNavBar {
+        width: 80%;
+        height: fit-content;
+    }
+	h1 {
+		font-size: 3rem;
+		text-align: center;
+		color: rgb(var(--accent1));
+	}
+	.card-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+	}
+</style>
