@@ -1,3 +1,4 @@
+# main.py
 from fastapi import FastAPI
 from sqlalchemy import create_engine, Column, Integer, String, Sequence
 from sqlalchemy.orm import sessionmaker, declarative_base
