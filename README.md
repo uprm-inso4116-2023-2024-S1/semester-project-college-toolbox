@@ -30,7 +30,7 @@ The two commonly hardest steps are:
 1. Run `cd backend`
 2. Run `poetry install`
 3. Run `poetry shell`
-4. Run `uvicorn main:app --host 0.0.0.0 --port 5670 --reload`
+4. Run `uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
 
 ### Deployment
 
