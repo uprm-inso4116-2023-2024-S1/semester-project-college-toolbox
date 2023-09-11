@@ -5,7 +5,7 @@
 1. Ensure you have `poetry` installed: `curl -sSL https://install.python-poetry.org | python3 -`
 2. cd into `backend/`
 3. Run `poetry install`
-4. Run `uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
+4. Run `poetry run uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
 5. Make desired changes and visit `localhost:5670`
 
 ## Option B: Docker
