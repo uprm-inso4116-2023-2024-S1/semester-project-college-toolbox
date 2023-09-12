@@ -1,44 +1,55 @@
-# Astro Starter Kit: Basics
-
-```
-npm create astro@latest -- --template basics
-```
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+# Frontend Overview
 
 ## 🚀 Project Structure
 
-Inside of your Astro project, you'll see the following folders and files:
+Inside of the project, you'll see the following folders and files:
 
 ```
 /
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Card.astro
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+🛬
+├── 💧 data
+│   └── **/*.json                        # Satic data sources for REST etc.
+│
+└── src
+    │
+    ├── 🧱 app
+    │   └── **/*.astro                   # Application-wide components
+    │
+    ├── 🌠 assets
+    │   └── **/*.{svg,…}                 # Transformable assets
+    │
+    ├── 🧱 components
+    │   └── **/*.astro                   # Simple, atomic UI elements
+    │
+    ├── 📚 lib
+    │   └── **/*.ts                      # Utilities (Databases, APIs…)
+    │
+    ├── 🧱 modules
+    │   └── **/*.astro                   # Complex views made of elements
+    │
+    ├── 📑 pages
+    │   ├── **/*.astro                   # File-based client routes
+    │   │
+    │   └── 🌐 api
+    │        └── [...entities].ts        # Catch-all endpoint for CRUD ops.
+    │
+    ├── 🚀 services
+    │   └── *.ts                         # Server-side CRUD operations
+    │
+    └── 📐 types
+        └── *.ts                         # Data entities typings
+
 ```
 
 Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
 
 There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
 
-Any static assets, like images, can be placed in the `public/` directory.
+Any static assets, like images, can be placed in the `assets/` directory.
 
 ## 🧞 Commands
 
-All commands are run from the root of the project, from a terminal:
+All commands are run from the root of the project (frontend/college-toolbox), from a terminal:
 
 | Command                   | Action                                           |
 | :------------------------ | :----------------------------------------------- |
@@ -49,6 +60,14 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
+## Installation Steps
+### Option 1: Local Development
+1. cd into `frontend/college-toolbox`
+2. run `npm i`
+3. run `npm run dev`
+### Option 2: Docker Build
+TBA
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Developer Recommendations
+1.This project makes extensive use of [Flowbite](https://flowbite.com/docs/getting-started/astro/) for styling and pre-made component. Check if what you need is available on Flowbite before you make it yourself.
+2. Familiarize yourself with the ideas behind Astro [Astro in 100 seconds](https://www.youtube.com/watch?v=dsTXcSeAZq8)
