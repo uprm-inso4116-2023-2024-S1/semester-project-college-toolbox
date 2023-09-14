@@ -135,6 +135,7 @@ import SearchInput from '../components/SearchInput.astro';
 							d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"
 						></path></svg
 					>
+					
 				</button>
 				<!-- Dropdown menu -->
 				<div
@@ -576,21 +577,30 @@ import SearchInput from '../components/SearchInput.astro';
 				<ColorModeSwitcher />
 
 				<!-- Profile -->
-				<div class="flex items-center ml-3">
+				<div class="flex items-center ml-2">
 					<div>
 						<button
 							type="button"
-							class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
 							id="user-menu-button-2"
 							aria-expanded="false"
 							data-dropdown-toggle="dropdown-2"
 						>
 							<span class="sr-only">Open user menu</span>
-							<img
-								class="w-8 h-8 rounded-full"
-								src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-								alt="user photo"
-							/>
+							<svg 
+							class="w-5 h-5 text-gray-800 dark:text-white" 
+							aria-hidden="true" 
+							xmlns="http://www.w3.org/2000/svg" 
+							fill="gray" 
+							viewBox="0 0 14 18">
+							  <path 
+							  stroke="currentColor" 
+							  stroke-linecap="round" 
+							  troke-linejoin="round" 
+							  stroke-width="2" 
+								  d="M7 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-2 3h4a4 4 0 0 1 4 4v2H1v-2a4 4 0 0 1 4-4Z"
+								  />
+							</svg>
+					 
 						</button>
 					</div>
 					<!-- Dropdown menu -->
