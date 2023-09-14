@@ -12,10 +12,16 @@ class User(Base):
     FirstLastName = Column(String)
     SecondLastName = Column(String)
     Email = Column(String, unique=True, index=True)
+    Password = Column(String)
+    Salt = Column(String)
+    ProfileImageUrl = Column(String)
 
-    def __init__(self, FirstName, Initial, FirstLastName, SecondLastName, Email):
+    def __init__(self, FirstName, Initial, FirstLastName, SecondLastName, Email, Password, Salt, ProfileImageUrl):
         self.FirstName = FirstName
         self.Initial = Initial
         self.FirstLastName = FirstLastName
         self.SecondLastName = SecondLastName
         self.Email = Email
+        self.Password = Password
+        self.Salt = Salt
+        self.ProfileImageUrl = ProfileImageUrl
