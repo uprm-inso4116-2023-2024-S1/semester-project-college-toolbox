@@ -143,24 +143,24 @@ async def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
         with SessionLocal() as session:
             pdf_document = session.query(PDFdocument).filter_by(id=pdf_id).first()
 
-            if pdf_document:
-                with open(filepath, "rb") as file:
-                    new_pdf_data = file.read()
-                    pdf_document.pdf_data = new_pdf_data
-                    # check if filename will change
-                    if filename:
-                        pdf_document.file_name = filename
-
-                session.add(pdf_document)
-                session.commit()
-
-                return {
-                    "filename": pdf_document.file_name,
-                    "pdf_document": pdf_document,
-                }
-            else:
+            if not pdf_document:
                 raise HTTPException(
                     status_code=404, detail=f"No PDF found with id: {pdf_id}"
                 )
+
+            with open(filepath, "rb") as file:
+                new_pdf_data = file.read()
+                pdf_document.pdf_data = new_pdf_data
+                # check if filename will change
+                if filename:
+                    pdf_document.file_name = filename
+
+            session.add(pdf_document)
+            session.commit()
+
+            return {
+                "filename": pdf_document.file_name,
+                "pdf_document": pdf_document,
+            }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving PDF: {str(e)}")
