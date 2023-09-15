@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 class PDFdocument(Base):
-    __tablename__ = 'pdf_file'
+    __tablename__ = "pdf_file"
 
     # TODO: make file name and pdf_data required
     id = Column(Integer, primary_key=True)
