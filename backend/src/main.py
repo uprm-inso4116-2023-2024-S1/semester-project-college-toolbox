@@ -113,9 +113,9 @@ async def delete_pdf_by_id(pdf_id: int):
                 raise HTTPException(
                     status_code=404, detail=f"No PDF found with id: {pdf_id}"
                 )
-
-            session.delete(pdf_document)
-            session.commit()
+            else:
+                session.delete(pdf_document)
+                session.commit()
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting PDF: {str(e)}")
