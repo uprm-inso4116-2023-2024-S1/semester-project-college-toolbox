@@ -151,12 +151,14 @@ const ScholarshipList = () => {
 
   return (
     <div style={{ paddingLeft: '20px' }}>
+      {/*
       <div className="counter-section">
         <span className="counter-item">Total Scholarships: {scholarshipCounters.total}</span>
         <span className="counter-item">Accepted: {scholarshipCounters.accepted}</span>
         <span className="counter-item">Denied: {scholarshipCounters.denied}</span>
         <span className="counter-item">Waiting: {scholarshipCounters.waiting}</span>
       </div>
+      */}
       {/* Add Scholarship Form */}
       {isAddingScholarship ? (
         <div className="add-scholarship-section">
