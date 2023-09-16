@@ -27,4 +27,12 @@ export interface User {
 	status: string;
 }
 
+//Scholarship Interface
+export interface ScholarshipApplication {
+  id: number;
+  name: string;
+  deadline: Date;
+  status: string;
+}
+
 export type PlaygroundAction = (typeof playgroundActions)[number];

@@ -1,0 +1,71 @@
+.add-scholarship-section {
+  background-color: #f0f0f0; /* Set your desired background color */
+  padding: 20px; /* Adjust the padding as needed */
+  border-radius: 8px; /* Optional: Add rounded corners */
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-button {
+  background-color: #4caf50; /* Set your desired button color */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.cancel-button {
+  background-color: #f44336; /* Set your desired button color */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Remove Confirmation Modal */
+.remove-confirmation-modal {
+
+  padding: 10px;
+  margin-top: 10px;
+  
+}
+
+.remove-confirmation-modal p {
+  margin-bottom: 10px;
+}
+
+.remove-confirmation-modal button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.remove-confirmation-modal button:last-child {
+  margin-right: 0; /* Remove margin from the last button */
+}
+
+/* Add margin to Cancel button */
+.remove-confirmation-modal .cancel-button {
+  margin-right: 10px;
+}
+/* ScholarshipList.css */
+.counter-section {
+  justify-content: space-between; /* Add space between items */
+  margin-bottom: 10px; /* Add margin at the bottom */
+}
+
+.counter-item {
+  margin-right: 10px; /* Add margin to the right of each counter */
+}
