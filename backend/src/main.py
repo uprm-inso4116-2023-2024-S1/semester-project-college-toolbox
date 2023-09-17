@@ -1,5 +1,7 @@
 # main.py
-from fastapi import FastAPI, UploadFile
+from typing import Annotated
+
+from fastapi import FastAPI, UploadFile, File, Request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -7,9 +9,25 @@ from src.config import DATABASE_URL
 from src.models.PDFdocument import PDFdocument
 from src.models.user import User
 from src.models.base import Base
+from fastapi.middleware.cors import CORSMiddleware
 
+
+# Configure CORS to allow requests from the React frontend
 
 app = FastAPI()
+
+frontendPort = "2121"
+origins = [
+    f"http://localhost:{frontendPort}"
+]  # Add any other allowed origins as needed
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # You can restrict HTTP methods if needed
+    allow_headers=["*"],  # You can restrict headers if needed
+)
+
 
 # Database configuration
 engine = create_engine(DATABASE_URL)
@@ -27,11 +45,20 @@ def read_root():
 # Additional API endpoints for interacting with models can be added here
 
 
-@app.post("/ScholarshipApplication/upload/{filename: str}")
-def upload_pdf(file: UploadFile, filename: str):
-    new_pdf = PDFdocument(filename, file)
-    new_pdf.upload_pdf(SessionLocal)
-    return {"message": "uploaded successfully"}
+@app.post("/ScholarshipApplication/upload")
+async def upload_pdf(request: Request):
+    # new_pdf = PDFdocument(filename, file)
+    # new_pdf.upload_pdf(SessionLocal)
+    # return {"message": "uploaded successfully"}
+
+    # print(await request.form())
+    async with request.form() as form:
+        filename = form["test"].filename
+        print(filename)
+        pdf_data = await form["test"].read()
+
+        doc = PDFdocument(filename, pdf_data)
+        doc.upload_pdf(SessionLocal)
 
 
 @app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")

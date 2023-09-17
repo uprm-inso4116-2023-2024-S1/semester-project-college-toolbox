@@ -13,7 +13,7 @@ class PDFdocument(Base):
 
     def __init__(self, filename, pdf_data):
         self.filename = filename
-        self.pdf_data = pdf_data.read()
+        self.pdf_data = pdf_data
 
     def upload_pdf(
         self,
