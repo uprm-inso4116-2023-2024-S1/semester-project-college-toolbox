@@ -1,5 +1,7 @@
 ---
 import LayoutSidebar from '../../app/LayoutSidebar.astro';
+import ScholarshipCard from '../../components/ScholarshipCard.jsx';
+import ScholarshipList from '../../components/ScholarshipList.jsx';
 ---
 
 <LayoutSidebar>
@@ -14,5 +16,8 @@ import LayoutSidebar from '../../app/LayoutSidebar.astro';
                 class="font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline"
                 >Scholarship Tracker</a
             >
+            
         </p>
+         
+        <ScholarshipList client:load/>
 </LayoutSidebar>
