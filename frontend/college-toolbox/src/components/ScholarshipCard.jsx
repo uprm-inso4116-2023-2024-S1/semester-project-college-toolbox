@@ -96,7 +96,8 @@ const ScholarshipCard = ({
       formData.append('uploadedFile.name', uploadedFile);
       console.log('FormData:', formData);
       // Make a POST request to FastAPI
-      fetch('/ScholarshipApplication/upload-resume', {
+      const URL = "/ScholarshipApplication/upload/" + uploadedFile.name
+      fetch(URL, {
         method: 'POST',
         body:  formData
       })
