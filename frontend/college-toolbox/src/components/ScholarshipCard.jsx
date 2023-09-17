@@ -88,11 +88,33 @@ const ScholarshipCard = ({
     // Perform any necessary actions here, e.g., update the status in the database
     setIsEditingStatus(false);
   };
-
   const handleResumeUpload = (e) => {
     const uploadedFile = e.target.files[0];
     if (uploadedFile) {
       setResumeFileName(uploadedFile.name);
+      const formData = new FormData();
+      formData.append('uploadedFile.name', uploadedFile);
+      console.log('FormData:', formData);
+      // Make a POST request to FastAPI
+      fetch('/ScholarshipApplication/upload-resume', {
+        method: 'POST',
+        body:  formData
+      })
+        .then(response=> {
+          if(response.ok) {
+            //File was uploaded
+            //Handle success
+            console.log("Hoopla! File uploaded.");
+          } else {
+            // Failure
+            console.error("Not hoopla, file upload FAILURE.")
+          }
+        })
+        .catch(error=> {
+          // Handle network errors
+          console.error('Error:', error)
+        });
+      
       setIsUploadingResume(false);
     }
   };
@@ -150,7 +172,9 @@ const ScholarshipCard = ({
                       if (resumeFileName) {
                         // Simulate a download when the resume name is clicked
                         // Replace this with actual download logic
+                        window.location.href = `/download-resume?resume_filename=${resumeFileName}`;
                         alert('Downloading resume: ' + resumeFileName);
+
                       }
                     }}
                   >
