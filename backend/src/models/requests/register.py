@@ -2,9 +2,10 @@
 from pydantic import BaseModel
 
 class RegisterRequest(BaseModel):
-    firstName: str
-    initial: str | None
-    firstLastName: str
-    secondLastName: str | None
-    email: str
-    password: int
+    FirstName: str
+    Initial: str | None
+    FirstLastName: str
+    SecondLastName: str | None
+    Email: str
+    Password: str
+    ProfileImageUrl: str | None

@@ -1,6 +1,5 @@
 # src/models/user.py
-from sqlalchemy import Column, Integer, String
-from uuid import uuid4
+from sqlalchemy import Column, Integer, Sequence, String
 
 from src.models.base import Base
 from src.security import generate_salt, hash_password
@@ -9,14 +8,14 @@ from src.security import generate_salt, hash_password
 class User(Base):
     __tablename__ = 'User'
 
-    UserId = Column(Integer, primary_key=True, default=uuid4().int)
-    FirstName = Column(String)
+    UserId = Column(Integer, Sequence("user_id_seq"), primary_key=True, index=True)
+    FirstName = Column(String, nullable=False)
     Initial = Column(String)
-    FirstLastName = Column(String)
+    FirstLastName = Column(String, nullable=False)
     SecondLastName = Column(String)
-    Email = Column(String, unique=True, index=True)
-    EncryptedPassword = Column(String)
-    Salt = Column(String)
+    Email = Column(String, unique=True, index=True, nullable=False)
+    EncryptedPassword = Column(String, nullable=False)
+    Salt = Column(String, nullable=False)
     ProfileImageUrl = Column(String)
 
     def __init__(self, FirstName, Initial, FirstLastName, SecondLastName, Email, Password, ProfileImageUrl):

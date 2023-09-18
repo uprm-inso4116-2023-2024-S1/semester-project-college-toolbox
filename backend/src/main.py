@@ -1,7 +1,7 @@
 # src/main.py
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from src.config import DATABASE_URL
 from src.models.base import Base
@@ -19,6 +19,14 @@ engine = create_engine(DATABASE_URL)
 Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Dependency to get the database session
+async def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # API endpoints
 # Dummy endpoint
 @app.get("/")
@@ -27,8 +35,7 @@ def read_root():
 
 # User registration endpoint
 @app.post("/register/", response_model=RegisterResponse)
-def register_user(user_request: RegisterRequest):
-    db = SessionLocal()
+def register_user(user_request: RegisterRequest, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.Email == user_request.Email).first()
     if existing_user:
         db.close()
@@ -52,8 +59,7 @@ def register_user(user_request: RegisterRequest):
 
 # Login endpoint
 @app.post("/login/", response_model=LoginResponse)
-def login_user(user_request: LoginRequest):
-    db = SessionLocal()
+def login_user(user_request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.Email == user_request.Email).first()
     if not user:
         db.close()

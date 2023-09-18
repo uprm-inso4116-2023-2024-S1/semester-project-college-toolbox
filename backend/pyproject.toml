@@ -9,7 +9,6 @@ packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pyjwt = "^3.10"
 fastapi = {extras = ["all"], version = "^0.103.1"}
 gunicorn = "^21.2.0"
 sqlalchemy = "^2.0.20"
