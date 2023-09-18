@@ -7,7 +7,7 @@ from typing import Annotated
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
-from src.models.responses.login import LoginResponse
+from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
@@ -27,6 +27,7 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
+
 
 # Dependency to get the database session
 def get_db():
@@ -70,7 +71,13 @@ def register_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    return {"token": permanent_token}
+    fullName = (
+        f"{user.FirstName} {user.Initial} {user.FirstLastName} {user.SecondLastName}"
+    )
+    profile = UserProfile(
+        fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
+    )
+    return {"token": permanent_token, "profile": profile}
 
 
 # Login endpoint
