@@ -6,18 +6,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from backend.src.main import app, get_db
-from backend.src.models.base import Base
+from src.main import app, get_db
+from src.database import Base
 from tests.test_config import TEST_DATABASE_URL
 
 engine = create_engine(
-    TEST_DATABASE_URL
+TEST_DATABASE_URL
 )
 Base.metadata.create_all(bind=engine)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
 def override_get_db():
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     try:
         db = TestingSessionLocal()
         yield db
@@ -31,30 +29,25 @@ client = TestClient(app)
 
 # Define test data
 register_data = {
-    "FirstName": "Foo",
-    "Initial": "",
-    "FirstLastName": "Bar",
-    "SecondLastName": "",
-    "Email": "foobar@example.com",
-    "Password": "password123",
-    "ProfileImageUrl": "https://example.com/foobar.jpg",
+    "firstName": "Foo",
+    "initial": "",
+    "firstLastName": "Bar",
+    "secondLastName": "",
+    "email": "foobar@example.com",
+    "password": "password123",
+    "profileImageUrl": "https://example.com/foobar.jpg",
 }
 
 login_data = {
-    "Email": "foobar@example.com",
-    "Password": "password123",
+    "email": "foobar@example.com",
+    "password": "password123",
 }
 
-# Define pytest fixtures for database setup and cleanup
-# @pytest.fixture(scope="module")
-# def db():
-#     # Database configuration
-#     engine = create_engine(DATABASE_URL)
-#     Base.metadata.create_all(bind=engine)
-#     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-#     yield SessionLocal()
-#     # Perform test cleanup
-#     Base.metadata.drop_all(bind=engine)
+@pytest.fixture()
+def test_db():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 # Test the dummy endpoint
 def test_read_root():
@@ -63,7 +56,7 @@ def test_read_root():
     assert response.json() == {"message": "Hello, FastAPI!"}
 
 # Test the register endpoint
-def test_register_user():
+def test_register_user(test_db):
     # Test successful registration
     response_register = client.post("/register/", json=register_data)
 
@@ -72,14 +65,14 @@ def test_register_user():
 
     assert response_register.status_code == 200
     data = response_register.json()
-    assert "UserId" in data  # Make sure the response contains UserId
+    assert "token" in data  # Make sure the response contains the auth token
 
     # Test duplicate registration (should fail)
     response_duplicate = client.post("/register/", json=register_data)
     assert response_duplicate.status_code == 400  # Expect a 400 Bad Request status code
 
 # Test the login endpoint
-def test_login_user():
+def test_login_user(test_db):
     # Register the user first (assuming registration works)
     response_register = client.post("/register/", json=register_data)
     assert response_register.status_code == 200
@@ -88,20 +81,20 @@ def test_login_user():
     response_login = client.post("/login/", json=login_data)
     assert response_login.status_code == 200
     data = response_login.json()
-    assert "UserId" in data  # Make sure the response contains UserId
+    assert "token" in data  # Make sure the response contains the auth token
 
     # Test user not found (should fail)
     user_not_found_data = {
-        "Email": "notfoobar@example.com",
-        "Password": "password123",
+        "email": "notfoobar@example.com",
+        "password": "password123",
     }
     response_user_not_found = client.post("/login/", json=user_not_found_data)
     assert response_user_not_found.status_code == 401  # Expect a 401 Unauthorized status code
 
     # Test incorrect password (should fail)
     incorrect_password_data = {
-        "Email": "foobar@example.com",
-        "Password": "notpassword123",
+        "email": "foobar@example.com",
+        "password": "notpassword123",
     }
     response_incorrect_password = client.post("/login/", json=incorrect_password_data)
     assert response_incorrect_password.status_code == 401  # Expect a 401 Unauthorized status code

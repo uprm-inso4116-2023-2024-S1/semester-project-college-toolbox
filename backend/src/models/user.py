@@ -1,12 +1,13 @@
 # src/models/user.py
 from sqlalchemy import Column, Integer, Sequence, String
 
-from src.models.base import Base
+from src.database import Base
 from src.security import generate_salt, hash_password
+
 
 # Define SQLAlchemy model for User table
 class User(Base):
-    __tablename__ = 'User'
+    __tablename__ = "User"
 
     UserId = Column(Integer, Sequence("user_id_seq"), primary_key=True, index=True)
     FirstName = Column(String, nullable=False)
@@ -18,7 +19,16 @@ class User(Base):
     Salt = Column(String, nullable=False)
     ProfileImageUrl = Column(String)
 
-    def __init__(self, FirstName, Initial, FirstLastName, SecondLastName, Email, Password, ProfileImageUrl):
+    def __init__(
+        self,
+        FirstName,
+        Initial,
+        FirstLastName,
+        SecondLastName,
+        Email,
+        Password,
+        ProfileImageUrl,
+    ):
         self.FirstName = FirstName
         self.Initial = Initial
         self.FirstLastName = FirstLastName

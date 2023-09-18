@@ -1,13 +1,11 @@
 # src/main.py
 from typing import Annotated
 from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Depends
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 
-from src.config import DATABASE_URL
 from src.models.PDFdocument import PDFdocument
 from src.models.user import User
-from src.models.base import Base
+from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse
@@ -31,17 +29,17 @@ app.add_middleware(
 )
 
 # Database configuration
-engine = create_engine(DATABASE_URL)
 Base.metadata.create_all(bind=engine)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 # Dependency to get the database session
-async def get_db():
+def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
 
 # API endpoints
 # Dummy endpoint
@@ -49,44 +47,49 @@ async def get_db():
 def read_root():
     return {"message": "Hello, FastAPI!"}
 
+
 # User registration endpoint
 @app.post("/register/", response_model=RegisterResponse)
-def register_user(user_request: RegisterRequest, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.Email == user_request.Email).first()
+def register_user(
+    user_request: RegisterRequest, db: Session = Depends(get_db)
+) -> RegisterResponse:
+    existing_user = db.query(User).filter(User.Email == user_request.email).first()
     if existing_user:
         db.close()
         raise HTTPException(status_code=400, detail="Email already registered.")
 
     user = User(
-        FirstName=user_request.FirstName,
-        Initial=user_request.Initial,
-        FirstLastName=user_request.FirstLastName,
-        SecondLastName=user_request.SecondLastName,
-        Email=user_request.Email,
-        Password=user_request.Password,
-        ProfileImageUrl=user_request.ProfileImageUrl,
+        FirstName=user_request.firstName,
+        Initial=user_request.initial,
+        FirstLastName=user_request.firstLastName,
+        SecondLastName=user_request.secondLastName,
+        Email=user_request.email,
+        Password=user_request.password,
+        ProfileImageUrl=user_request.profileImageUrl,
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
     db.close()
-    return user
+    return {"token": generate_permanent_token(user.UserId)}
+
 
 # Login endpoint
 @app.post("/login/", response_model=LoginResponse)
 def login_user(user_request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.Email == user_request.Email).first()
+    user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
         db.close()
         raise HTTPException(status_code=401, detail="User not found.")
-    if user.EncryptedPassword != hash_password(user_request.Password, user.Salt):
+    if user.EncryptedPassword != hash_password(user_request.password, user.Salt):
         db.close()
         raise HTTPException(status_code=401, detail="Incorrect password.")
-    
+
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    return {"UserId": permanent_token}
+    return {"token": permanent_token}
+
 
 # PDF document upload endpoint
 @app.post("/ScholarshipApplication/upload")
@@ -104,10 +107,12 @@ async def upload_pdf(request: Request):
         doc = PDFdocument(filename, pdf_data)
         doc.upload_pdf(SessionLocal)
 
+
 # Get PDF by ID endpoint
 @app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")
 def get_pdf_by_id(pdf_id: int):
     return PDFdocument.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
+
 
 # Delete PDF by ID endpoint
 @app.delete("/ScholarshipApplication/delete/pdf_id/{pdf_id}")
@@ -137,6 +142,7 @@ def delete_pdf_by_id(pdf_id: int):
     #     raise HTTPException(status_code=500, detail=f"Error deleting PDF: {str(e)}")
 
     return PDFdocument.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
+
 
 # Update PDF by ID endpoint
 @app.put(
