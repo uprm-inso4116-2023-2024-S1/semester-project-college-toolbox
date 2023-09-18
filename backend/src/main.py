@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from src.database import Base, SessionLocal, engine
-from src.models.PDFdocument import PDFdocument
-from src.models.user import User
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse
 from src.models.responses.register import RegisterResponse
+from src.models.tables.PDFdocument import PDFdocument
+from src.models.tables.user import User
 from src.security import hash_password, generate_permanent_token
 
 app = FastAPI()
