@@ -1,13 +1,13 @@
-# tests/test_main.py
+# test/test_main.py
 import pytest
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from .test_config import TEST_DATABASE_URL
 from src.main import app, get_db
 from src.database import Base
-from tests.test_config import TEST_DATABASE_URL
 
 # Test database configuration
 engine = create_engine(TEST_DATABASE_URL)
