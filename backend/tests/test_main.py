@@ -4,16 +4,17 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from src.main import app, get_db
 from src.database import Base
 from tests.test_config import TEST_DATABASE_URL
 
-engine = create_engine(
-TEST_DATABASE_URL
-)
+# Test database configuration
+engine = create_engine(TEST_DATABASE_URL)
 Base.metadata.create_all(bind=engine)
+
+
+# Override database
 def override_get_db():
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     try:
@@ -22,6 +23,7 @@ def override_get_db():
     finally:
         db.close()
 
+# Override FastAPI app dependency
 app.dependency_overrides[get_db] = override_get_db
 
 # Create a test client
@@ -43,17 +45,21 @@ login_data = {
     "password": "password123",
 }
 
+
+# Set up test database tables and cleanup
 @pytest.fixture()
 def test_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
 
+
 # Test the dummy endpoint
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Hello, FastAPI!"}
+
 
 # Test the register endpoint
 def test_register_user(test_db):
@@ -70,6 +76,7 @@ def test_register_user(test_db):
     # Test duplicate registration (should fail)
     response_duplicate = client.post("/register/", json=register_data)
     assert response_duplicate.status_code == 400  # Expect a 400 Bad Request status code
+
 
 # Test the login endpoint
 def test_login_user(test_db):

@@ -1,17 +1,17 @@
 # src/main.py
-from typing import Annotated
 from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from typing import Annotated
 
+from src.database import Base, SessionLocal, engine
 from src.models.PDFdocument import PDFdocument
 from src.models.user import User
-from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse
 from src.models.responses.register import RegisterResponse
 from src.security import hash_password, generate_permanent_token
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -27,10 +27,6 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
-
-# Database configuration
-Base.metadata.create_all(bind=engine)
-
 
 # Dependency to get the database session
 def get_db():
@@ -71,13 +67,17 @@ def register_user(
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    return {"token": generate_permanent_token(user.UserId)}
+    return {"token": permanent_token}
 
 
 # Login endpoint
 @app.post("/login/", response_model=LoginResponse)
-def login_user(user_request: LoginRequest, db: Session = Depends(get_db)):
+def login_user(
+    user_request: LoginRequest, db: Session = Depends(get_db)
+) -> LoginResponse:
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
         db.close()
