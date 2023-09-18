@@ -23,6 +23,7 @@ def override_get_db():
     finally:
         db.close()
 
+
 # Override FastAPI app dependency
 app.dependency_overrides[get_db] = override_get_db
 
@@ -96,7 +97,9 @@ def test_login_user(test_db):
         "password": "password123",
     }
     response_user_not_found = client.post("/login/", json=user_not_found_data)
-    assert response_user_not_found.status_code == 401  # Expect a 401 Unauthorized status code
+    assert (
+        response_user_not_found.status_code == 401
+    )  # Expect a 401 Unauthorized status code
 
     # Test incorrect password (should fail)
     incorrect_password_data = {
@@ -104,4 +107,6 @@ def test_login_user(test_db):
         "password": "notpassword123",
     }
     response_incorrect_password = client.post("/login/", json=incorrect_password_data)
-    assert response_incorrect_password.status_code == 401  # Expect a 401 Unauthorized status code
+    assert (
+        response_incorrect_password.status_code == 401
+    )  # Expect a 401 Unauthorized status code

@@ -1,6 +1,7 @@
 # src/models/responses/login.py
 from pydantic import BaseModel
 
+
 class UserProfile(BaseModel):
     fullName: str
     email: str
