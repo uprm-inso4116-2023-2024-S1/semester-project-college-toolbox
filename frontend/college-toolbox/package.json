@@ -29,11 +29,13 @@
 		"start": "astro dev"
 	},
 	"dependencies": {
+		"@astrojs/react": "^3.0.2",
 		"@astrojs/sitemap": "^1.1.0",
 		"@astrojs/tailwind": "^3.0.1",
 		"@faker-js/faker": "^7.6.0",
 		"apexcharts": "^3.37.2",
 		"astro": "^2.0.4",
+		"bootstrap": "^5.3.2",
 		"flowbite": "^1.6.3",
 		"flowbite-typography": "^1.0.3",
 		"shiki": "^0.14.1",
