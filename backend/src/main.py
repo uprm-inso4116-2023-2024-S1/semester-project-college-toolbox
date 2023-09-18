@@ -1,6 +1,5 @@
 # src/main.py
 from typing import Annotated
-
 from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -13,14 +12,12 @@ from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse
 from src.models.responses.register import RegisterResponse
-from fastapi.middleware.cors import CORSMiddleware
-
-
-# Configure CORS to allow requests from the React frontend
 from src.security import hash_password, generate_permanent_token
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# Configure CORS to allow requests from the React frontend
 frontendPort = "2121"
 origins = [
     f"http://localhost:{frontendPort}"
@@ -32,7 +29,6 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
-
 
 # Database configuration
 engine = create_engine(DATABASE_URL)
@@ -48,13 +44,10 @@ async def get_db():
         db.close()
 
 # API endpoints
-
-
 # Dummy endpoint
 @app.get("/")
 def read_root():
     return {"message": "Hello, FastAPI!"}
-
 
 # User registration endpoint
 @app.post("/register/", response_model=RegisterResponse)
@@ -95,7 +88,7 @@ def login_user(user_request: LoginRequest, db: Session = Depends(get_db)):
     db.close()
     return {"UserId": permanent_token}
 
-
+# PDF document upload endpoint
 @app.post("/ScholarshipApplication/upload")
 async def upload_pdf(request: Request):
     # new_pdf = PDFdocument(filename, file)
@@ -111,12 +104,12 @@ async def upload_pdf(request: Request):
         doc = PDFdocument(filename, pdf_data)
         doc.upload_pdf(SessionLocal)
 
-
+# Get PDF by ID endpoint
 @app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")
 def get_pdf_by_id(pdf_id: int):
     return PDFdocument.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
-
+# Delete PDF by ID endpoint
 @app.delete("/ScholarshipApplication/delete/pdf_id/{pdf_id}")
 def delete_pdf_by_id(pdf_id: int):
     # """
@@ -145,7 +138,7 @@ def delete_pdf_by_id(pdf_id: int):
 
     return PDFdocument.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
-
+# Update PDF by ID endpoint
 @app.put(
     "/ScholarshipApplication/update/pdf_id/{pdf_id}/filepath/{filepath: str}/filename/{filename: str}"
 )
