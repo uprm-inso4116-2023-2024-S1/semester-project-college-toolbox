@@ -8,9 +8,9 @@ const DEV_PORT = 2121;
 // https://astro.build/config
 export default defineConfig({
 	site: process.env.CI
-		? 'https://themesberg.github.io'
+		? 'https://uprm-inso4116-2023-2024-s1.github.io.github.io'
 		: `http://localhost:${DEV_PORT}`,
-	base: process.env.CI ? '/flowbite-astro-admin-dashboard' : undefined,
+	base: process.env.CI ? '/semester-project-college-toolbox/frontend/college-toolbox' : undefined,
 
 	// output: 'server',
 
