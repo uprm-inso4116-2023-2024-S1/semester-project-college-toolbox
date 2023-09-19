@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import Column, Integer, String, LargeBinary
-from src.models.base import Base
+from src.database import Base
 from sqlalchemy.orm import sessionmaker
 
 

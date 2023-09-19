@@ -1,21 +1,21 @@
-# main.py
+# src/main.py
+from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 from typing import Annotated
 
-from fastapi import FastAPI, UploadFile, File, Request
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from src.config import DATABASE_URL
-from src.models.PDFdocument import PDFdocument
-from src.models.user import User
-from src.models.base import Base
-from fastapi.middleware.cors import CORSMiddleware
-
-
-# Configure CORS to allow requests from the React frontend
+from src.database import Base, SessionLocal, engine
+from src.models.requests.login import LoginRequest
+from src.models.requests.register import RegisterRequest
+from src.models.responses.login import LoginResponse, UserProfile
+from src.models.responses.register import RegisterResponse
+from src.models.tables.PDFdocument import PDFdocument
+from src.models.tables.user import User
+from src.security import hash_password, generate_permanent_token
 
 app = FastAPI()
 
+# Configure CORS to allow requests from the React frontend
 frontendPort = "2121"
 origins = [
     f"http://localhost:{frontendPort}"
@@ -29,22 +29,76 @@ app.add_middleware(
 )
 
 
-# Database configuration
-engine = create_engine(DATABASE_URL)
-Base.metadata.create_all(bind=engine)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Dependency to get the database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 # API endpoints
-
-
+# Dummy endpoint
 @app.get("/")
 def read_root():
     return {"message": "Hello, FastAPI!"}
 
 
-# Additional API endpoints for interacting with models can be added here
+# User registration endpoint
+@app.post("/register/", response_model=RegisterResponse)
+def register_user(
+    user_request: RegisterRequest, db: Session = Depends(get_db)
+) -> RegisterResponse:
+    existing_user = db.query(User).filter(User.Email == user_request.email).first()
+    if existing_user:
+        db.close()
+        raise HTTPException(status_code=400, detail="Email already registered.")
+
+    user = User(
+        FirstName=user_request.firstName,
+        Initial=user_request.initial,
+        FirstLastName=user_request.firstLastName,
+        SecondLastName=user_request.secondLastName,
+        Email=user_request.email,
+        Password=user_request.password,
+        ProfileImageUrl=user_request.profileImageUrl,
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    permanent_token = generate_permanent_token(user.UserId)
+    db.close()
+    fullName = (
+        f"{user.FirstName} {user.Initial} {user.FirstLastName} {user.SecondLastName}"
+    )
+    profile = UserProfile(
+        fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
+    )
+    return {"token": permanent_token, "profile": profile}
 
 
+# Login endpoint
+@app.post("/login/", response_model=LoginResponse)
+def login_user(
+    user_request: LoginRequest, db: Session = Depends(get_db)
+) -> LoginResponse:
+    user = db.query(User).filter(User.Email == user_request.email).first()
+    if not user:
+        db.close()
+        raise HTTPException(status_code=401, detail="User not found.")
+    if user.EncryptedPassword != hash_password(user_request.password, user.Salt):
+        db.close()
+        raise HTTPException(status_code=401, detail="Incorrect password.")
+
+    permanent_token = generate_permanent_token(user.UserId)
+    db.close()
+    return {"token": permanent_token}
+
+
+# PDF document upload endpoint
 @app.post("/ScholarshipApplication/upload")
 async def upload_pdf(request: Request):
     # new_pdf = PDFdocument(filename, file)
@@ -61,11 +115,13 @@ async def upload_pdf(request: Request):
         doc.upload_pdf(SessionLocal)
 
 
+# Get PDF by ID endpoint
 @app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")
 def get_pdf_by_id(pdf_id: int):
     return PDFdocument.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
 
+# Delete PDF by ID endpoint
 @app.delete("/ScholarshipApplication/delete/pdf_id/{pdf_id}")
 def delete_pdf_by_id(pdf_id: int):
     # """
@@ -95,6 +151,7 @@ def delete_pdf_by_id(pdf_id: int):
     return PDFdocument.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
 
+# Update PDF by ID endpoint
 @app.put(
     "/ScholarshipApplication/update/pdf_id/{pdf_id}/filepath/{filepath: str}/filename/{filename: str}"
 )
