@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Paths to the backend folder
+backend_folder="backend"
+
+# Check if poetry is available
+if ! command_exists "poetry"; then
+    echo "Error: poetry must be installed for this hook. Follow the readme in backend."
+    exit 1
+fi
+
+# Check for uncommitted changes in the backend folder
+git_diff=$(git diff --name-only --cached)
+if [[ "$git_diff" == *"${backend_folder}/"* ]]; then
+    # Run black on Python files in the backend folder
+    echo "Running black on Python files in ${backend_folder}..."
+    (cd "$backend_folder" && poetry run black .) || {
+        echo "Formatting failed."
+        exit 1
+    }
+    echo "Formatting completed successfully."
+fi
+
+exit 0
