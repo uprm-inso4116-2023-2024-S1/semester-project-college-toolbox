@@ -16,6 +16,7 @@ fi
 
 # Check for uncommitted changes in the backend folder
 git_diff=$(git diff --name-only --cached)
+formatted_files=""
 if [[ "$git_diff" == *"${backend_folder}/"* ]]; then
     # Run black on Python files in the backend folder
     echo "Running black on Python files in ${backend_folder}..."
@@ -24,6 +25,13 @@ if [[ "$git_diff" == *"${backend_folder}/"* ]]; then
         exit 1
     }
     echo "Formatting completed successfully."
+
+    # Stage the formatted files
+    formatted_files=$(git diff --name-only)
+    if [ -n "$formatted_files" ]; then
+        git add $formatted_files
+        echo "Staged the formatted files for commit."
+    fi
 fi
 
 exit 0
