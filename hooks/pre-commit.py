@@ -29,6 +29,7 @@ try:
         subprocess.check_call(["poetry", "run", "black", "."])
         print("Formatting completed successfully.")
 except subprocess.CalledProcessError:
+    print("Failed to format.")
     sys.exit(1)
 
 sys.exit(0)
