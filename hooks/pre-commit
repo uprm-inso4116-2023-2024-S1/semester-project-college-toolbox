@@ -1,37 +1,33 @@
 #!/bin/bash
 
+backend_root="backend/"
 # Function to check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Paths to the backend folder
-backend_folder="backend"
+### Execute backend commands ###
+
+cd ${backend_root}
 
 # Check if poetry is available
 if ! command_exists "poetry"; then
-    echo "Error: poetry must be installed for this hook. Follow the readme in backend."
+    echo "Error: poetry must be installed for this hook. Install it following the README in backend/."
+    exit 1
+fi
+ 
+# Run black in check mode
+if ! poetry run black --check .; then
+    echo "Error: Unformatted code detected. Running black formatter."
+    poetry run black .
+    echo "Stage the newly formatted files with 'git add' ('git add .' to stage all files )."
     exit 1
 fi
 
-# Check for uncommitted changes in the backend folder
-git_diff=$(git diff --name-only --cached)
-formatted_files=""
-if [[ "$git_diff" == *"${backend_folder}/"* ]]; then
-    # Run black on Python files in the backend folder
-    echo "Running black on Python files in ${backend_folder}..."
-    (cd "$backend_folder" && poetry run black .) || {
-        echo "Formatting failed."
-        exit 1
-    }
-    echo "Formatting completed successfully."
+cd .. # return back to root dir
 
-    # Stage the formatted files
-    formatted_files=$(git diff --name-only)
-    if [ -n "$formatted_files" ]; then
-        git add $formatted_files
-        echo "Staged the formatted files for commit."
-    fi
-fi
+### Execute frontend commands ###
+
 
 exit 0
+
