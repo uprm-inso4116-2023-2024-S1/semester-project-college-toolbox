@@ -10,6 +10,7 @@ from fastapi import (
     Cookie,
 )
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -57,7 +58,7 @@ def read_root():
 
 
 # User registration endpoint
-@app.post("/register/", response_model=RegisterResponse)
+@app.post("/register", response_model=RegisterResponse)
 def register_user(
     user_request: RegisterRequest, db: Session = Depends(get_db)
 ) -> RegisterResponse:
@@ -88,7 +89,7 @@ def register_user(
     profile = UserProfile(
         fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
     )
-    response = JSONResponse(content=profile)
+    response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
     response.set_cookie(
         key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
     )
@@ -96,7 +97,7 @@ def register_user(
 
 
 # Login endpoint
-@app.post("/login/", response_model=LoginResponse)
+@app.post("/login", response_model=LoginResponse)
 def login_user(
     user_request: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
@@ -116,7 +117,7 @@ def login_user(
     profile = UserProfile(
         fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
     )
-    response = JSONResponse(content=profile)
+    response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
     response.set_cookie(
         key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
     )
