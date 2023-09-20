@@ -2,6 +2,17 @@
 import LayoutSidebar from '../../app/LayoutSidebar.astro';
 import ScholarshipCard from '../../components/ScholarshipCard.jsx';
 import ScholarshipList from '../../components/ScholarshipList.jsx';
+
+const cookie = Astro.request.headers.get('cookie');
+// Check if the "auth_token" cookie is present
+const authToken = cookie?.split('; ').find(row => row.startsWith('auth_token='));
+
+// If the "auth_token" cookie is not found, redirect to the sign-in page
+if (!authToken) {
+	return Astro.redirect('/authentication/sign-in');
+}
+
+// TODO: Add user profile fetching here. if it fails with the cookie, reroute to login
 ---
 
 <LayoutSidebar>
