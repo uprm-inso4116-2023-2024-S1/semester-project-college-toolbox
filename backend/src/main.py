@@ -30,7 +30,8 @@ app = FastAPI()
 # Configure CORS to allow requests from the React frontend
 frontendPort = "2121"
 origins = [
-    f"http://localhost:{frontendPort}"
+    f"http://localhost:{frontendPort}",
+    "https://uprm-inso4116-2023-2024-s1.github.io/semester-project-college-toolbox",
 ]  # Add any other allowed origins as needed
 app.add_middleware(
     CORSMiddleware,
@@ -91,7 +92,12 @@ def register_user(
     )
     response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
     response.set_cookie(
-        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
+        key="auth_token",
+        value=permanent_token,
+        max_age=TOKEN_EXPIRATION_TIME,
+        samesite="None",  # Set SameSite attribute
+        secure=True,
+        path="/",
     )
     return response
 
@@ -119,7 +125,12 @@ def login_user(
     )
     response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
     response.set_cookie(
-        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
+        key="auth_token",
+        value=permanent_token,
+        max_age=TOKEN_EXPIRATION_TIME,
+        samesite="None",  # Set SameSite attribute
+        secure=True,
+        path="/",
     )
     return response
 
