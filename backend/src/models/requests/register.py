@@ -4,9 +4,9 @@ from pydantic import BaseModel
 
 class RegisterRequest(BaseModel):
     firstName: str
-    initial: str | None
+    initial: str | None = None
     firstLastName: str
-    secondLastName: str | None
+    secondLastName: str | None = None
     email: str
     password: str
-    profileImageUrl: str | None
+    profileImageUrl: str | None = None
