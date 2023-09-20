@@ -6,7 +6,6 @@ import secrets
 
 from datetime import datetime, timedelta
 from fastapi import HTTPException
-from jose import JWTError
 from typing import Optional
 
 SECRET_KEY = secrets.token_hex(32)
@@ -39,5 +38,5 @@ def get_user_id_from_token(token: str) -> Optional[int]:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = int(payload.get("sub"))
         return user_id
-    except JWTError:
+    except:
         raise HTTPException(status_code=401, detail="Invalid token.")
