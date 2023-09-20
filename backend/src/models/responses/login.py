@@ -5,7 +5,7 @@ from pydantic import BaseModel
 class UserProfile(BaseModel):
     fullName: str
     email: str
-    profileImageUrl: str
+    profileImageUrl: str | None = None
 
 
 class LoginResponse(BaseModel):
