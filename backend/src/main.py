@@ -13,7 +13,6 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
-from src.config import TOKEN_EXPIRATION_TIME
 
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
@@ -22,7 +21,7 @@ from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
-from src.security import hash_password, generate_permanent_token
+from src.security import hash_password, generate_permanent_token, TOKEN_EXPIRATION_SECONDS
 
 app = FastAPI()
 
@@ -90,7 +89,7 @@ def register_user(
     )
     response = JSONResponse(content=profile)
     response.set_cookie(
-        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
+        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_SECONDS
     )
     return response
 
@@ -118,7 +117,7 @@ def login_user(
     )
     response = JSONResponse(content=profile)
     response.set_cookie(
-        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
+        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_SECONDS
     )
     return response
 
