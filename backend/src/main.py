@@ -1,8 +1,19 @@
 # src/main.py
-from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Depends
+from fastapi import (
+    FastAPI,
+    Response,
+    UploadFile,
+    File,
+    Request,
+    HTTPException,
+    Depends,
+    Cookie,
+)
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
+from src.config import TOKEN_EXPIRATION_TIME
 
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
@@ -77,7 +88,11 @@ def register_user(
     profile = UserProfile(
         fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
     )
-    return {"token": permanent_token, "profile": profile}
+    response = JSONResponse(content=profile)
+    response.set_cookie(
+        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
+    )
+    return response
 
 
 # Login endpoint
@@ -95,7 +110,17 @@ def login_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    return {"token": permanent_token}
+    fullName = (
+        f"{user.FirstName} {user.Initial} {user.FirstLastName} {user.SecondLastName}"
+    )
+    profile = UserProfile(
+        fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
+    )
+    response = JSONResponse(content=profile)
+    response.set_cookie(
+        key="auth_token", value=permanent_token, max_age=TOKEN_EXPIRATION_TIME
+    )
+    return response
 
 
 # PDF document upload endpoint
