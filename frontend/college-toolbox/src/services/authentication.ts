@@ -39,6 +39,31 @@ export async function register(profile: NewProfile): Promise<User | null> {
   }
 }
 
+export async function login(email: string, password: string): Promise<User | null> {
+  try {
+
+    const response = await fetch(`http://localhost:5670/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+			credentials: 'include',
+      body: JSON.stringify({email, password}),
+    })
+
+    if (!response.ok) {
+      throw new Error('Login failed')
+    }
+
+    const data: User = await response.json() as User
+    return data
+
+  } catch (error) {
+    console.error('Login error:', error)
+		return null
+  }
+}
+
 
 export function logout() {
 	const regex = /(^|;\s*)auth_token=([^;]*)/;
