@@ -9,5 +9,4 @@ class UserProfile(BaseModel):
 
 
 class LoginResponse(BaseModel):
-    token: str  # Will hold the permanent token upon successful login
     profile: UserProfile | None = None
