@@ -32,6 +32,7 @@ def generate_permanent_token(user_id: int) -> str:
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
+
 # Token validation and user_id extraction
 def get_user_id_from_token(token: str) -> Optional[int]:
     try:
