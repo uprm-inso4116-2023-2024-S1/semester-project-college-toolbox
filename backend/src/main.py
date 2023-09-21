@@ -9,12 +9,11 @@ from fastapi import (
     Depends,
     Cookie,
 )
-from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
-from src.config import TOKEN_EXPIRATION_TIME
 
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
@@ -23,9 +22,11 @@ from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
-from src.security import hash_password, generate_permanent_token
+from src.security import hash_password, generate_permanent_token, TOKEN_EXPIRATION_SECONDS
 
-app = FastAPI()
+app = FastAPI(
+    docs_url="/api/docs",
+)
 
 # Configure CORS to allow requests from the React frontend
 frontendPort = "2121"
@@ -63,6 +64,12 @@ def read_root():
 def register_user(
     user_request: RegisterRequest, db: Session = Depends(get_db)
 ) -> RegisterResponse:
+    """
+    Registers a new user account and logs the user in.
+
+    - **user_request**: Request for registering a user.
+    - **db**: Database to be utilized (prod or test).
+    """
     existing_user = db.query(User).filter(User.Email == user_request.email).first()
     if existing_user:
         db.close()
@@ -94,7 +101,7 @@ def register_user(
     response.set_cookie(
         key="auth_token",
         value=permanent_token,
-        max_age=TOKEN_EXPIRATION_TIME,
+        max_age=TOKEN_EXPIRATION_SECONDS,
         samesite="None",  # Set SameSite attribute
         secure=True,
         path="/",
@@ -107,6 +114,12 @@ def register_user(
 def login_user(
     user_request: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
+    """
+    Logs an existing user in.
+
+    - **user_request**: Request for logging in a user.
+    - **db**: Database to be utilized (prod or test).
+    """
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
         db.close()
@@ -127,7 +140,7 @@ def login_user(
     response.set_cookie(
         key="auth_token",
         value=permanent_token,
-        max_age=TOKEN_EXPIRATION_TIME,
+        max_age=TOKEN_EXPIRATION_SECONDS,
         samesite="None",  # Set SameSite attribute
         secure=True,
         path="/",

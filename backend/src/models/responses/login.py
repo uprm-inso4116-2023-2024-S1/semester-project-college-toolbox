@@ -1,11 +1,6 @@
 # src/models/responses/login.py
 from pydantic import BaseModel
-
-
-class UserProfile(BaseModel):
-    fullName: str
-    email: str
-    profileImageUrl: str | None = None
+from src.models.common.user_profile import UserProfile
 
 
 class LoginResponse(BaseModel):

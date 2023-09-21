@@ -22,9 +22,18 @@ The two commonly hardest steps are:
 
 #### 🏠Local Development
 
+##### API Documentation
+
+1. Run `cd backend`
+2. Run `poetry install`
+3. Run `poetry shell`
+4. Run `uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
+5. Access http://localhost:5670/api/docs on your browser
+
 ##### 📜Scripts
 
 ##### Frontend
+
 1. Run `cd frontend/college-toolbox`
 2. Run `npm install`
 3. Run `npm run dev`
