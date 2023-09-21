@@ -1,3 +1,4 @@
+import {API_URL} from '../app/constants.js'
 // authentication.ts
 interface NewProfile {
 	firstName: string;
@@ -17,8 +18,7 @@ interface User {
 
 export async function register(profile: NewProfile): Promise<User | null> {
   try {
-
-    const response = await fetch(`http://localhost:5670/register`, {
+    const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ export async function register(profile: NewProfile): Promise<User | null> {
 export async function login(email: string, password: string): Promise<User | null> {
   try {
 
-    const response = await fetch(`http://localhost:5670/login`, {
+    const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
