@@ -24,7 +24,9 @@ from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
 from src.security import hash_password, generate_permanent_token, TOKEN_EXPIRATION_SECONDS
 
-app = FastAPI()
+app = FastAPI(
+    docs_url="/api/docs",
+)
 
 # Configure CORS to allow requests from the React frontend
 frontendPort = "2121"
@@ -62,6 +64,12 @@ def read_root():
 def register_user(
     user_request: RegisterRequest, db: Session = Depends(get_db)
 ) -> RegisterResponse:
+    """
+    Registers a new user account and logs the user in.
+
+    - **user_request**: Request for registering a user.
+    - **db**: Database to be utilized (prod or test).
+    """
     existing_user = db.query(User).filter(User.Email == user_request.email).first()
     if existing_user:
         db.close()
@@ -106,6 +114,12 @@ def register_user(
 def login_user(
     user_request: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
+    """
+    Logs an existing user in.
+
+    - **user_request**: Request for logging in a user.
+    - **db**: Database to be utilized (prod or test).
+    """
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
         db.close()
