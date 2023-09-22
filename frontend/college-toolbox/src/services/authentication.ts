@@ -1,24 +1,15 @@
-// authentication.ts
-interface NewProfile {
-	firstName: string;
-	initial?: string;
-	firstLastName: string;
-	secondLastName?: string;
-	email: string;
-	password: string;
-	profileImageUrl?: string;
-}
+import { API_URL } from "../app/constants";
+import type { NewProfile, User } from "../types/entities";
 
-interface User {
-  fullName: string;
-  email: string;
-	profileImageUrl?: string;
-}
+// authentication.ts
+
+
+
 
 export async function register(profile: NewProfile): Promise<User | null> {
   try {
 
-    const response = await fetch(`http://localhost:5670/register`, {
+    const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,6 +55,31 @@ export async function login(email: string, password: string): Promise<User | nul
   }
 }
 
+export async function fetchProfile(): Promise<User | null> {
+    try {
+  
+      const response = await fetch(`${API_URL}/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      })
+  
+      if (!response.ok) {
+        throw new Error('Login failed')
+      }
+  
+      const responseData = await response.json() as {"profile": User}
+      return responseData.profile 
+  
+    } catch (error) {
+      console.error('Login error:', error)
+          return null
+    }
+  }
+  
+  
 
 export function logout() {
 	const regex = /(^|;\s*)auth_token=([^;]*)/;
