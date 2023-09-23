@@ -41,3 +41,22 @@ border-radius: 0.25rem;
 li.custom-checkbox:hover {
 background-color: #edf2f7; /* Background color on hover */
 }
+
+/* Fixed button location */
+.left-fixed-button {
+	position: fixed;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	background-color: #333;
+	color: #fff;
+	padding: 10px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+/* Add some spacing between the fixed buttons */
+.left-fixed-button + .left-fixed-button {
+	margin-top: 10px;
+}

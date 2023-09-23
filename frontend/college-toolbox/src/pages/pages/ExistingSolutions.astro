@@ -16,8 +16,13 @@ import DropDownCheckbox from '../../components/DropDownCheckbox/DropDownCheckbox
                 >Existing Solutions</a
             >
         </p>
-		<DropDownCheckbox filterType={'Money'} targetId={'filter-container-money'} data={['Fee', 'Membership', 'Single pay', 'Free trial']} client:load/>
-		<DropDownCheckbox filterType={'Type'} targetId={'filter-container-type'} data={['Note taking', 'Budget Tracker', 'Planners', 'Studying']} client:load/>
+		
+		<DropDownCheckbox filterType={'Type'} targetId={'type'} data={['Note taking', 'Budget Tracker', 'Planners', 'Studying']} dataId={'openType'} client:idle/>
+		<br>
+		<DropDownCheckbox filterType={'Money'} targetId={'money'} data={['Fee', 'Membership', 'Single pay', 'Free trial']} dataId={'openMoney'} client:idle/>
+		<br>
+		<DropDownCheckbox filterType={'Other'} targetId={'other'} data={['testing']} dataId={'openOther'} client:idle/>
+
 			
 </LayoutSidebar>
 
