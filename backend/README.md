@@ -2,9 +2,10 @@
 
 ## Option A: Local
 
-1. Ensure you have `poetry` installed: `curl -sSL https://install.python-poetry.org | python3 -`
-2. Add the following line to your [PATH](https://gist.github.com/nex3/c395b2f8fd4b02068be37c961301caa7):
- `%APPDATA%\Python\Scripts`
+1. Ensure you have `poetry` installed: `curl -sSL https://install.python-poetry.org | python -`
+2. Add the following lines to your [PATH](https://gist.github.com/nex3/c395b2f8fd4b02068be37c961301caa7):
+ `%APPDATA%\Python\Scripts` (if you have Python installed through the MS store)
+ `%APPDATA%\pypoetry\venv\Scripts`
 3. cd into `backend/`
 4. Run `poetry install`
 5. Run `poetry run uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
