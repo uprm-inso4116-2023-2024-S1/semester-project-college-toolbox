@@ -1,7 +1,7 @@
 ---
 /* eslint max-lines: 'off' */
 
-import { asset } from '../lib/data.js';
+import { asset, url } from '../lib/data.js';
 
 import ColorModeSwitcher from '../components/ColorModeSwitcher.astro';
 import SearchInput from '../components/SearchInput.astro';
@@ -98,7 +98,7 @@ import UserDropdown from '../components/UserDropdown.jsx';
 						</li>
 						<li>
 							<a
-								href="#"
+								href={url('settings')}
 								class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
 								>Settings</a
 							>
@@ -479,7 +479,7 @@ import UserDropdown from '../components/UserDropdown.jsx';
 							</div>
 						</a>
 						<a
-							href="#"
+							href={url('settings')}
 							class="block p-4 text-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
 						>
 							<svg
@@ -584,5 +584,3 @@ import UserDropdown from '../components/UserDropdown.jsx';
 		</div>
 	</div>
 </nav>
-../components/UserMenu.js
-../components/UserDropdown.js
