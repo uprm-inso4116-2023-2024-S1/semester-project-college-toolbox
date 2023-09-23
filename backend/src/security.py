@@ -39,5 +39,5 @@ def get_user_id_from_token(token: str) -> Optional[int]:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = int(payload.get("sub"))
         return user_id
-    except:
+    except Exception:
         raise HTTPException(status_code=401, detail="Invalid token.")

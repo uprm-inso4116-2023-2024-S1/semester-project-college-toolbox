@@ -1,4 +1,4 @@
-export const API_URL = `${import.meta.env.BACKEND_URL}`;
+export const API_URL = 'http://localhost:5670';
 
 export const REMOTE_ASSETS_BASE_URL = `https://college-toolbox.vercel.app`;
 
