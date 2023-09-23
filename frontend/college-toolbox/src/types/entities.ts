@@ -24,17 +24,14 @@ export interface NewProfile {
 	profileImageUrl?: string;
 }
 
-export type Users = User[];
-export interface User {
-  fullName: string;
-  email: string;
-	profileImageUrl?: string;
-}
 
 export interface Profile {
-	fullName: string;
+	firstName: string;
+	initial?: string;
+	firstLastName: string;
+	secondLastName?: string;
 	email: string;
-	profileImageUrl: string;
+	profileImageUrl?: string;
 }
 
 //Scholarship Interface

@@ -101,7 +101,12 @@ def register_user(
     db.close()
     
     profile = UserProfile(
-        fullName=get_full_name(user), email=user.Email, profileImageUrl=user.ProfileImageUrl
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email, 
+        profileImageUrl=user.ProfileImageUrl
     )
     response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
     response.set_cookie(
@@ -138,7 +143,12 @@ def login_user(
     db.close()
 
     profile = UserProfile(
-        fullName=get_full_name(user), email=user.Email, profileImageUrl=user.ProfileImageUrl
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email, 
+        profileImageUrl=user.ProfileImageUrl
     )
     response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
     response.set_cookie(
@@ -167,7 +177,12 @@ def fetch_user(
     db.close()
 
     profile = UserProfile(
-        fullName=get_full_name(user), email=user.Email, profileImageUrl=user.ProfileImageUrl
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email, 
+        profileImageUrl=user.ProfileImageUrl
     )
     return LoginResponse(profile=profile)
 

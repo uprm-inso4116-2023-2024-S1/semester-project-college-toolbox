@@ -1,12 +1,12 @@
 import { API_URL } from "../app/constants";
-import type { NewProfile, User } from "../types/entities";
+import type { NewProfile, Profile } from "../types/entities";
 
 // authentication.ts
 
 
 
 
-export async function register(profile: NewProfile): Promise<User | null> {
+export async function register(profile: NewProfile): Promise<Profile | null> {
   try {
 
     const response = await fetch(`${API_URL}/register`, {
@@ -21,7 +21,7 @@ export async function register(profile: NewProfile): Promise<User | null> {
       throw new Error('Registration failed')
     }
 
-    const data: User = await response.json() as User
+    const data: Profile = await response.json() as Profile
     return data
 
   } catch (error) {
@@ -30,7 +30,7 @@ export async function register(profile: NewProfile): Promise<User | null> {
   }
 }
 
-export async function login(email: string, password: string): Promise<User | null> {
+export async function login(email: string, password: string): Promise<Profile | null> {
   try {
 
     const response = await fetch(`http://localhost:5670/login`, {
@@ -46,7 +46,7 @@ export async function login(email: string, password: string): Promise<User | nul
       throw new Error('Login failed')
     }
 
-    const data: User = await response.json() as User
+    const data: Profile = await response.json() as Profile
     return data
 
   } catch (error) {
@@ -55,7 +55,7 @@ export async function login(email: string, password: string): Promise<User | nul
   }
 }
 
-export async function fetchProfile(): Promise<User | null> {
+export async function fetchProfile(): Promise<Profile | null> {
     try {
   
       const response = await fetch(`${API_URL}/profile`, {
@@ -70,7 +70,7 @@ export async function fetchProfile(): Promise<User | null> {
         throw new Error('Login failed')
       }
   
-      const responseData = await response.json() as {"profile": User}
+      const responseData = await response.json() as {"profile": Profile}
       return responseData.profile 
   
     } catch (error) {

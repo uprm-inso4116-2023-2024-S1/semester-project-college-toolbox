@@ -1,22 +1,35 @@
 import React, {useState, useEffect} from 'react';
+import { useStore } from '@nanostores/react';
 import { url } from '../lib/data';
 import { fetchProfile, logout } from '../services/authentication';
-import type { User } from '../types/entities';
+import { storedProfile, isLoggedIn } from '../lib/profile';
 
 const UserDropdown = () => {
-    const [profileData, setProfileData] = useState<User | null>(null);
+    const $profileData = useStore(storedProfile);
+		const $isLoggedIn = useStore(isLoggedIn);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 					fetchProfile().then(
 						(profile)=>{
-							setProfileData(profile)
+							if (profile){
+								isLoggedIn.set(true);
+								storedProfile.set(profile)
+							} else {
+								isLoggedIn.set(false)
+								storedProfile.set({
+								firstName:'',
+								firstLastName:'',
+								email:''
+							});
+							}
           		setLoading(false)
 						}
 					).catch(
 						((err)=>{
 							console.error(err)
 							setLoading(false)
+							isLoggedIn.set(false)
 						})
 					)
           
@@ -33,10 +46,10 @@ const UserDropdown = () => {
           data-dropdown-toggle="dropdown-2"
         >
           <span className="sr-only">Open user menu</span>
-          {profileData?.profileImageUrl ?
+          {$profileData?.profileImageUrl ?
 					   <div className="w-40 h-40 rounded-full" style={{maxWidth:"40px",maxHeight: "40px"}}>
 						 <img
-							 src={profileData.profileImageUrl}
+							 src={$profileData.profileImageUrl}
 							 alt="Profile Picture"
 							 className="object-cover w-full h-full rounded-full"
 						 />
@@ -62,12 +75,12 @@ const UserDropdown = () => {
         className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
         id="dropdown-2"
     >
-				{profileData	&& <div className="px-4 py-3" role="none">
+				{$isLoggedIn	&& <div className="px-4 py-3" role="none">
 				<p className="text-sm text-gray-900 dark:text-white" role="none">
-						{profileData.fullName}
+						{$profileData.firstName} {$profileData?.initial && $profileData?.initial+'.'} {$profileData.firstLastName} {$profileData.secondLastName}
 				</p>
 				<p className="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
-						{profileData.email}
+						{$profileData.email}
 				</p>
 				</div>}
         <ul className="py-1" role="none">
@@ -80,7 +93,7 @@ const UserDropdown = () => {
                 Settings
                 </a>
             </li>
-            {!loading && profileData ?
+            {!loading && $isLoggedIn ?
             <li>
                 <a
                 href={url('')}
@@ -101,7 +114,7 @@ const UserDropdown = () => {
                 Sign in
                 </a>
             </li>
-            }
+						}
         </ul>
     </div>
     </div>

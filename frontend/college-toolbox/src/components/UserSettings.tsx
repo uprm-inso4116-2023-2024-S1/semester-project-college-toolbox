@@ -1,13 +1,74 @@
-import React, {useState} from 'react'; // Import React if it's not already imported
-import ToggleSwitch from './ToggleSwitch.tsx';
+import React, {useState, useEffect} from 'react'; // Import React if it's not already imported
+import ToggleSwitch from './ToggleSwitch.jsx';
+import { asset, url } from '../lib/data.js';
+import { storedProfile, isLoggedIn } from '../lib/profile';
+import { useStore } from '@nanostores/react';
+
 
 const UserSettings = () => {
-
-	const [hasCourseNotifications, setCourseNotifications] = useState(false);
+	const $storedProfile = useStore(storedProfile);
+	const [hasCourseNotifications, setCourseNotifications] = useState(false)
+	const [profileForm, setProfileForm] = useState({
+    firstName: storedProfile.get().firstName,
+    middleInitial: storedProfile.get().initial,
+    firstLastName: storedProfile.get().firstLastName,
+    secondLastName: storedProfile.get().secondLastName,
+		profileImageUrl: storedProfile.get().profileImageUrl,
+    email: storedProfile.get().email,
+  });
+	const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+		newPassword: '',
+		confirmPassword: '',
+  });
 
 	const toggleCourseNotifications = () => {
-    setCourseNotifications(!hasCourseNotifications);
+    setCourseNotifications(!hasCourseNotifications)
 	}
+	
+	useEffect(() => {
+		if (isLoggedIn.get()){
+			setProfileForm(
+			{	firstName: $storedProfile.firstName,
+				middleInitial: $storedProfile.initial,
+				firstLastName: $storedProfile.firstLastName,
+				secondLastName: $storedProfile.secondLastName,
+				profileImageUrl: $storedProfile.profileImageUrl,
+				email: $storedProfile.email
+			}
+			)
+		}
+		
+	},[$storedProfile])
+
+	const handleProfileInputChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    const newValue = type === 'checkbox' ? checked : value;
+
+    setProfileForm({
+      ...profileForm,
+      [name]: newValue,
+    });
+  };
+
+	const handleProfileSave = () => {
+    //TODO: emit update profile request
+  };
+
+
+	const handlePasswordInputChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    const newValue = type === 'checkbox' ? checked : value;
+
+    setPasswordForm({
+      ...passwordForm,
+      [name]: newValue,
+    });
+  };
+
+	const handlePasswordSave = () => {
+    //TODO: emit update password
+  };
 
   return (
 		<>
@@ -17,7 +78,7 @@ const UserSettings = () => {
           <ol className="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
             <li className="inline-flex items-center">
               <a
-                href="#"
+                href={url('')}
                 className="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white"
               >
                 <svg
@@ -47,28 +108,6 @@ const UserSettings = () => {
                     clipRule="evenodd"
                   ></path>
                 </svg>
-                <a
-                  href="#"
-                  className="ml-1 text-gray-700 hover:text-primary-600 md:ml-2 dark:text-gray-300 dark:hover:text-white"
-                >
-                  Users
-                </a>
-              </div>
-            </li>
-            <li>
-              <div className="flex items-center">
-                <svg
-                  className="w-6 h-6 text-gray-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
                 <span className="ml-1 text-gray-400 md:ml-2 dark:text-gray-500" aria-current="page">
                   Settings
                 </span>
@@ -83,7 +122,7 @@ const UserSettings = () => {
       <div className="col-span-2">
         <div className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
           <h3 className="mb-4 text-xl font-semibold dark:text-white">General information</h3>
-					<form action="#">
+					<form onSubmit={handleProfileSave}>
 						<div className="grid grid-cols-6 gap-6">
 							<div className="col-span-8 sm:col-span-4">
 								<label
@@ -98,6 +137,8 @@ const UserSettings = () => {
 									id="firstName"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder=""
+									value={profileForm.firstName}
+									onChange={handleProfileInputChange}
 									required
 								/>
 							</div>
@@ -114,6 +155,8 @@ const UserSettings = () => {
 									id="middleInitial"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder=""
+									value={profileForm.middleInitial}
+									onChange={handleProfileInputChange}
 								/>
 							</div>
 							<div className="col-span-6 sm:col-span-3">
@@ -129,6 +172,8 @@ const UserSettings = () => {
 									id="firstLastName"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder=""
+									value={profileForm.firstLastName}
+									onChange={handleProfileInputChange}
 									required
 								/>
 							</div>
@@ -145,6 +190,8 @@ const UserSettings = () => {
 									id="secondLastName"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder=""
+									value={profileForm.secondLastName}
+									onChange={handleProfileInputChange}
 								/>
 							</div>
 							<div className="col-span-6 sm:col-span-3">
@@ -160,6 +207,8 @@ const UserSettings = () => {
 									id="profileImageURL"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder=""
+									value={profileForm.profileImageUrl}
+									onChange={handleProfileInputChange}
 								/>
 							</div>
 							<div className="col-span-6 sm:col-span-3">
@@ -175,6 +224,8 @@ const UserSettings = () => {
 									id="email"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder=""
+									value={profileForm.email}
+									onChange={handleProfileInputChange}
 									required
 								/>
 							</div>
@@ -193,7 +244,7 @@ const UserSettings = () => {
 					<h3 className="mb-4 text-xl font-semibold dark:text-white">
 						Password information
 					</h3>
-					<form action="#">
+					<form onSubmit={handlePasswordSave}>
 						<div className="grid grid-cols-6 gap-6">
 							<div className="col-span-6 sm:col-span-3">
 								<label
@@ -208,6 +259,8 @@ const UserSettings = () => {
 									id="current-password"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder="••••••••"
+									value={passwordForm.currentPassword}
+									onChange={handlePasswordInputChange}
 									required
 								/>
 							</div>
@@ -225,6 +278,8 @@ const UserSettings = () => {
 									id="password"
 									className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 									placeholder="••••••••"
+									value={passwordForm.newPassword}
+									onChange={handlePasswordInputChange}
 									required
 								/>
 								<div
@@ -311,6 +366,8 @@ const UserSettings = () => {
 									id="confirm-password"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder="••••••••"
+									value={passwordForm.confirmPassword}
+									onChange={handlePasswordInputChange}
 									required
 								/>
 							</div>
