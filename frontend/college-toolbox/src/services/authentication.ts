@@ -8,7 +8,6 @@ import type { NewProfile, Profile } from "../types/entities";
 
 export async function register(profile: NewProfile): Promise<Profile | null> {
   try {
-
     const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: {
@@ -33,7 +32,7 @@ export async function register(profile: NewProfile): Promise<Profile | null> {
 export async function login(email: string, password: string): Promise<Profile | null> {
   try {
 
-    const response = await fetch(`http://localhost:5670/login`, {
+    const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
