@@ -54,3 +54,29 @@ def get_course_section_time_blocks(course_id: str, section: str, term: Term, yea
 def validate_course_id(course_id: str):
     with Session(engine) as session:
         return session.query(CourseSection).filter(CourseSection.course_id == course_id).first() is not None
+
+
+def make_all_schedules(courses : list[str], term : Term, year: int) -> list[WeekSchedule]:
+    pass
+  
+
+def make_all_schedules_helper(curr_week_schedule : WeekSchedule, \
+                              courses : list[str],               \
+                              term : Term,                       \
+                              year: int,                         \
+                              courses_scheduled : set,           \
+                              index : int) -> list[WeekSchedule]:
+
+    pass
+    
+
+def add_course_to_schedule(curr_week_schedule : WeekSchedule, course_section_time_blocks : list[TimeBlock]) -> tuple[WeekSchedule, bool]:
+    pass
+
+def add_time_block_to_day(week_day : list[TimeBlock], new_section_block : TimeBlock) -> bool:
+    pass
+
+
+# Return true if times conlfict
+def check_time_conflict(locked_time_block : TimeBlock, new_time_block : TimeBlock) -> bool:
+    pass
