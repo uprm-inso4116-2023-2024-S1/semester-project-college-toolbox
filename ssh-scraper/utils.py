@@ -4,7 +4,9 @@ from models import engine, CourseSection, RoomSchedule
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import copy
+from dataclasses import dataclass
 
+@dataclass
 class TimeBlock:
     def __init__(self, course_id: str, section: str, room: str, day: str, start_time: time, end_time: time):
         self.course_id = course_id
@@ -17,6 +19,7 @@ class TimeBlock:
     def __repr__(self):
         return f"{self.course_id}-{self.section} {self.start_time.strftime('%I:%M %p')} - {self.end_time.strftime('%I:%M %p')} {self.room}"
 
+@dataclass
 class WeekSchedule:
     def __init__(self):
         self.monday = []
@@ -58,6 +61,8 @@ def validate_course_id(course_id: str):
 
 # main call function for schedule generation
 def make_all_schedules(courses : list[str], term : Term, year: int) -> list[WeekSchedule]:
+    if len(courses) == 0: return []
+
     return make_all_schedules_helper(WeekSchedule(), courses, term, year, set(), 0)
   
 # Recursively adds and removes courses and course sections using backtracking.
