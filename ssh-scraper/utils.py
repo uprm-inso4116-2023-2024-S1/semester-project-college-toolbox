@@ -13,8 +13,20 @@ class TimeBlock:
         self.start_time = start_time
         self.end_time = end_time
 
-    def __str__(self):
-        return f"Course: {self.course_id}, Section: {self.section}, Room: {self.room}, Day: {self.day}, Start Time: {self.start_time}, End Time: {self.end_time}"
+    def __repr__(self):
+        return f"{self.course_id}-{self.section} {self.start_time.strftime('%I:%M %p')} - {self.end_time.strftime('%I:%M %p')} {self.room}"
+
+class WeekSchedule:
+    def __init__(self):
+        self.monday = []
+        self.tuesday = []
+        self.wednesday = []
+        self.thursday = []
+        self.friday = []
+
+    def __repr__(self) -> str:
+        return f"L: {self.monday}\nM: {self.tuesday}\nW: {self.wednesday}\nJ: {self.thursday}\nV: {self.friday}\n"
+
 
 def get_course_sections(course_id: str, term: Term, year: int) -> list[CourseSection]:
     with Session(engine) as session:
