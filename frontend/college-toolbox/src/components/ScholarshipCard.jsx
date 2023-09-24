@@ -122,11 +122,31 @@ const ScholarshipCard = ({
   const handleResumeDelete = () => {
     if (!isDeletingResume) {
       setIsDeletingResume(true);
-    } else {
-      // Perform delete action here or reset state if canceled
-      setResumeFileName('');
-      setIsDeletingResume(false);
     }
+    const formData = new FormData();
+    formData.append('uploadedFile.name', resumeFileName);
+    
+    // Perform delete action here or reset state if canceled
+    fetch('/ScholarshipApplication/delete-resume', {
+      method: 'POST',
+      body:  formData
+    })
+      .then(response=> {
+        if(response.ok) {
+          //File was deleted
+          //Handle success
+          console.log("Hoopla! File deleted.");
+        } else {
+          // Failure
+          console.error("Not hoopla, file delete FAILURE.")
+        }
+      })
+      .catch(error=> {
+        // Handle network errors
+        console.error('Error:', error)
+      });
+    setResumeFileName('');
+    setIsDeletingResume(false);
   };
 
   return (
