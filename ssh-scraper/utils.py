@@ -57,7 +57,7 @@ def validate_course_id(course_id: str):
 
 
 def make_all_schedules(courses : list[str], term : Term, year: int) -> list[WeekSchedule]:
-    pass
+    return make_all_schedules_helper(WeekSchedule(), courses, term, year, set(), 0)
   
 
 def make_all_schedules_helper(curr_week_schedule : WeekSchedule, \
@@ -67,16 +67,77 @@ def make_all_schedules_helper(curr_week_schedule : WeekSchedule, \
                               courses_scheduled : set,           \
                               index : int) -> list[WeekSchedule]:
 
-    pass
+    if len(courses_scheduled) == len(courses):
+        return [curr_week_schedule]
+    if index >= len(courses):
+        return []
+
+    all_schedules = []
+    for course_section in get_course_sections(courses[index], term, year):
+        time_blocks = get_course_section_time_blocks(course_section.course_id, course_section.section, Term(course_section.term), course_section.year)
+        
+        updated_schedule, time_conflict_detected = add_course_to_schedule(curr_week_schedule, time_blocks)
+
+        if not time_conflict_detected:
+            courses_scheduled.add(course_section.course_id)
+            all_schedules += make_all_schedules_helper(updated_schedule, courses, term, year, courses_scheduled, index + 1) 
+            courses_scheduled.remove(course_section.course_id)
+
+    return all_schedules
     
 
 def add_course_to_schedule(curr_week_schedule : WeekSchedule, course_section_time_blocks : list[TimeBlock]) -> tuple[WeekSchedule, bool]:
-    pass
+    copy_week_schedule = copy.deepcopy(curr_week_schedule)
+
+    time_conflict_flag = False
+
+    for section_block in course_section_time_blocks:
+        day = section_block.day
+        if day == 'L':
+            time_conflict_flag = add_time_block_to_day(copy_week_schedule.monday, section_block)
+            
+        elif day == 'M':
+            time_conflict_flag = add_time_block_to_day(copy_week_schedule.tuesday, section_block)
+            
+        elif day == 'W':
+            time_conflict_flag = add_time_block_to_day(copy_week_schedule.wednesday, section_block)
+            
+        elif day == 'J':
+            time_conflict_flag = add_time_block_to_day(copy_week_schedule.thursday, section_block)
+            
+        elif day == 'V':
+            time_conflict_flag = add_time_block_to_day(copy_week_schedule.friday, section_block)
+
+        if time_conflict_flag:
+            return (curr_week_schedule, True)
+
+    return (copy_week_schedule, False)
 
 def add_time_block_to_day(week_day : list[TimeBlock], new_section_block : TimeBlock) -> bool:
-    pass
+    temp_stack = []
+    time_conclict_flag = False
+  
+    while len(week_day) != 0:
+        top = week_day[-1]
+
+        if top.end_time < new_section_block.start_time: break
+
+        if check_time_conflict(top, new_section_block):
+            time_conclict_flag = True
+            break
+
+        temp_stack.append(week_day.pop())
+
+    if not time_conclict_flag:
+        week_day.append(new_section_block)
+
+    while len(temp_stack) != 0:
+        week_day.append(temp_stack.pop())
+
+    return time_conclict_flag
 
 
 # Return true if times conlfict
 def check_time_conflict(locked_time_block : TimeBlock, new_time_block : TimeBlock) -> bool:
-    pass
+    return locked_time_block.end_time > new_time_block.start_time and \
+           locked_time_block.start_time < new_time_block.end_time
