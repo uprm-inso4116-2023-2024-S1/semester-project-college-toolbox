@@ -1,4 +1,5 @@
 # src/main.py
+from src.utils import get_full_name
 from fastapi import (
     FastAPI,
     Request,
@@ -22,6 +23,7 @@ from src.models.tables.user import User
 from src.security import (
     hash_password,
     generate_permanent_token,
+    get_user_id_from_token,
     TOKEN_EXPIRATION_SECONDS,
 )
 
@@ -42,6 +44,8 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 
 # Dependency to get the database session
@@ -92,11 +96,14 @@ async def register_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    fullName = (
-        f"{user.FirstName} {user.Initial} {user.FirstLastName} {user.SecondLastName}"
-    )
+
     profile = UserProfile(
-        fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
     response.set_cookie(
@@ -131,11 +138,14 @@ async def login_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    fullName = (
-        f"{user.FirstName} {user.Initial} {user.FirstLastName} {user.SecondLastName}"
-    )
+
     profile = UserProfile(
-        fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
     response.set_cookie(
@@ -149,7 +159,32 @@ async def login_user(
     return response
 
 
-# document upload endpoint MODIFY
+# Login endpoint
+@app.get("/profile", response_model=LoginResponse)
+def fetch_user(
+    db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
+) -> LoginResponse:
+    """
+    Returns the profile of a user given a valid auth token.
+    """
+    if not auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(auth_token)
+    user = db.query(User).filter(User.UserId == user_id).first()
+    db.close()
+
+    profile = UserProfile(
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
+    )
+    return LoginResponse(profile=profile)
+
+
+# PDF document upload endpoint
 @app.post("/ScholarshipApplication/upload")
 async def upload_doc(request: Request):
     # new_pdf = Document(filename, file)
