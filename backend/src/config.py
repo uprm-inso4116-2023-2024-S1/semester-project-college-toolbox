@@ -1,10 +1,11 @@
-# config.py
+# src/config.py
 from sqlalchemy import URL
 
 DATABASE_URL = URL.create(
     drivername="postgresql+psycopg2",
-    username="postgres",
-    password="2928",  # plain (unescaped) text
+    username="ct",
+    password="password",  # plain (unescaped) text
     host="localhost",
-    port=5432,
+    port=5433,
+    database="ct",
 )

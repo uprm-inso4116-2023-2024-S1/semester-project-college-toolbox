@@ -1,8 +1,8 @@
-# College Toolbox
+# 🧰College Toolbox🧰
 
 Welcome to College Toolbox, your all-in-one web application for managing your college life more efficiently. This web app is built using Astro and is designed to help students streamline various aspects of their college experience, from tracking job and scholarship applications to generating tuition schedules and discovering useful college websites.
 
-### Installation
+### 🛠Installation
 
 #### Pre-requisites
 
@@ -17,10 +17,24 @@ The two commonly hardest steps are:
 3. Git Bash or another flavor of Bash
 4. Python
 5. Poetry: `curl -sSL https://install.python-poetry.org | python3 -`
+6. Add the following line to your [PATH](https://gist.github.com/nex3/c395b2f8fd4b02068be37c961301caa7):
+ `%APPDATA%\Python\Scripts`
+7. Node [Download](https://nodejs.org/en/download)
 
-#### Local Development
+#### 🏠Local Development
+
+##### API Documentation
+
+1. Run `cd backend`
+2. Run `poetry install`
+3. Run `poetry shell`
+4. Run `uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
+5. Access http://localhost:5670/api/docs on your browser
+
+##### 📜Scripts
 
 ##### Frontend
+
 1. Run `cd frontend/college-toolbox`
 2. Run `npm install`
 3. Run `npm run dev`
@@ -33,6 +47,10 @@ The two commonly hardest steps are:
 4. Run `uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
 
 ### Deployment
+
+#### Frontend
+
+The frontend is automatically deployed to Github Pages on every push to the main branch
 
 #### Self-hosted
 

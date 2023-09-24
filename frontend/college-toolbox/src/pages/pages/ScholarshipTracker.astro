@@ -2,6 +2,7 @@
 import LayoutSidebar from '../../app/LayoutSidebar.astro';
 import ScholarshipCard from '../../components/ScholarshipCard.jsx';
 import ScholarshipList from '../../components/ScholarshipList.jsx';
+
 ---
 
 <LayoutSidebar>
@@ -21,3 +22,16 @@ import ScholarshipList from '../../components/ScholarshipList.jsx';
          
         <ScholarshipList client:load/>
 </LayoutSidebar>
+
+<script>
+	import { url, asset } from "../../lib/data";
+
+	const cookies = document.cookie;
+	// Check if the "auth_token" cookie is present
+	const authToken = cookies?.split('; ').find(row => row.startsWith('auth_token='));
+
+	// If the "auth_token" cookie is not found, redirect to the sign-in page
+	if (!authToken) {
+		window.location.href = url('authentication/sign-in');
+	}
+</script>

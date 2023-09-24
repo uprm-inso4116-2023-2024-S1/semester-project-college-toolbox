@@ -25,9 +25,9 @@ export async function fetchData<Selected extends Endpoint>(endpoint: Selected) {
 export function url(path = '') {
 	return `${import.meta.env.SITE}${import.meta.env.BASE_URL}${path}`;
 }
-
-// TODO: Remove old local assets from git history (to make cloning snappier).
+// Generate URL for static assets (like images)
 export function asset(path: string) {
-	// NOTE: Fetching remote assets from the Hugo admin dashboard Vercel dist.
-	return `${REMOTE_ASSETS_BASE_URL}/${path}`;
+	const localURL = `${import.meta.env.SITE}${import.meta.env.BASE_URL}${path}`
+	const remoteURL = `https://raw.githubusercontent.com/uprm-inso4116-2023-2024-S1/semester-project-college-toolbox/main/frontend/college-toolbox/${path}`
+	return process.env.CI ? remoteURL : localURL
 }

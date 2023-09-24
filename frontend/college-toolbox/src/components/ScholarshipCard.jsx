@@ -94,10 +94,12 @@ const ScholarshipCard = ({
     if (uploadedFile) {
       setResumeFileName(uploadedFile.name);
       const formData = new FormData();
-      formData.append('uploadedFile.name', uploadedFile);
+      formData.append("test", uploadedFile);
       console.log('FormData:', formData);
       // Make a POST request to FastAPI
+      
       fetch(`${API_URL}/upload-resume`, {
+
         method: 'POST',
         body:  formData
       })
@@ -105,9 +107,11 @@ const ScholarshipCard = ({
           if(response.ok) {
             //File was uploaded
             //Handle success
+            console.log(response)
             console.log("Hoopla! File uploaded.");
           } else {
             // Failure
+            console.log(response)
             console.error("Not hoopla, file upload FAILURE.")
           }
         })

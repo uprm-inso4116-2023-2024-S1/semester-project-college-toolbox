@@ -13,6 +13,7 @@ fastapi = {extras = ["all"], version = "^0.103.1"}
 gunicorn = "^21.2.0"
 sqlalchemy = "^2.0.20"
 psycopg2-binary = "^2.9.7" # needed for postgres SQLAlchemy integration
+pyjwt = "^2.8.0"
 
 
 [tool.poetry.group.dev.dependencies]
