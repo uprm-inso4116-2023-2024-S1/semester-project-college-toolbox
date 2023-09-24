@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from "../app/constants"
 
 const ScholarshipCard = ({
   scholarship_name,
@@ -96,7 +97,7 @@ const ScholarshipCard = ({
       formData.append('uploadedFile.name', uploadedFile);
       console.log('FormData:', formData);
       // Make a POST request to FastAPI
-      fetch('/ScholarshipApplication/upload-resume', {
+      fetch(`${API_URL}/upload-resume`, {
         method: 'POST',
         body:  formData
       })
@@ -125,9 +126,9 @@ const ScholarshipCard = ({
     }
     const formData = new FormData();
     formData.append('uploadedFile.name', resumeFileName);
-    
+
     // Perform delete action here or reset state if canceled
-    fetch('/ScholarshipApplication/delete-resume', {
+    fetch(`${API_URL}/delete-resume`, {
       method: 'POST',
       body:  formData
     })
