@@ -3,6 +3,7 @@ from enums import Term
 from models import engine, CourseSection, RoomSchedule
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
+import copy
 
 class TimeBlock:
     def __init__(self, course_id: str, section: str, room: str, day: str, start_time: time, end_time: time):
