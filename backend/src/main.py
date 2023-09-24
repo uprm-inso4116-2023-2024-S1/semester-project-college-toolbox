@@ -197,7 +197,7 @@ async def upload_doc(request: Request):
         print(filename)
         pdf_data = await form["test"].read()
 
-        doc = Document(filename, pdf_data)
+        doc = Document(filename, pdf_data, "test")
         doc.upload_pdf(SessionLocal)
 
 
