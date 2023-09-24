@@ -55,11 +55,15 @@ def validate_course_id(course_id: str):
     with Session(engine) as session:
         return session.query(CourseSection).filter(CourseSection.course_id == course_id).first() is not None
 
-
+# main call function for schedule generation
 def make_all_schedules(courses : list[str], term : Term, year: int) -> list[WeekSchedule]:
     return make_all_schedules_helper(WeekSchedule(), courses, term, year, set(), 0)
   
-
+# Recursively adds and removes courses and course sections using backtracking.
+# This ensures that all possible schedules will be checked for validity.
+# Valid meaning that there were no conflicts and that all courses were added.
+# If 5 course IDs were passed by parameter, all shceudles must strictly have 5 courses.
+# The function return a list of all possible schedules that were valid.
 def make_all_schedules_helper(curr_week_schedule : WeekSchedule, \
                               courses : list[str],               \
                               term : Term,                       \
@@ -85,7 +89,9 @@ def make_all_schedules_helper(curr_week_schedule : WeekSchedule, \
 
     return all_schedules
     
-
+# Adds all the time blocks to their corresponfing day for a specific course section.
+# If just one time block conflicts with another section' time block (added in a previous iteration),
+# the function is terminated and returns the original WeekSchedule before any changes were made.
 def add_course_to_schedule(curr_week_schedule : WeekSchedule, course_section_time_blocks : list[TimeBlock]) -> tuple[WeekSchedule, bool]:
     copy_week_schedule = copy.deepcopy(curr_week_schedule)
 
@@ -113,6 +119,8 @@ def add_course_to_schedule(curr_week_schedule : WeekSchedule, course_section_tim
 
     return (copy_week_schedule, False)
 
+# Adds one time block to the specified day passed in the parameters. This function takes care of
+# placing the time block in order by its time (->ascending) and checks for time conflicts if any.
 def add_time_block_to_day(week_day : list[TimeBlock], new_section_block : TimeBlock) -> bool:
     temp_stack = []
     time_conclict_flag = False
@@ -137,7 +145,7 @@ def add_time_block_to_day(week_day : list[TimeBlock], new_section_block : TimeBl
     return time_conclict_flag
 
 
-# Return true if times conlfict
+# Return true if the time blocks conflict or overlap
 def check_time_conflict(locked_time_block : TimeBlock, new_time_block : TimeBlock) -> bool:
     return locked_time_block.end_time > new_time_block.start_time and \
            locked_time_block.start_time < new_time_block.end_time
