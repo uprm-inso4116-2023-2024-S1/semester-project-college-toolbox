@@ -17,7 +17,6 @@ from typing import Annotated
 
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
-from src.models.requests.userDocs import userDocsRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
@@ -94,6 +93,7 @@ async def register_user(
     )
 
     db.add(user)
+    print("added user")
     db.commit()
     db.refresh(user)
 
@@ -189,25 +189,6 @@ def fetch_user(
         profileImageUrl=user.ProfileImageUrl,
     )
     return LoginResponse(profile=profile)
-
-
-# PDF document upload endpoint
-@app.post("/upload")
-# async def upload_doc(request: Request, db: Session = Depends(get_db)):
-#     # new_pdf = Document(filename, file)
-#     # new_pdf.upload_pdf(SessionLocal)
-#     # return {"message": "uploaded successfully"}
-
-#     # print(await request.form())
-#     try:
-#         async with request.form() as form:
-#             filename = form["filename"]
-#             data = await form["file"].read()
-#             userid = form["userId"]
-#             doc = Document(filename, data, "pdf", userid)
-#             print(doc.upload(db))
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail="error uploading")
 
 
 @app.post("/upload")
