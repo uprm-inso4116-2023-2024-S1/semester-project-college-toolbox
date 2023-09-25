@@ -101,7 +101,6 @@ const ScholarshipCard = ({
       const formData = new FormData();
       formData.append("file", uploadedFile);
       formData.append("filename", uploadedFile.name)
-      formData.append("userId", "1")
       console.log('FormData:', formData);
       // Make a POST request to FastAPI
       
@@ -112,7 +111,8 @@ const ScholarshipCard = ({
       fetch(`${API_URL}/upload`, {
 
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: "include"
       })
         .then(response=> {
           if(response.ok) {

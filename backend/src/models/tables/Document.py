@@ -1,5 +1,13 @@
 from fastapi import HTTPException
-from sqlalchemy import Column, Integer, String, LargeBinary, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    LargeBinary,
+    ForeignKey,
+    Sequence,
+    DateTime,
+)
 from src.database import Base
 from datetime import datetime
 
@@ -7,20 +15,20 @@ from datetime import datetime
 class Document(Base):
     __tablename__ = "document"
 
-    docid = Column(Integer, primary_key=True)
+    docId = Column(Integer, primary_key=True, nullable=False)
     filename = Column(String)
     data = Column(LargeBinary)
     filetype = Column(String, nullable=False)
-    created = Column(Integer, nullable=False)
-    lastmodified = Column(Integer, nullable=False)
+    created = Column(DateTime, nullable=False)
+    lastModified = Column(DateTime, nullable=False)
 
-    userid = Column(
+    userId = Column(
         Integer,
-        ForeignKey("user.userid"),
+        ForeignKey("User.UserId"),
         nullable=False,
     )
 
-    def __init__(self, filename, data, filetype, userId=1):
+    def __init__(self, filename, data, filetype, userId):
         """constructor
 
         Args:
@@ -35,7 +43,16 @@ class Document(Base):
 
         self.created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.lastModified = self.created
-        self.userid = userId
+        self.userId = userId
+
+    def __repr__(self):
+        return f"""
+              Document object: docId: {self.docId}, 
+                               filename: {self.filename}, 
+                               filetype: {self.filetype}
+                               created: {self.created}
+                               last modified: {self.lastModified}
+              """
 
     def upload(
         self,
@@ -58,6 +75,7 @@ class Document(Base):
         """
         try:
             session.add(self)
+
             session.commit()
             session.close()
             return {"message": "Document uploaded successfully"}

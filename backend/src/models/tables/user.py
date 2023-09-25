@@ -9,7 +9,7 @@ from src.security import generate_salt, hash_password
 class User(Base):
     __tablename__ = "User"
 
-    UserId = Column(Integer, Sequence("user_id_seq"), primary_key=True, index=True)
+    UserId = Column(Integer, Sequence("User_UserId_seq"), primary_key=True, index=True)
     FirstName = Column(String, nullable=False)
     Initial = Column(String)
     FirstLastName = Column(String, nullable=False)

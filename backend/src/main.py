@@ -92,8 +92,8 @@ async def register_user(
         ProfileImageUrl=user_request.profileImageUrl,
     )
 
+    print(f" ID: {user.UserId}")
     db.add(user)
-    print("added user")
     db.commit()
     db.refresh(user)
 
@@ -195,17 +195,16 @@ def fetch_user(
 async def upload_doc(
     filename: str = Form(...),
     file: UploadFile = Form(...),
-    userId: int = Form(...),
+    auth_token: Annotated[str | None, Cookie()] = None,
     db: Session = Depends(get_db),
 ):
-    try:
-        data = await file.read()
-        doc = Document(filename, data, "pdf", userId)
-        doc.upload(db)
-        return {"message": "Uploaded successfully"}
-    except Exception as e:
-        db.rollback()  # Rollback changes in case of an exception
-        raise HTTPException(status_code=500, detail="Error uploading")
+    userId = get_user_id_from_token(auth_token)
+    data = await file.read()
+    doc = Document(filename, data, "pdf", userId)
+    print(doc)
+
+    doc.upload(db)
+    return {"message": "Document uploaded successfully"}
 
 
 # Get PDF by ID endpoint MODIFY
