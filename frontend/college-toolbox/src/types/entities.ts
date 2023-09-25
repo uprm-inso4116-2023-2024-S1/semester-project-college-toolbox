@@ -25,7 +25,7 @@ export interface NewProfile {
 }
 
 
-export interface Profile {
+export interface Profile extends Record<string, string> {
 	firstName: string;
 	initial?: string;
 	firstLastName: string;
@@ -34,7 +34,7 @@ export interface Profile {
 	profileImageUrl?: string;
 }
 
-//Scholarship Interface
+// Scholarship Interface
 export interface ScholarshipApplication {
   id: number;
   name: string;

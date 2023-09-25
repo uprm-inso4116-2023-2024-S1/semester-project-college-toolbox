@@ -10,7 +10,7 @@ const UserSettings = () => {
 	const [hasCourseNotifications, setCourseNotifications] = useState(false)
 	const [profileForm, setProfileForm] = useState({
     firstName: storedProfile.get().firstName,
-    middleInitial: storedProfile.get().initial,
+    initial: storedProfile.get().initial,
     firstLastName: storedProfile.get().firstLastName,
     secondLastName: storedProfile.get().secondLastName,
 		profileImageUrl: storedProfile.get().profileImageUrl,
@@ -30,7 +30,7 @@ const UserSettings = () => {
 		if (isLoggedIn.get()){
 			setProfileForm(
 			{	firstName: $storedProfile.firstName,
-				middleInitial: $storedProfile.initial,
+				initial: $storedProfile.initial,
 				firstLastName: $storedProfile.firstLastName,
 				secondLastName: $storedProfile.secondLastName,
 				profileImageUrl: $storedProfile.profileImageUrl,
@@ -144,18 +144,18 @@ const UserSettings = () => {
 							</div>
 							<div className="col-span-4 sm:col-span-2">
 								<label
-									htmlFor="middleInitial"
+									htmlFor="initial"
 									className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 								>
 									Middle Initial
 								</label>
 								<input
 									type="text"
-									name="middleInitial"
-									id="middleInitial"
+									name="initial"
+									id="initial"
 									className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 									placeholder=""
-									value={profileForm.middleInitial}
+									value={profileForm.initial}
 									onChange={handleProfileInputChange}
 								/>
 							</div>

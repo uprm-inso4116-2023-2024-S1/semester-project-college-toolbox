@@ -8,7 +8,9 @@ export const SITE_TITLE = 'College Toolbox';
 
 export const EMPTY_PROFILE: Profile = {
 	firstName: '',
+	initial: '',
 	firstLastName: '',
+	secondLastName: '',
 	email: '',
 	profileImageUrl: '',
 }

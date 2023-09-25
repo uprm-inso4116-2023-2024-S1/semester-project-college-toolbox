@@ -5,7 +5,7 @@ import { register } from '../services/authentication';
 const SignUpForm = () => {
   const [formData, setFormData] = useState({
     firstName: '',
-    middleInitial: '',
+    initial: '',
     firstLastName: '',
     secondLastName: '',
 		profileImageUrl: '',
@@ -71,18 +71,18 @@ const SignUpForm = () => {
 						{/* Middle Name Initial */}
 						<div className="w-1/2">
 						<label
-							htmlFor="middleInitial"
+							htmlFor="initial"
 							className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 						>
 							Middle Name Initial
 						</label>
 						<input
 							type="text"
-							name="middleInitial"
-							id="middleInitial"
+							name="initial"
+							id="initial"
 							className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
 							placeholder="M"
-							value={formData.middleInitial}
+							value={formData.initial}
               onChange={handleInputChange}
 						/>
 						</div>
