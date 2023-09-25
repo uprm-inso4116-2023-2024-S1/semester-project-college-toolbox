@@ -101,7 +101,7 @@ def test_login_user(test_db):
     }
     response_user_not_found = client.post("/login", json=user_not_found_data)
     assert (
-        response_user_not_found.status_code == 401
+        response_user_not_found.status_code == 404
     )  # Expect a 401 Unauthorized status code
     assert response_user_not_found.json() == {"detail": "User not found."}
 
