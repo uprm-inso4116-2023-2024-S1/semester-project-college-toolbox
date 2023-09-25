@@ -23,6 +23,7 @@ from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
+from src.models.tables.existing_app import ExistingApplication
 from src.security import (
     hash_password,
     generate_permanent_token,
