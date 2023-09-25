@@ -1,5 +1,6 @@
-import { API_URL } from "../app/constants";
+import { API_URL, EMPTY_PROFILE } from "../app/constants";
 import type { NewProfile, Profile } from "../types/entities";
+import { storedProfile, isLoggedIn } from '../lib/profile';
 
 // authentication.ts
 
@@ -7,85 +8,111 @@ import type { NewProfile, Profile } from "../types/entities";
 
 
 export async function register(profile: NewProfile): Promise<Profile | null> {
-  try {
-    const response = await fetch(`${API_URL}/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profile),
-    })
+	try {
+		const response = await fetch(`${API_URL}/register`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(profile),
+		})
 
-    if (!response.ok) {
-      throw new Error('Registration failed')
-    }
+		if (!response.ok) {
+			isLoggedIn.set(false)
+			storedProfile.set(EMPTY_PROFILE)
+			throw new Error('Registration failed')
+		}
 
-    const data: Profile = await response.json() as Profile
-    return data
+		const data: Profile = await response.json() as Profile
+		isLoggedIn.set(true)
+		storedProfile.set(data)
 
-  } catch (error) {
-    console.error('Registration error:', error)
+		return data
+
+	} catch (error) {
+		isLoggedIn.set(false)
+		storedProfile.set(EMPTY_PROFILE)
+		console.error('Registration error:', error)
 		return null
-  }
+	}
 }
 
 export async function login(email: string, password: string): Promise<Profile | null> {
-  try {
+	try {
 
-    const response = await fetch(`${API_URL}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+		const response = await fetch(`${API_URL}/login`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
 			credentials: 'include',
-      body: JSON.stringify({email, password}),
-    })
+			body: JSON.stringify({ email, password }),
+		})
 
-    if (!response.ok) {
-      throw new Error('Login failed')
-    }
+		if (!response.ok) {
+			isLoggedIn.set(false)
+			storedProfile.set(EMPTY_PROFILE)
+			throw new Error('Login failed')
+		}
+		const data: Profile = await response.json() as Profile
+		isLoggedIn.set(true)
+		storedProfile.set(data)
+		return data
 
-    const data: Profile = await response.json() as Profile
-    return data
-
-  } catch (error) {
-    console.error('Login error:', error)
+	} catch (error) {
+		isLoggedIn.set(false)
+		storedProfile.set(EMPTY_PROFILE)
+		console.error('Login error:', error)
 		return null
-  }
+	}
 }
 
 export async function fetchProfile(): Promise<Profile | null> {
-    try {
-  
-      const response = await fetch(`${API_URL}/profile`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      })
-  
-      if (!response.ok) {
-        throw new Error('Login failed')
-      }
-  
-      const responseData = await response.json() as {"profile": Profile}
-      return responseData.profile 
-  
-    } catch (error) {
-      console.error('Login error:', error)
-          return null
-    }
-  }
-  
-  
+	try {
+
+		const response = await fetch(`${API_URL}/profile`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			credentials: 'include'
+		})
+
+		if (!response.ok) {
+			isLoggedIn.set(false)
+			storedProfile.set(EMPTY_PROFILE)
+			throw new Error('User is not logged in')
+		}
+
+		const responseData = await response.json() as { "profile": Profile }
+		isLoggedIn.set(true)
+		storedProfile.set(responseData.profile)
+		return responseData.profile
+
+	} catch (error) {
+		isLoggedIn.set(false)
+		storedProfile.set(EMPTY_PROFILE)
+		console.error('Failed to fetch:', error)
+		return null
+	}
+}
+
+
 
 export function logout() {
 	const regex = /(^|;\s*)auth_token=([^;]*)/;
-  const match = document.cookie.match(regex);
+	const match = document.cookie.match(regex);
 
-  if (match) {
-    // Set the matched cookie to expire in the past to remove it
-    document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  }
+	if (match) {
+		// Set the matched cookie to expire in the past to remove it
+		document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+	}
+	isLoggedIn.set(false)
+	storedProfile.set(EMPTY_PROFILE)
+}
+
+export function hasToken() {
+	const regex = /(^|;\s*)auth_token=([^;]*)/;
+	const match = document.cookie.match(regex);
+	return match != null;
 }
