@@ -5,20 +5,19 @@ import LayoutSidebar from '../../app/LayoutSidebar.astro';
 <LayoutSidebar>
     <div class="format dark:format-invert lg:format-lg mt-10">
             <p
-                class="ml-10 text-4xl lg:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline"
-                >Course Code:</p
+                class="ml-5 text-4xl lg:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline"
+                >Course Code</p
             >
-            <form action="#" method="GET" class="hidden lg:block lg:pl-3.5">
-                <div class="relative mt-1 ml-8">
+            <div class="format dark:format-invert ml-12">Enter course codes separeted by commas:</div>
+            <form method="POST">
+                <div class="relative mt-1 ml-12">
                     <input
                         type="text"
                         name="course"
-                        maxlength=4
                         class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="i.e. CIIC"
+                        placeholder="i.e. CIIC4020,INSO4101"
                     />
                 </div>
             </form>
-        </p>
         <br>
 </LayoutSidebar>
