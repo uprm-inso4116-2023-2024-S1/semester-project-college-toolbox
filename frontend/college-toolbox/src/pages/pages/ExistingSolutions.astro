@@ -1,7 +1,10 @@
 ---
 import LayoutSidebar from '../../app/LayoutSidebar.astro';
-// import DropDownCheckbox from '../../components/DropDownCheckbox/DropDownCheckbox.astro';
 import DropDownCheckbox from '../../components/DropDownCheckbox/DropDownCheckbox.jsx';
+import Grid from '../../components/Grid.jsx';
+import spotifyIcon from '../../images/spotifyIcon.png';
+import cheggIcon from '../../images/cheggIcon.png';
+import quizletIcon from '../../images/quizletIcon.png';
 ---
 
 <LayoutSidebar>
@@ -16,15 +19,23 @@ import DropDownCheckbox from '../../components/DropDownCheckbox/DropDownCheckbox
                 >Existing Solutions</a
             >
         </p>
-		
-		<DropDownCheckbox filterType={'Type'} targetId={'type'} data={['Note taking', 'Budget Tracker', 'Planners', 'Studying']} dataId={'openType'} client:idle/>
-		<br>
-		<DropDownCheckbox filterType={'Money'} targetId={'money'} data={['Fee', 'Membership', 'Single pay', 'Free trial']} dataId={'openMoney'} client:idle/>
-		<br>
-		<DropDownCheckbox filterType={'Other'} targetId={'other'} data={['testing']} dataId={'openOther'} client:idle/>
+			<!-- Filter section -->
+		<div class="filters"></div>
+			<h2 class="font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline">
+				Filters:
+			</h2>
+			<DropDownCheckbox filterType={'Type'} targetId={'type'} data={['Note taking', 'Budget Tracker', 'Planners', 'Studying']} dataId={'openType'} client:idle/>
+			<br>
+			<DropDownCheckbox filterType={'Money'} targetId={'money'} data={['Fee', 'Membership', 'Single pay', 'Free trial']} dataId={'openMoney'} client:idle/>
+			<br>
+			<DropDownCheckbox filterType={'Other'} targetId={'other'} data={['testing']} dataId={'openOther'} client:idle/>
+		</div>		
+	<!-- Grid for apps section -->
+		<Grid imgLink={spotifyIcon} appLink={'https://open.spotify.com/'} description={"dis be spotify for musci and podcasts :)\n"} name={"Spotify1"} client:load/>
+		<Grid imgLink={cheggIcon} appLink={'https://www.chegg.com/'} description={"Copiate en todo, con solo $20 al mes\n"} name={"Chegg1"} client:load/>
+		<Grid imgLink={quizletIcon} appLink={'https://quizlet.com/'} description={"lo mejor pa estudiar\n"} name={"Quizlet1"} client:load/>
 
-			
+		<Grid imgLink={spotifyIcon} appLink={'https://open.spotify.com/'} description={"test\n"} name={"test"} client:load/>
+	</div>
 </LayoutSidebar>
-
-
 

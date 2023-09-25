@@ -14,7 +14,6 @@ function FilterOptions({filterType, targetId, data, dataId}) {
             // div element
             const divElement = document.createElement('div');
             divElement.classList.add(
-                "list-item",
                 "flex",
                 "items-center",
                 "p-2",
