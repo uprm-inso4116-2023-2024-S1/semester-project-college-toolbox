@@ -2,10 +2,12 @@
 from src.utils import get_full_name
 from fastapi import (
     FastAPI,
+    Form,
     Request,
     HTTPException,
     Depends,
     Cookie,
+    UploadFile,
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +17,7 @@ from typing import Annotated
 
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
+from src.models.requests.userDocs import userDocsRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
@@ -185,20 +188,39 @@ def fetch_user(
 
 
 # PDF document upload endpoint
-@app.post("/ScholarshipApplication/upload")
-async def upload_doc(request: Request):
-    # new_pdf = Document(filename, file)
-    # new_pdf.upload_pdf(SessionLocal)
-    # return {"message": "uploaded successfully"}
+@app.post("/upload")
+# async def upload_doc(request: Request, db: Session = Depends(get_db)):
+#     # new_pdf = Document(filename, file)
+#     # new_pdf.upload_pdf(SessionLocal)
+#     # return {"message": "uploaded successfully"}
 
-    # print(await request.form())
-    async with request.form() as form:
-        filename = form["test"].filename
-        print(filename)
-        pdf_data = await form["test"].read()
+#     # print(await request.form())
+#     try:
+#         async with request.form() as form:
+#             filename = form["filename"]
+#             data = await form["file"].read()
+#             userid = form["userId"]
+#             doc = Document(filename, data, "pdf", userid)
+#             print(doc.upload(db))
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail="error uploading")
 
-        doc = Document(filename, pdf_data, "test")
-        doc.upload_pdf(SessionLocal)
+
+@app.post("/upload")
+async def upload_doc(
+    filename: str = Form(...),
+    file: UploadFile = Form(...),
+    userId: int = Form(...),
+    db: Session = Depends(get_db),
+):
+    try:
+        data = await file.read()
+        doc = Document(filename, data, "pdf", userId)
+        doc.upload(db)
+        return {"message": "Uploaded successfully"}
+    except Exception as e:
+        db.rollback()  # Rollback changes in case of an exception
+        raise HTTPException(status_code=500, detail="Error uploading")
 
 
 # Get PDF by ID endpoint MODIFY
