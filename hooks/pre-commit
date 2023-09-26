@@ -32,12 +32,6 @@ cd .. # return back to root dir
 # Navigate to frontend folder
 cd ${frontend_root}
 
-# Check if prettier is available
-if ! command_exists "npx prettier"; then
-    echo "Error: prettier must be installed for this hook. Install it by running 'npm i' from ${frontend_root} /."
-    exit 1
-fi
-
 if ! npx prettier --check .; then
     echo "Error: Unformatted code detected. Running prettier formatter."
     npx prettier --write .
