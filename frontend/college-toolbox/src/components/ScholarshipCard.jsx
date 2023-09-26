@@ -67,12 +67,6 @@ const ScholarshipCard = ({
     fontSize: '0.9rem',
   };
 
-  // const userDocsRequest = {
-  //   filename : "",
-  //   file : "",
-  //   userid: ""
-
-  // }
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [resumeFileName, setResumeFileName] = useState(applicantResume);
   const [isDeletingResume, setIsDeletingResume] = useState(false);
