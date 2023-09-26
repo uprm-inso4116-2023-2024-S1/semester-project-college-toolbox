@@ -1,6 +1,18 @@
 # src/main.py
-from fastapi import FastAPI, UploadFile, File, Request, HTTPException, Depends
+from src.utils import get_full_name
+from fastapi import (
+    FastAPI,
+    Response,
+    UploadFile,
+    File,
+    Request,
+    HTTPException,
+    Depends,
+    Cookie,
+)
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
 
@@ -11,14 +23,22 @@ from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
-from src.security import hash_password, generate_permanent_token
+from src.security import (
+    hash_password,
+    generate_permanent_token,
+    get_user_id_from_token,
+    TOKEN_EXPIRATION_SECONDS,
+)
 
-app = FastAPI()
+app = FastAPI(
+    docs_url="/api/docs",
+)
 
 # Configure CORS to allow requests from the React frontend
 frontendPort = "2121"
 origins = [
-    f"http://localhost:{frontendPort}"
+    f"http://localhost:{frontendPort}",
+    "https://uprm-inso4116-2023-2024-s1.github.io",
 ]  # Add any other allowed origins as needed
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +47,8 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 
 # Dependency to get the database session
@@ -46,10 +68,16 @@ def read_root():
 
 
 # User registration endpoint
-@app.post("/register/", response_model=RegisterResponse)
+@app.post("/register", response_model=RegisterResponse)
 def register_user(
     user_request: RegisterRequest, db: Session = Depends(get_db)
 ) -> RegisterResponse:
+    """
+    Registers a new user account and logs the user in.
+
+    - **user_request**: Request for registering a user.
+    - **db**: Database to be utilized (prod or test).
+    """
     existing_user = db.query(User).filter(User.Email == user_request.email).first()
     if existing_user:
         db.close()
@@ -71,20 +99,38 @@ def register_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    fullName = (
-        f"{user.FirstName} {user.Initial} {user.FirstLastName} {user.SecondLastName}"
-    )
+
     profile = UserProfile(
-        fullName=fullName, email=user.Email, profileImageUrl=user.ProfileImageUrl
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
-    return {"token": permanent_token, "profile": profile}
+    response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
+    response.set_cookie(
+        key="auth_token",
+        value=permanent_token,
+        max_age=TOKEN_EXPIRATION_SECONDS,
+        samesite="None",  # Set SameSite attribute
+        secure=True,
+        path="/",
+    )
+    return response
 
 
 # Login endpoint
-@app.post("/login/", response_model=LoginResponse)
+@app.post("/login", response_model=LoginResponse)
 def login_user(
     user_request: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
+    """
+    Logs an existing user in.
+
+    - **user_request**: Request for logging in a user.
+    - **db**: Database to be utilized (prod or test).
+    """
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
         db.close()
@@ -95,7 +141,54 @@ def login_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    return {"token": permanent_token}
+
+    profile = UserProfile(
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
+    )
+    response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
+    response.set_cookie(
+        key="auth_token",
+        value=permanent_token,
+        max_age=TOKEN_EXPIRATION_SECONDS,
+        samesite="None",  # Set SameSite attribute
+        secure=True,
+        path="/",
+    )
+    return response
+
+
+# fetch profile endpoint
+@app.get("/profile", response_model=LoginResponse)
+def fetch_user(
+    db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
+) -> LoginResponse:
+    """
+    Returns the profile of a user given a valid auth token.
+    """
+    if not auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(auth_token)
+    user = db.query(User).filter(User.UserId == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=400, detail="User corresponding to this token does not exist."
+        )
+    db.close()
+
+    profile = UserProfile(
+        firstName=user.FirstName,
+        initial=user.Initial,
+        firstLastName=user.FirstLastName,
+        secondLastName=user.SecondLastName,
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
+    )
+    return LoginResponse(profile=profile)
 
 
 # PDF document upload endpoint

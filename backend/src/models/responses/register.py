@@ -1,6 +1,7 @@
 # src/models/responses/register.py
 from pydantic import BaseModel
+from src.models.common.user_profile import UserProfile
 
 
 class RegisterResponse(BaseModel):
-    token: str
+    profile: UserProfile | None = None

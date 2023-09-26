@@ -9,7 +9,7 @@ import { asset, url } from '../lib/data.js';
 		href="#"
 		class="flex items-center justify-center mb-8 text-2xl font-semibold lg:mb-10 dark:text-white"
 	>
-		<img src="/src/assets/toolboxImg.svg" alt="FlowBite Logo" class="mr-4 h-11" />
+		<img src={asset("docs/assets/toolboxImg.svg")} alt="toolbox logo" class="mr-4 h-11" />
 		<span>College Toolbox</span>
 	</a>
 	<!-- Card -->
@@ -79,10 +79,10 @@ import { asset, url } from '../lib/data.js';
 				>Login to your account</button
 			>
 			<div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-				Not registered? <a
-					class="text-primary-700 hover:underline dark:text-primary-500"
-					>Create account</a
-				>
+				Not registered? 
+				<a href={url('authentication/sign-up')} class="text-primary-700 hover:underline dark:text-primary-500">
+					Create account
+				</a>
 			</div>
 		</form>
 	</div>

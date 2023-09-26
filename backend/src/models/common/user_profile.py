@@ -1,12 +1,11 @@
-# src/models/requests/register.py
+# src/models/common/user_profile.py
 from pydantic import BaseModel
 
 
-class RegisterRequest(BaseModel):
+class UserProfile(BaseModel):
     firstName: str
     initial: str | None = None
     firstLastName: str
     secondLastName: str | None = None
     email: str
-    password: str
     profileImageUrl: str | None = None

@@ -1,5 +1,4 @@
 import type { endpointsToOperations } from '../pages/api/[...entity].js';
-import type { playgroundActions } from '../pages/playground/_actions.js';
 
 export type EndpointsToOperations = typeof endpointsToOperations;
 export type Endpoint = keyof EndpointsToOperations;
@@ -15,24 +14,30 @@ export interface Product {
 	discount: string;
 }
 
-export type Users = User[];
-export interface User {
-	id: number;
-	name: string;
-	avatar: string;
+export interface NewProfile {
+	firstName: string;
+	initial?: string;
+	firstLastName: string;
+	secondLastName?: string;
 	email: string;
-	biography: string;
-	position: string;
-	country: string;
-	status: string;
+	password: string;
+	profileImageUrl?: string;
 }
 
-//Scholarship Interface
+
+export interface Profile extends Record<string, string> {
+	firstName: string;
+	initial?: string;
+	firstLastName: string;
+	secondLastName?: string;
+	email: string;
+	profileImageUrl?: string;
+}
+
+// Scholarship Interface
 export interface ScholarshipApplication {
 	id: number;
 	name: string;
 	deadline: Date;
 	status: string;
 }
-
-export type PlaygroundAction = (typeof playgroundActions)[number];

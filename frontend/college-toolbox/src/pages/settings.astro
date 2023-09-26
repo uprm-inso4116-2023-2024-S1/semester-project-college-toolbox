@@ -1,8 +1,8 @@
 ---
 import LayoutSidebar from '../app/LayoutSidebar.astro';
-import UserSettings from '../modules/UserSettings.astro';
+import UserSettings from '../components/UserSettings.jsx';
 ---
 
 <LayoutSidebar>
-	<UserSettings />
+	<UserSettings client:load />
 </LayoutSidebar>
