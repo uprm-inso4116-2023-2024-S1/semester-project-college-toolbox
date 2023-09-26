@@ -1,0 +1,48 @@
+name: Backend Pre-Merge Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  format-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10 # You can adjust the Python version as needed
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+          export PATH="$HOME/.poetry/bin:$PATH"
+        shell: bash
+
+      - name: Install Dependencies with Poetry
+        working-directory: backend/ # Navigate to the backend folder
+        run: poetry install
+
+      - name: Format Code with Black
+        working-directory: backend/ # Navigate to the backend folder
+        run: |
+          poetry run black --check .  # Check for code formatting issues
+          if [ $? -ne 0 ]; then
+              echo "Error: Unformatted files found, run 'poetry run black .' from backend/ ."
+              exit 1
+          fi
+
+      - name: Run Tests with Pytest
+        working-directory: backend/ # Navigate to the backend folder
+        run: |
+          poetry run pytest 
+          if [ $? -ne 0 ]; then
+              echo "Error: Some tests failed when running Pytest."
+              exit 1
+          fi
