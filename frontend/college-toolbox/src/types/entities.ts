@@ -29,10 +29,10 @@ export interface User {
 
 //Scholarship Interface
 export interface ScholarshipApplication {
-  id: number;
-  name: string;
-  deadline: Date;
-  status: string;
+	id: number;
+	name: string;
+	deadline: Date;
+	status: string;
 }
 
 export type PlaygroundAction = (typeof playgroundActions)[number];

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 backend_root="backend/"
+frontend_root="frontend/college-toolbox/"
 # Function to check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -28,6 +29,23 @@ cd .. # return back to root dir
 
 ### Execute frontend commands ###
 
+# Navigate to frontend folder
+cd ${frontend_root}
+
+# Check if prettier is available
+if ! command_exists "npx prettier"; then
+    echo "Error: prettier must be installed for this hook. Install it by running 'npm i' from ${frontend_root} /."
+    exit 1
+fi
+
+if ! npx prettier --check .; then
+    echo "Error: Unformatted code detected. Running prettier formatter."
+    npx prettier --write .
+    echo "Stage the newly formatted files with 'git add' ('git add .' to stage all files )."
+    exit 1
+fi
+
+cd ../..
 
 exit 0
 
