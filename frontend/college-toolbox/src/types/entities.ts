@@ -24,7 +24,6 @@ export interface NewProfile {
 	profileImageUrl?: string;
 }
 
-
 export interface Profile extends Record<string, string> {
 	firstName: string;
 	initial?: string;
