@@ -19,6 +19,7 @@ The two commonly hardest steps are:
 5. Poetry: `curl -sSL https://install.python-poetry.org | python3 -`
 6. Add the following line to your [PATH](https://gist.github.com/nex3/c395b2f8fd4b02068be37c961301caa7):
  `%APPDATA%\Python\Scripts`
+7. Node [Download](https://nodejs.org/en/download)
 
 #### 🏠Local Development
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { url } from '../lib/data';
+import { url, asset } from '../lib/data';
 import { login } from '../services/authentication';
 
 const LoginForm = () => {
@@ -40,7 +40,7 @@ const LoginForm = () => {
   return (
     <div className="w-full flex flex-col items-center justify-center px-6 pt-8 mx-auto pt:mt-0 dark:bg-gray-900">
       <a href="#" className="flex items-center justify-center mb-8 text-2xl font-semibold lg:mb-10 dark:text-white">
-        <img src="/src/assets/toolboxImg.svg" alt="FlowBite Logo" className="mr-4 h-11" />
+        <img src={asset("docs/assets/toolboxImg.svg")} alt="toolbox logo" className="mr-4 h-11" />
         <span>College Toolbox</span>
       </a>
       {/* Card */}
