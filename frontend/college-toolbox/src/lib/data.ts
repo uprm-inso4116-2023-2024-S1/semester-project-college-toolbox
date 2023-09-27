@@ -29,5 +29,10 @@ export function url(path = '') {
 export function asset(path: string) {
 	const localURL = `${import.meta.env.SITE}${import.meta.env.BASE_URL}${path}`
 	const remoteURL = `https://raw.githubusercontent.com/uprm-inso4116-2023-2024-S1/semester-project-college-toolbox/main/frontend/college-toolbox/${path}`
-	return process.env.CI ? remoteURL : localURL
+	  // Check if process exists and process.env.CI is defined
+		if (typeof process !== 'undefined' && process.env.CI) {
+			return remoteURL;
+		} else {
+			return localURL;
+		}
 }

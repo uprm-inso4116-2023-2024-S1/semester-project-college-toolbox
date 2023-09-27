@@ -2,10 +2,12 @@
 from src.utils import get_full_name
 from fastapi import (
     FastAPI,
+    Form,
     Request,
     HTTPException,
     Depends,
     Cookie,
+    UploadFile,
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,7 +37,7 @@ app = FastAPI(
 frontendPort = "2121"
 origins = [
     f"http://localhost:{frontendPort}",
-    "https://uprm-inso4116-2023-2024-s1.github.io/semester-project-college-toolbox",
+    "https://uprm-inso4116-2023-2024-s1.github.io",
 ]  # Add any other allowed origins as needed
 app.add_middleware(
     CORSMiddleware,
@@ -90,6 +92,7 @@ async def register_user(
         ProfileImageUrl=user_request.profileImageUrl,
     )
 
+    print(f" ID: {user.UserId}")
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -159,7 +162,7 @@ async def login_user(
     return response
 
 
-# Login endpoint
+# fetch profile endpoint
 @app.get("/profile", response_model=LoginResponse)
 def fetch_user(
     db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
@@ -171,6 +174,10 @@ def fetch_user(
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(auth_token)
     user = db.query(User).filter(User.UserId == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=400, detail="User corresponding to this token does not exist."
+        )
     db.close()
 
     profile = UserProfile(
@@ -184,21 +191,20 @@ def fetch_user(
     return LoginResponse(profile=profile)
 
 
-# PDF document upload endpoint
-@app.post("/ScholarshipApplication/upload")
-async def upload_doc(request: Request):
-    # new_pdf = Document(filename, file)
-    # new_pdf.upload_pdf(SessionLocal)
-    # return {"message": "uploaded successfully"}
+@app.post("/upload")
+async def upload_doc(
+    filename: str = Form(...),
+    file: UploadFile = Form(...),
+    auth_token: Annotated[str | None, Cookie()] = None,
+    db: Session = Depends(get_db),
+):
+    userId = get_user_id_from_token(auth_token)
+    data = await file.read()
+    doc = Document(filename, data, "pdf", userId)
+    print(doc)
 
-    # print(await request.form())
-    async with request.form() as form:
-        filename = form["test"].filename
-        print(filename)
-        pdf_data = await form["test"].read()
-
-        doc = Document(filename, pdf_data, "test")
-        doc.upload_pdf(SessionLocal)
+    doc.upload(db)
+    return {"message": "Document uploaded successfully"}
 
 
 # Get PDF by ID endpoint MODIFY

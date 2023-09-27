@@ -39,7 +39,6 @@ const ScholarshipCard = ({
     Denied: 'red',
     Waiting: '#FF5733', // Darker yellow color
   };
-
   const [editedStatus, setEditedStatus] = useState(applicationStatus);
   const [tempStatus, setTempStatus] = useState(applicationStatus); // Temporary status for edits
 
@@ -94,14 +93,20 @@ const ScholarshipCard = ({
     if (uploadedFile) {
       setResumeFileName(uploadedFile.name);
       const formData = new FormData();
-      formData.append("test", uploadedFile);
+      formData.append("file", uploadedFile);
+      formData.append("filename", uploadedFile.name)
       console.log('FormData:', formData);
       // Make a POST request to FastAPI
       
-      fetch(`${API_URL}/upload-resume`, {
+      // userDocsRequest.filename = uploadedFile.name;
+      // userDocsRequest.file = uploadedFile;
+      // userDocsRequest.userid = 1
+      // console.log(JSON.stringify(userDocsRequest))
+      fetch(`${API_URL}/upload`, {
 
         method: 'POST',
-        body:  formData
+        body: formData,
+        credentials: "include"
       })
         .then(response=> {
           if(response.ok) {

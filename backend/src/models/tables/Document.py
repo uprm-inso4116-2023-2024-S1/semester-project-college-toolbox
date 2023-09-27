@@ -1,5 +1,13 @@
 from fastapi import HTTPException
-from sqlalchemy import Column, Integer, String, LargeBinary, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    LargeBinary,
+    ForeignKey,
+    Sequence,
+    DateTime,
+)
 from src.database import Base
 from datetime import datetime
 
@@ -7,30 +15,48 @@ from datetime import datetime
 class Document(Base):
     __tablename__ = "document"
 
-    id = Column(Integer, primary_key=True)
+    docId = Column(Integer, primary_key=True, nullable=False)
     filename = Column(String)
     data = Column(LargeBinary)
     filetype = Column(String, nullable=False)
-    created = Column(Integer, nullable=False)
-    lastModified = Column(Integer, nullable=False)
+    created = Column(DateTime, nullable=False)
+    lastModified = Column(DateTime, nullable=False)
 
     userId = Column(
         Integer,
-        ForeignKey("user.userId"),
+        ForeignKey("User.UserId"),
         nullable=False,
     )
 
-    def __init__(self, filename, data, filetype):
+    def __init__(self, filename, data, filetype, userId):
+        """constructor
+
+        Args:
+            filename (str): _description_
+            data (binary data): _description_
+            filetype (str): _description_
+            userId (int, optional): user id . Defaults to 1.
+        """
         self.filename = filename
         self.data = data
         self.filetype = filetype
 
         self.created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.lastModified = self.created
+        self.userId = userId
+
+    def __repr__(self):
+        return f"""
+              Document object: docId: {self.docId}, 
+                               filename: {self.filename}, 
+                               filetype: {self.filetype}
+                               created: {self.created}
+                               last modified: {self.lastModified}
+              """
 
     def upload(
         self,
-        SessionLocal,
+        session,
     ):
         """
         Test for uploading files to database
@@ -48,10 +74,10 @@ class Document(Base):
             message to console stating success
         """
         try:
-            with SessionLocal() as session:
-                session.add(self)
-                session.commit()
+            session.add(self)
 
+            session.commit()
+            session.close()
             return {"message": "Document uploaded successfully"}
 
         except Exception as e:

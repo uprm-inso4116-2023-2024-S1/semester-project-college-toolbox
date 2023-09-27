@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useStore } from '@nanostores/react';
 import { url } from '../lib/data';
-import { fetchProfile, logout } from '../services/authentication';
+import { fetchProfile, hasToken, logout } from '../services/authentication';
 import { storedProfile, isLoggedIn } from '../lib/profile';
 
 const UserDropdown = () => {
@@ -10,31 +10,15 @@ const UserDropdown = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+			if (hasToken())
 					fetchProfile().then(
-						(profile)=>{
-							if (profile){
-								isLoggedIn.set(true);
-								storedProfile.set(profile)
-							} else {
-								isLoggedIn.set(false)
-								storedProfile.set({
-								firstName:'',
-								firstLastName:'',
-								email:''
-							});
-							}
-          		setLoading(false)
-						}
+						()=>setLoading(false)
 					).catch(
-						((err)=>{
-							console.error(err)
-							setLoading(false)
-							isLoggedIn.set(false)
-						})
+						()=>{
+							logout() // remove auth token cookie as it may be outdated
+							setLoading(false)}
 					)
-          
       }, []);
-    
 
     return (
 			<div className="flex items-center ml-2">
