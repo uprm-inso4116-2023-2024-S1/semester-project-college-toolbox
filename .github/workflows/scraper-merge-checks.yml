@@ -1,4 +1,4 @@
-name: Backend Pre-Merge Checks
+name: SSH Scraper Pre-Merge Checks
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - main
       - develop
     paths:
-      - 'backend/**'
+      - 'ssh-scraper/**'
 
 jobs:
   format-and-test:
@@ -36,12 +36,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Check for Changes in Backend Directory
+      - name: Check for Changes in ssh-scraper Directory
         id: check_changes
         run: |
-          changes=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^backend/')
+          changes=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^ssh-scraper/')
           if [ -z "$changes" ]; then
-            echo "No changes in backend directory. Skipping the workflow."
+            echo "No changes in ssh-scraper directory. Skipping the workflow."
             exit 78  # Exit with a neutral status code to skip the workflow
           fi
 
@@ -56,24 +56,25 @@ jobs:
           export PATH="$HOME/.poetry/bin:$PATH"
         shell: bash
 
-      - name: Install Backend Dependencies with Poetry
-        working-directory: backend/ # Navigate to the backend folder
+      - name: Install SSH-Scraper Dependencies with Poetry
+        working-directory: ssh-scraper/ # Navigate to the scraper folder
         run: poetry install
-
-      - name: Check Backend Code Formatting with Black
-        working-directory: backend/ # Navigate to the backend folder
+    
+      - name: Check Scraper Code Formatting with Black
+        working-directory: ssh-scraper/ # Navigate to the scraper folder
         run: |
-          poetry run black --check .  # Check for code formatting issues
-          if [ $? -ne 0 ]; then
-              echo "Error: Unformatted files found, run 'poetry run black .' from backend/ ."
-              exit 1
-          fi
+            poetry run black --check .  # Check for code formatting issues
+            if [ $? -ne 0 ]; then
+                echo "Error: Unformatted files found, run 'poetry run black .' from backend/ ."
+                exit 1
+            fi
 
-      - name: Run Backend Tests with Pytest
-        working-directory: backend/ # Navigate to the backend folder
+      - name: Run Scraper Tests with Pytest
+        working-directory: ssh-scraper/ # Navigate to the scraper folder
         run: |
-          poetry run pytest 
-          if [ $? -ne 0 ]; then
-              echo "Error: Some tests failed when running Pytest."
-              exit 1
-          fi
+            poetry run pytest 
+            if [ $? -ne 0 ]; then
+                echo "Error: Some tests failed when running Pytest."
+                exit 1
+            fi
+                
