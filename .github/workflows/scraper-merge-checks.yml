@@ -36,15 +36,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Check for Changes in ssh-scraper Directory
-        id: check_changes
-        run: |
-          changes=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^ssh-scraper/')
-          if [ -z "$changes" ]; then
-            echo "No changes in ssh-scraper directory. Skipping the workflow."
-            exit 78  # Exit with a neutral status code to skip the workflow
-          fi
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
