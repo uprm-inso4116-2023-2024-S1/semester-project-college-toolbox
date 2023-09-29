@@ -23,6 +23,7 @@ from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
+from src.models.tables.existing_app import ExistingApplication
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -38,7 +39,7 @@ app = FastAPI(
 frontendPort = "2121"
 origins = [
     f"http://localhost:{frontendPort}",
-    "https://uprm-inso4116-2023-2024-s1.github.io/semester-project-college-toolbox",
+    "https://uprm-inso4116-2023-2024-s1.github.io",
 ]  # Add any other allowed origins as needed
 app.add_middleware(
     CORSMiddleware,
@@ -99,14 +100,14 @@ def register_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    
+
     profile = UserProfile(
         firstName=user.FirstName,
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
     response.set_cookie(
@@ -147,8 +148,8 @@ def login_user(
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
     response.set_cookie(
@@ -162,7 +163,7 @@ def login_user(
     return response
 
 
-# Login endpoint
+# fetch profile endpoint
 @app.get("/profile", response_model=LoginResponse)
 def fetch_user(
     db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
@@ -174,6 +175,10 @@ def fetch_user(
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(auth_token)
     user = db.query(User).filter(User.UserId == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=400, detail="User corresponding to this token does not exist."
+        )
     db.close()
 
     profile = UserProfile(
@@ -181,8 +186,8 @@ def fetch_user(
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     return LoginResponse(profile=profile)
 

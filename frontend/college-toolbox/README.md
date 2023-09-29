@@ -61,13 +61,17 @@ All commands are run from the root of the project (frontend/college-toolbox), fr
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
 ## Installation Steps
+
 ### Option 1: Local Development
+
 1. cd into `frontend/college-toolbox`
 2. run `npm i`
 3. run `npm run dev`
+
 ### Option 2: Docker Build
+
 TBA
 
 ## Developer Recommendations
-1.This project makes extensive use of [Flowbite](https://flowbite.com/docs/getting-started/astro/) for styling and pre-made component. Check if what you need is available on Flowbite before you make it yourself.
-2. Familiarize yourself with the ideas behind Astro [Astro in 100 seconds](https://www.youtube.com/watch?v=dsTXcSeAZq8)
+
+1.This project makes extensive use of [Flowbite](https://flowbite.com/docs/getting-started/astro/) for styling and pre-made component. Check if what you need is available on Flowbite before you make it yourself. 2. Familiarize yourself with the ideas behind Astro [Astro in 100 seconds](https://www.youtube.com/watch?v=dsTXcSeAZq8)

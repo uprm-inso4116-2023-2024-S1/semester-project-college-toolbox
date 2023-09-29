@@ -67,7 +67,9 @@ def test_register_user(test_db):
     # Test successful registration
     response_register = client.post("/register", json=register_data)
     assert response_register.status_code == 200
-    assert "auth_token" in response_register.cookies  # Make sure the cookie contains the auth token
+    assert (
+        "auth_token" in response_register.cookies
+    )  # Make sure the cookie contains the auth token
     data = response_register.json()
     assert "profile" in data  # Make sure the response contains the user profile
 
@@ -86,7 +88,9 @@ def test_login_user(test_db):
     # Test successful login
     response_login = client.post("/login", json=login_data)
     assert response_login.status_code == 200
-    assert "auth_token" in response_login.cookies  # Make sure the cookie contains the auth token
+    assert (
+        "auth_token" in response_login.cookies
+    )  # Make sure the cookie contains the auth token
     data = response_login.json()
     assert "profile" in data  # Make sure the response contains the user profile
 
