@@ -4,29 +4,30 @@ from models import engine, CourseSection, RoomSchedule
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
 
 @dataclass
 class TimeBlock:
-    def __init__(self, course_id: str, section: str, room: str, day: str, start_time: time, end_time: time):
-        self.course_id = course_id
-        self.section = section
-        self.room = room
-        self.day = day
-        self.start_time = start_time
-        self.end_time = end_time
+    course_id: str
+    section: str
+    room: str
+    day: str
+    start_time: time
+    end_time: time
 
     def __repr__(self):
         return f"{self.course_id}-{self.section} {self.start_time.strftime('%I:%M %p')} - {self.end_time.strftime('%I:%M %p')} {self.room}"
 
+def make_empty_list():
+    return []
 @dataclass
 class WeekSchedule:
-    def __init__(self):
-        self.monday = []
-        self.tuesday = []
-        self.wednesday = []
-        self.thursday = []
-        self.friday = []
+    monday: list =  field(default_factory=make_empty_list)
+    tuesday: list =  field(default_factory=make_empty_list)
+    wednesday: list = field(default_factory=make_empty_list)
+    thursday: list = field(default_factory=make_empty_list)
+    friday: list = field(default_factory=make_empty_list)
 
     def __repr__(self) -> str:
         return f"L: {self.monday}\nM: {self.tuesday}\nW: {self.wednesday}\nJ: {self.thursday}\nV: {self.friday}\n"
