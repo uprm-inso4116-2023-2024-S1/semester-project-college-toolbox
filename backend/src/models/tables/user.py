@@ -11,7 +11,7 @@ from src.security import generate_salt, hash_password
 class User(Base):
     __tablename__ = "User"
 
-    UserId = Column(String, primary_key=True, default=str(uuid.uuid4()))  # Use UUID4 as the default value
+    UserId = Column(String, primary_key=True)
     FirstName = Column(String, nullable=False)
     Initial = Column(String)
     FirstLastName = Column(String, nullable=False)
@@ -31,6 +31,7 @@ class User(Base):
         Password,
         ProfileImageUrl,
     ):
+        self.UserId = str(uuid.uuid4())
         self.FirstName = FirstName
         self.Initial = Initial
         self.FirstLastName = FirstLastName

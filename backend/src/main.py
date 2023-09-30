@@ -1,5 +1,4 @@
 # src/main.py
-from src.utils import get_full_name
 from fastapi import (
     FastAPI,
     Response,
@@ -23,6 +22,7 @@ from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
+from src.utils import get_full_name
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -99,14 +99,14 @@ def register_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    
+
     profile = UserProfile(
         firstName=user.FirstName,
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
     response.set_cookie(
@@ -147,8 +147,8 @@ def login_user(
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
     response.set_cookie(
@@ -184,8 +184,8 @@ def fetch_user(
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     return LoginResponse(profile=profile)
 
