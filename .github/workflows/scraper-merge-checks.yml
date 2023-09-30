@@ -1,0 +1,71 @@
+name: SSH Scraper Pre-Merge Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'ssh-scraper/**'
+
+jobs:
+  format-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+        postgres-prod:
+          image: postgres:latest
+          env:
+            POSTGRES_DB: ct
+            POSTGRES_USER: ct
+            POSTGRES_PASSWORD: password
+          ports:
+            - 5433:5432
+          options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        postgres-test:
+            image: postgres:latest
+            env:
+              POSTGRES_DB: ct_test
+              POSTGRES_USER: ct_test
+              POSTGRES_PASSWORD: password
+            ports:
+              - 5434:5432
+            options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+  
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11' # You can adjust the Python version as needed
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+          export PATH="$HOME/.poetry/bin:$PATH"
+        shell: bash
+
+      - name: Install SSH-Scraper Dependencies with Poetry
+        working-directory: ssh-scraper/ # Navigate to the scraper folder
+        run: poetry install
+    
+      - name: Check Scraper Code Formatting with Black
+        working-directory: ssh-scraper/ # Navigate to the scraper folder
+        run: |
+            poetry run black --check .  # Check for code formatting issues
+            if [ $? -ne 0 ]; then
+                echo "Error: Unformatted files found, run 'poetry run black .' from backend/ ."
+                exit 1
+            fi
+
+      - name: Run Scraper Tests with Pytest
+        working-directory: ssh-scraper/ # Navigate to the scraper folder
+        run: |
+            poetry run pytest 
+            if [ $? -ne 0 ]; then
+                echo "Error: Some tests failed when running Pytest."
+                exit 1
+            fi
+                

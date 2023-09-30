@@ -11,7 +11,7 @@ module.exports = {
 	// See: https://github.com/prettier/prettier/issues/7475
 	useTabs: true,
 
-	plugins: ['./node_modules/prettier-plugin-astro'],
+	plugins: [require.resolve('prettier-plugin-astro')],
 	overrides: [
 		{
 			files: '*.astro',

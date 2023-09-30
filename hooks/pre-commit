@@ -1,0 +1,45 @@
+#!/bin/bash
+
+backend_root="backend/"
+frontend_root="frontend/college-toolbox/"
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+### Execute backend commands ###
+
+cd ${backend_root}
+
+# Check if poetry is available
+if ! command_exists "poetry"; then
+    echo "Error: poetry must be installed for this hook. Install it following the README in backend/."
+    exit 1
+fi
+ 
+# Run black in check mode
+if ! poetry run black --check .; then
+    echo "Error: Unformatted code detected. Running black formatter."
+    poetry run black .
+    echo "Stage the newly formatted files with 'git add' ('git add .' to stage all files )."
+    exit 1
+fi
+
+cd .. # return back to root dir
+
+### Execute frontend commands ###
+
+# Navigate to frontend folder
+cd ${frontend_root}
+
+if ! npx prettier --check .; then
+    echo "Error: Unformatted code detected. Running prettier formatter."
+    npx prettier --write .
+    echo "Stage the newly formatted files with 'git add' ('git add .' to stage all files )."
+    exit 1
+fi
+
+cd ../..
+
+exit 0
+
