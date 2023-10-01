@@ -178,6 +178,10 @@ def fetch_user(
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(auth_token)
     user = db.query(User).filter(User.UserId == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=400, detail="User corresponding to this token does not exist."
+        )
     db.close()
 
     profile = UserProfile(
