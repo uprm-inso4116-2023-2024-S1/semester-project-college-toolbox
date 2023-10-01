@@ -101,6 +101,39 @@ def get_course_section_time_blocks(
     return time_blocks
 
 
+def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBlock]:
+    time_blocks = []
+    section_and_schedule: list[tuple[CourseSection, list[RoomSchedule]]] = []
+    with Session(engine) as session:
+        for sid in course_section_ids:
+            section_and_schedule.append(
+                (
+                    session.query(CourseSection)
+                    .filter(CourseSection.id == sid)
+                    .first(),
+                    get_room_schedules(sid),
+                )
+            )
+
+    for section, schedules in section_and_schedule:
+        for schedule in schedules:
+            if schedule.days is None:
+                continue
+            for day in schedule.days:
+                time_blocks.append(
+                    TimeBlock(
+                        section.course_id,
+                        section.section,
+                        schedule.room,
+                        day,
+                        schedule.start_time,
+                        schedule.end_time,
+                    )
+                )
+
+    return time_blocks
+
+
 def validate_course_id(course_id: str):
     with Session(engine) as session:
         return (
@@ -109,6 +142,7 @@ def validate_course_id(course_id: str):
             .first()
             is not None
         )
+
 
 # main call function for schedule generation
 def make_all_schedules(courses: list[str], term: Term, year: int) -> list[WeekSchedule]:

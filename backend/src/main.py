@@ -1,4 +1,6 @@
 # src/main.py
+from src.models.requests.calendar import ExportCalendarRequest
+from src.ssh_scraper.utils import get_section_time_blocks_by_ids
 from src.utils import get_full_name
 from fastapi import (
     FastAPI,
@@ -251,3 +253,11 @@ def delete_pdf_by_id(pdf_id: int):
 )
 def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
     PDFdocument.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+
+
+# Create .ics calendar file
+@app.post("/export_calendar")
+def export_calendar(request: ExportCalendarRequest):
+    time_blocks = get_section_time_blocks_by_ids(request.section_ids)
+    # assume the time blocks are non conflicting
+    return time_blocks  # TODO: implement this
