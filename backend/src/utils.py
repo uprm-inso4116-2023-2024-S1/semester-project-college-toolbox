@@ -30,6 +30,7 @@ def try_delete_file(file_name: str):
     except Exception as e:
         print(f"Error deleting {file_name}: {str(e)}")
 
+
 time_block_day_to_rfc = {
     "L": "MO",
     "M": "TU",
@@ -42,33 +43,33 @@ time_block_day_to_rfc = {
 
 weekday_str_to_int = {day_str: day_int for day_int, day_str in enumerate("LMWJVSD")}
 
+
 def get_semester(term: Term, year: str) -> Semester:
     # TODO: turn this into a proper service which does a lookup of the appropriate semester given a date
-    if term == Term.FIRST_SEMESTER:  
+    if term == Term.FIRST_SEMESTER:
         return Semester(
             title="Fall Semester Courses",
             start=datetime(int(year), 8, 1),
             end=datetime(int(year), 12, 24),
         )
-    if term == Term.SECOND_SEMESTER:  
+    if term == Term.SECOND_SEMESTER:
         return Semester(
             title="Spring Semester Courses",
-            start=datetime(int(year)+1, 1, 1),
-            end=datetime(int(year)+1, 5, 30),
+            start=datetime(int(year) + 1, 1, 1),
+            end=datetime(int(year) + 1, 5, 30),
         )
-    if term == Term.FIRST_SUMMER:  
+    if term == Term.FIRST_SUMMER:
         return Semester(
             title="First Summer Semester Courses",
-            start=datetime(int(year)+1, 6, 1),
-            end=datetime(int(year)+1, 7, 30),
+            start=datetime(int(year) + 1, 6, 1),
+            end=datetime(int(year) + 1, 7, 30),
         )
-    if term == Term.SECOND_SUMMER:  
+    if term == Term.SECOND_SUMMER:
         return Semester(
             title="Second Summer Semester Courses",
-            start=datetime(int(year)+1, 7, 1),
-            end=datetime(int(year)+1, 8, 30),
+            start=datetime(int(year) + 1, 7, 1),
+            end=datetime(int(year) + 1, 8, 30),
         )
-
 
 
 def next_weekday_date(start_date: datetime, weekday: int):
@@ -79,7 +80,7 @@ def next_weekday_date(start_date: datetime, weekday: int):
 
 
 def get_building_location(room: str) -> Tuple[Optional[str], Optional[str]]:
-    room_code = re.sub(r'\d+', '', room)
+    room_code = re.sub(r"\d+", "", room)
     room_to_building_location = {
         "AE": ("Administración de Empresas", "https://goo.gl/maps/uS2sHKErq9muJFx6A"),
         "B": ("Edificio de Biología", "https://goo.gl/maps/zpv6MvfdXoqa7rgk8"),

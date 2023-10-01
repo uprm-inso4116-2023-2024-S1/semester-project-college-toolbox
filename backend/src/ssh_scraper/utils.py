@@ -6,11 +6,13 @@ from sqlalchemy import and_
 import copy
 from dataclasses import dataclass, field
 
+
 @dataclass
 class Semester:
     title: str
     start: datetime
     end: datetime
+
 
 @dataclass
 class TimeBlock:
