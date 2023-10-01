@@ -1,5 +1,4 @@
 # src/main.py
-from src.utils import get_full_name
 from fastapi import (
     FastAPI,
     Response,
@@ -21,8 +20,10 @@ from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
+from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
+from src.utils import get_full_name
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -134,7 +135,7 @@ def login_user(
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
         db.close()
-        raise HTTPException(status_code=401, detail="User not found.")
+        raise HTTPException(status_code=404, detail="User not found.")
     if user.EncryptedPassword != hash_password(user_request.password, user.Salt):
         db.close()
         raise HTTPException(status_code=401, detail="Incorrect password.")
@@ -162,13 +163,16 @@ def login_user(
     return response
 
 
-# fetch profile endpoint
+# Fetch profile endpoint
 @app.get("/profile", response_model=LoginResponse)
 def fetch_user(
     db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
 ) -> LoginResponse:
     """
     Returns the profile of a user given a valid auth token.
+
+    - **db**: Database to be utilized (prod or test).
+    - **auth_token**: The authentication token obtained during login.
     """
     if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
