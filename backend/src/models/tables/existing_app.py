@@ -8,7 +8,9 @@ from src.database import Base
 class ExistingApplication(Base):
     __tablename__ = "ExistingApplication"
 
-    ExistingApplicationId = Column(Integer, Sequence("existing_application_id_seq"), primary_key=True, index=True)
+    ExistingApplicationId = Column(
+        Integer, Sequence("existing_application_id_seq"), primary_key=True, index=True
+    )
     Name = Column(String, nullable=False)
     Description = Column(String)
     URL = Column(String)
@@ -16,7 +18,6 @@ class ExistingApplication(Base):
     Type = Column(String)
     Rating = Column(Integer)
     RatingCount = Column(Integer)
-
 
     def __init__(
         self,
