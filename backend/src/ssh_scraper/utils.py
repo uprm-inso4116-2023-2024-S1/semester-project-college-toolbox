@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import time, datetime
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
 from sqlalchemy.orm import Session
@@ -6,6 +6,11 @@ from sqlalchemy import and_
 import copy
 from dataclasses import dataclass, field
 
+@dataclass
+class Semester:
+    title: str
+    start: datetime
+    end: datetime
 
 @dataclass
 class TimeBlock:

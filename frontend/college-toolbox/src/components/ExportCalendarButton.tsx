@@ -1,21 +1,23 @@
 import React from 'react';
+import { API_URL } from '../app/constants';
 
 
 interface ExportButtonProps {
-	courses: number[]
+	section_ids: number[]
 	term: string
+	year: string
 }
 
-const ExportButton: React.FC<ExportButtonProps> = ({ courses, term }) => {
+const ExportButton: React.FC<ExportButtonProps> = ({ section_ids, term, year  }) => {
   const handleDownloadClick = async () => {
     try {
 
-      const response = await fetch('/create_calendar', {
+      const response = await fetch(`${API_URL}/export_calendar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-				body: JSON.stringify({courses, term}),
+				body: JSON.stringify({section_ids, term, year}),
         credentials: 'include',
       });
 
