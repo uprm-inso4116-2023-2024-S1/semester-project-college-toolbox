@@ -1,6 +1,6 @@
 from datetime import time
-from enums import Term
-from models import engine, CourseSection, RoomSchedule
+from src.ssh_scraper.enums import Term
+from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import copy
@@ -109,7 +109,6 @@ def validate_course_id(course_id: str):
             .first()
             is not None
         )
-
 
 # main call function for schedule generation
 def make_all_schedules(courses: list[str], term: Term, year: int) -> list[WeekSchedule]:

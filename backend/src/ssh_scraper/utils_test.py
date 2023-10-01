@@ -1,6 +1,6 @@
-from enums import Term
+from src.ssh_scraper.enums import Term
 
-from utils import *
+from src.ssh_scraper.utils import *
 
 
 def course_section_to_str(section):
