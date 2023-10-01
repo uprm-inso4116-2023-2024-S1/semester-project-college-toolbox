@@ -39,7 +39,7 @@ app = FastAPI(
 frontendPort = "2121"
 origins = [
     f"http://localhost:{frontendPort}",
-    "https://uprm-inso4116-2023-2024-s1.github.io/semester-project-college-toolbox",
+    "https://uprm-inso4116-2023-2024-s1.github.io",
 ]  # Add any other allowed origins as needed
 app.add_middleware(
     CORSMiddleware,
