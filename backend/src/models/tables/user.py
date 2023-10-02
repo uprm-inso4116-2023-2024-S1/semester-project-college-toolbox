@@ -1,5 +1,7 @@
 # src/models/user.py
-from sqlalchemy import Column, Integer, Sequence, String
+import uuid
+
+from sqlalchemy import Column, String
 
 from src.database import Base
 from src.security import generate_salt, hash_password
@@ -9,7 +11,7 @@ from src.security import generate_salt, hash_password
 class User(Base):
     __tablename__ = "User"
 
-    UserId = Column(Integer, Sequence("user_id_seq"), primary_key=True, index=True)
+    UserId = Column(String, primary_key=True)
     FirstName = Column(String, nullable=False)
     Initial = Column(String)
     FirstLastName = Column(String, nullable=False)
@@ -29,6 +31,7 @@ class User(Base):
         Password,
         ProfileImageUrl,
     ):
+        self.UserId = str(uuid.uuid4())
         self.FirstName = FirstName
         self.Initial = Initial
         self.FirstLastName = FirstLastName
