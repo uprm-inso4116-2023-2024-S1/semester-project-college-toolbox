@@ -1,5 +1,15 @@
 # src/main.py
-from src.utils import get_full_name
+import atexit
+from uuid import uuid4
+from src.models.requests.calendar import ExportCalendarRequest
+from src.ssh_scraper.enums import Term
+from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.utils import (
+    create_course_calendar,
+    get_full_name,
+    get_semester,
+    try_delete_file,
+)
 from fastapi import (
     FastAPI,
     Response,
@@ -12,7 +22,7 @@ from fastapi import (
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
 
@@ -21,8 +31,10 @@ from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
+from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
+from src.utils import get_full_name
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -38,7 +50,7 @@ app = FastAPI(
 frontendPort = "2121"
 origins = [
     f"http://localhost:{frontendPort}",
-    "https://uprm-inso4116-2023-2024-s1.github.io/semester-project-college-toolbox",
+    "https://uprm-inso4116-2023-2024-s1.github.io",
 ]  # Add any other allowed origins as needed
 app.add_middleware(
     CORSMiddleware,
@@ -99,14 +111,14 @@ def register_user(
 
     permanent_token = generate_permanent_token(user.UserId)
     db.close()
-    
+
     profile = UserProfile(
         firstName=user.FirstName,
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
     response.set_cookie(
@@ -134,7 +146,7 @@ def login_user(
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
         db.close()
-        raise HTTPException(status_code=401, detail="User not found.")
+        raise HTTPException(status_code=404, detail="User not found.")
     if user.EncryptedPassword != hash_password(user_request.password, user.Salt):
         db.close()
         raise HTTPException(status_code=401, detail="Incorrect password.")
@@ -147,8 +159,8 @@ def login_user(
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
     response.set_cookie(
@@ -162,18 +174,25 @@ def login_user(
     return response
 
 
-# Login endpoint
+# Fetch profile endpoint
 @app.get("/profile", response_model=LoginResponse)
 def fetch_user(
     db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
 ) -> LoginResponse:
     """
     Returns the profile of a user given a valid auth token.
+
+    - **db**: Database to be utilized (prod or test).
+    - **auth_token**: The authentication token obtained during login.
     """
     if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(auth_token)
     user = db.query(User).filter(User.UserId == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=400, detail="User corresponding to this token does not exist."
+        )
     db.close()
 
     profile = UserProfile(
@@ -181,8 +200,8 @@ def fetch_user(
         initial=user.Initial,
         firstLastName=user.FirstLastName,
         secondLastName=user.SecondLastName,
-        email=user.Email, 
-        profileImageUrl=user.ProfileImageUrl
+        email=user.Email,
+        profileImageUrl=user.ProfileImageUrl,
     )
     return LoginResponse(profile=profile)
 
@@ -246,3 +265,20 @@ def delete_pdf_by_id(pdf_id: int):
 )
 def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
     PDFdocument.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+
+
+# Create .ics calendar file
+@app.post("/export_calendar")
+def export_calendar(request: ExportCalendarRequest) -> FileResponse:
+    time_blocks = get_section_time_blocks_by_ids(request.section_ids)
+    # assume the time blocks are non conflicting
+    file_name = f"{request.term}-calendar-{uuid4()}.ics"
+    atexit.register(lambda: try_delete_file(file_name))
+    semester = get_semester(Term(request.term), request.year)
+    return create_course_calendar(time_blocks, file_name, semester)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=5670)
