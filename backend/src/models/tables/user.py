@@ -1,5 +1,6 @@
 # src/models/user.py
 from sqlalchemy import Column, Integer, Sequence, String
+from sqlalchemy.orm import relationship
 
 from src.database import Base
 from src.security import generate_salt, hash_password
@@ -37,3 +38,5 @@ class User(Base):
         self.Salt = generate_salt()
         self.EncryptedPassword = hash_password(Password, self.Salt)
         self.ProfileImageUrl = ProfileImageUrl
+    
+    schedules = relationship("Schedule", back_populates="user")
