@@ -3,9 +3,6 @@ import time
 import re
 import sys
 from sqlalchemy.orm import sessionmaker
-# following imports apply if we using main DB
-# from ..backend.src.models.tables.tuition_scheduler_models import CourseSection, RoomSchedule
-# from ..backend.src.database import engine
 from models import engine, CourseSection, RoomSchedule
 from datetime import time as Time, datetime
 import asyncio
