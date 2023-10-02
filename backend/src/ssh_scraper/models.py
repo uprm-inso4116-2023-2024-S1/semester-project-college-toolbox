@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Time, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
-engine = create_engine("sqlite:///sections.db")
+engine = create_engine("sqlite:///src/ssh_scraper/sections.db")
 Base = declarative_base()
 
 

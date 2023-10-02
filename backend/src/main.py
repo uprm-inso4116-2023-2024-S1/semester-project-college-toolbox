@@ -1,4 +1,15 @@
 # src/main.py
+import atexit
+from uuid import uuid4
+from src.models.requests.calendar import ExportCalendarRequest
+from src.ssh_scraper.enums import Term
+from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.utils import (
+    create_course_calendar,
+    get_full_name,
+    get_semester,
+    try_delete_file,
+)
 from fastapi import (
     FastAPI,
     Response,
@@ -11,7 +22,7 @@ from fastapi import (
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
 
@@ -254,3 +265,20 @@ def delete_pdf_by_id(pdf_id: int):
 )
 def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
     PDFdocument.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+
+
+# Create .ics calendar file
+@app.post("/export_calendar")
+def export_calendar(request: ExportCalendarRequest) -> FileResponse:
+    time_blocks = get_section_time_blocks_by_ids(request.section_ids)
+    # assume the time blocks are non conflicting
+    file_name = f"{request.term}-calendar-{uuid4()}.ics"
+    atexit.register(lambda: try_delete_file(file_name))
+    semester = get_semester(Term(request.term), request.year)
+    return create_course_calendar(time_blocks, file_name, semester)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=5670)

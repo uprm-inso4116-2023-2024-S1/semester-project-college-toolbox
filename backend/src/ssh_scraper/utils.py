@@ -1,10 +1,17 @@
-from datetime import time
-from enums import Term
-from models import engine, CourseSection, RoomSchedule
+from datetime import time, datetime
+from src.ssh_scraper.enums import Term
+from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import copy
 from dataclasses import dataclass, field
+
+
+@dataclass
+class Semester:
+    title: str
+    start: datetime
+    end: datetime
 
 
 @dataclass
@@ -90,6 +97,39 @@ def get_course_section_time_blocks(
                 time_blocks.append(
                     TimeBlock(
                         course_id,
+                        section.section,
+                        schedule.room,
+                        day,
+                        schedule.start_time,
+                        schedule.end_time,
+                    )
+                )
+
+    return time_blocks
+
+
+def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBlock]:
+    time_blocks = []
+    section_and_schedule: list[tuple[CourseSection, list[RoomSchedule]]] = []
+    with Session(engine) as session:
+        for sid in course_section_ids:
+            section_and_schedule.append(
+                (
+                    session.query(CourseSection)
+                    .filter(CourseSection.id == sid)
+                    .first(),
+                    get_room_schedules(sid),
+                )
+            )
+
+    for section, schedules in section_and_schedule:
+        for schedule in schedules:
+            if schedule.days is None:
+                continue
+            for day in schedule.days:
+                time_blocks.append(
+                    TimeBlock(
+                        section.course_id,
                         section.section,
                         schedule.room,
                         day,

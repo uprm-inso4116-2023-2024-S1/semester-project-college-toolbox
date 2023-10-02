@@ -3,11 +3,11 @@ import time
 import re
 import sys
 from sqlalchemy.orm import sessionmaker
-from models import engine, CourseSection, RoomSchedule
+from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
 from datetime import time as Time, datetime
 import asyncio
 import socket
-from enums import Term
+from src.ssh_scraper.enums import Term
 
 TASK_COUNT = 40
 TIMEOUT_TIME = 60
