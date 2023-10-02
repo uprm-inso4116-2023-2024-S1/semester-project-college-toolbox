@@ -2,8 +2,9 @@
 import atexit
 from uuid import uuid4
 from src.models.requests.calendar import ExportCalendarRequest
+from src.models.responses.section import GetSectionsResponse, Section
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.ssh_scraper.utils import get_course_sections, get_section_time_blocks_by_ids
 from src.utils import (
     create_course_calendar,
     get_full_name,
@@ -34,7 +35,6 @@ from src.models.responses.register import RegisterResponse
 from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
-from src.utils import get_full_name
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -276,6 +276,28 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
     atexit.register(lambda: try_delete_file(file_name))
     semester = get_semester(Term(request.term), request.year)
     return create_course_calendar(time_blocks, file_name, semester)
+
+
+# Get all the sections for a particular course
+@app.get("/courses/{course_code}/{term}/{year}")
+def get_sections(course_code: str, term: str, year: int) -> GetSectionsResponse:
+    course_sections = get_course_sections(course_code, Term(term), year)
+    response = {"sections": []}
+    for section in course_sections:
+        response["sections"].append(
+            Section(
+                section_id=section.id,
+                section_code=section.section,
+                course_name=section.course_name,
+                credits=section.credits,
+                professor=section.professor,
+                capacity=section.capacity,
+                usage=section.usage,
+                term=section.term,
+                year=section.year,
+            )
+        )
+    return response
 
 
 if __name__ == "__main__":
