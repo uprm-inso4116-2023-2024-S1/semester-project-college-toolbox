@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from "../app/constants"
-
 const ScholarshipCard = ({
 	scholarship_name,
 	applicantResume,
@@ -16,7 +15,6 @@ const ScholarshipCard = ({
 		backgroundColor: '#35495e',
 		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
 	};
-
 	const titleStyle = {
 		fontSize: '1.5rem', // Increase font size
 		marginBottom: '10px', // Increase margin bottom
@@ -31,20 +29,16 @@ const ScholarshipCard = ({
 		flexWrap: 'wrap',
 		alignItems: 'flex-start', // Align elements to the left
 	};
-
 	const statusColors = {
 		Accepted: 'green',
 		Denied: 'red',
 		Waiting: '#FF5733', // Darker yellow color
 	};
-
 	const [editedStatus, setEditedStatus] = useState(applicationStatus);
 	const [tempStatus, setTempStatus] = useState(applicationStatus); // Temporary status for edits
-
 	useEffect(() => {
 		setTempStatus(editedStatus);
 	}, [editedStatus]);
-
 	const bubbleStyle = {
 		display: 'inline-block',
 		backgroundColor: statusColors[tempStatus] || 'lightyellow', // Updated this line to use tempStatus
@@ -55,7 +49,6 @@ const ScholarshipCard = ({
 		whiteSpace: 'nowrap', // Prevent text wrapping to the next line
 		fontSize: '0.9rem',
 	};
-
 	const editButtonStyle = {
 		background: 'none',
 		border: 'none',
@@ -66,23 +59,26 @@ const ScholarshipCard = ({
 		fontSize: '0.9rem',
 	};
 
+	// const userDocsRequest = {
+	//   filename : "",
+	//   file : "",
+	//   userid: ""
+
+	// }
 	const [isEditingStatus, setIsEditingStatus] = useState(false);
 	const [resumeFileName, setResumeFileName] = useState(applicantResume);
 	const [isDeletingResume, setIsDeletingResume] = useState(false);
 	const [isUploadingResume, setIsUploadingResume] = useState(
-		applicantResume === '',
+		applicantResume === ''
 	);
-
 	const handleEditStatus = () => {
 		setIsEditingStatus(true);
 	};
-
 	const handleCancelEdit = () => {
 		// Revert editedStatus to the original status when canceling the edit
 		setEditedStatus(tempStatus);
 		setIsEditingStatus(false);
 	};
-
 	const handleSaveStatus = () => {
 		// Perform any necessary actions here, e.g., update the status in the database
 		setIsEditingStatus(false);
@@ -92,105 +88,62 @@ const ScholarshipCard = ({
 		if (uploadedFile) {
 			setResumeFileName(uploadedFile.name);
 			const formData = new FormData();
-			formData.append('test', uploadedFile);
+			formData.append("file", uploadedFile);
+			formData.append("filename", uploadedFile.name)
 			console.log('FormData:', formData);
-			// Make a POST request to FastAPI
-			const URL = 'http://127.0.0.1:5670/ScholarshipApplication/upload';
-			fetch(URL, {
+			fetch(`${API_URL}/upload`, {
 				method: 'POST',
 				body: formData,
+				credentials: "include"
 			})
-				.then((response) => {
+				.then(response => {
 					if (response.ok) {
 						//File was uploaded
 						//Handle success
-						console.log(response);
-						console.log('Hoopla! File uploaded.');
+						console.log(response)
+						console.log("Hoopla! File uploaded.");
 					} else {
 						// Failure
-						console.log(response);
-						console.error('Not hoopla, file upload FAILURE.');
+						console.log(response)
+						console.error("Not hoopla, file upload FAILURE.")
 					}
 				})
-				.catch((error) => {
+				.catch(error => {
 					// Handle network errors
-					console.error('Error:', error);
+					console.error('Error:', error)
 				});
 
-  const handleSaveStatus = () => {
-    // Perform any necessary actions here, e.g., update the status in the database
-    setIsEditingStatus(false);
-  };
-  const handleResumeUpload = (e) => {
-    const uploadedFile = e.target.files[0];
-    if (uploadedFile) {
-      setResumeFileName(uploadedFile.name);
-      const formData = new FormData();
-      formData.append("file", uploadedFile);
-      formData.append("filename", uploadedFile.name)
-      console.log('FormData:', formData);
-      // Make a POST request to FastAPI
-      
-      // userDocsRequest.filename = uploadedFile.name;
-      // userDocsRequest.file = uploadedFile;
-      // userDocsRequest.userid = 1
-      // console.log(JSON.stringify(userDocsRequest))
-      fetch(`${API_URL}/upload`, {
-
-        method: 'POST',
-        body: formData,
-        credentials: "include"
-      })
-        .then(response=> {
-          if(response.ok) {
-            //File was uploaded
-            //Handle success
-            console.log(response)
-            console.log("Hoopla! File uploaded.");
-          } else {
-            // Failure
-            console.log(response)
-            console.error("Not hoopla, file upload FAILURE.")
-          }
-        })
-        .catch(error=> {
-          // Handle network errors
-          console.error('Error:', error)
-        });
-      
-      setIsUploadingResume(false);
-    }
-  };
-
-  const handleResumeDelete = () => {
-    if (!isDeletingResume) {
-      setIsDeletingResume(true);
-    }
-    const formData = new FormData();
-    formData.append('uploadedFile.name', resumeFileName);
-
-    // Perform delete action here or reset state if canceled
-    fetch(`${API_URL}/delete-resume`, {
-      method: 'POST',
-      body:  formData
-    })
-      .then(response=> {
-        if(response.ok) {
-          //File was deleted
-          //Handle success
-          console.log("Hoopla! File deleted.");
-        } else {
-          // Failure
-          console.error("Not hoopla, file delete FAILURE.")
-        }
-      })
-      .catch(error=> {
-        // Handle network errors
-        console.error('Error:', error)
-      });
-    setResumeFileName('');
-    setIsDeletingResume(false);
-
+			setIsUploadingResume(false);
+		}
+	};
+	const handleResumeDelete = () => {
+		if (!isDeletingResume) {
+			setIsDeletingResume(true);
+		}
+		const formData = new FormData();
+		formData.append('uploadedFile.name', resumeFileName);
+		// Perform delete action here or reset state if canceled
+		fetch(`${API_URL}/delete-resume`, {
+			method: 'POST',
+			body: formData
+		})
+			.then(response => {
+				if (response.ok) {
+					//File was deleted
+					//Handle success
+					console.log("Hoopla! File deleted.");
+				} else {
+					// Failure
+					console.error("Not hoopla, file delete FAILURE.")
+				}
+			})
+			.catch(error => {
+				// Handle network errors
+				console.error('Error:', error)
+			});
+		setResumeFileName('');
+		setIsDeletingResume(false);
+	};
 	return (
 		<div className="my-scholarship-card">
 			<div className="card" style={cardStyle}>
@@ -202,6 +155,7 @@ const ScholarshipCard = ({
 					<div style={containerStyle}>
 						{!isEditingStatus ? (
 							<div>
+
 								<div style={bubbleStyle}>
 									<strong>Status:</strong> {editedStatus}
 								</div>
@@ -240,16 +194,15 @@ const ScholarshipCard = ({
 									>
 										Resume: {resumeFileName || 'No file uploaded'}
 									</div>
-									{(!resumeFileName || isUploadingResume) &&
-										!isEditingStatus && (
-											<div>
-												<input
-													type="file"
-													accept=".pdf"
-													onChange={handleResumeUpload}
-												/>
-											</div>
-										)}
+									{(!resumeFileName || isUploadingResume) && !isEditingStatus && (
+										<div>
+											<input
+												type="file"
+												accept=".pdf"
+												onChange={handleResumeUpload}
+											/>
+										</div>
+									)}
 									{resumeFileName && !isUploadingResume && !isEditingStatus && (
 										<button onClick={handleResumeDelete}>Delete</button>
 									)}
@@ -291,5 +244,4 @@ const ScholarshipCard = ({
 		</div>
 	);
 };
-		}}}
 export default ScholarshipCard;
