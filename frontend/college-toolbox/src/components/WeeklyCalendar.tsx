@@ -1,4 +1,3 @@
-
 import { Button, Modal } from 'flowbite-react';
 import './WeeklyCalendar.scss';
 import {
@@ -22,21 +21,29 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	year,
 }) => {
 	const shortDaysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-	const daysOfWeek = ['Monday', 'Tueday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+	const daysOfWeek = [
+		'Monday',
+		'Tueday',
+		'Wednesday',
+		'Thursday',
+		'Friday',
+		'Saturday',
+		'Sunday',
+	];
 	const hoursOffsetInMinutes = 6 * 60; // Adjusted offset to start at 6:00 am
 	const currentTimeRow =
 		getCurrentTimeInMinutes() - hoursOffsetInMinutes > 0
 			? Math.floor((getCurrentTimeInMinutes() - hoursOffsetInMinutes) / 30) + 1
 			: 1;
-	const currentTimeTop = getCurrentTimeInMinutes() - hoursOffsetInMinutes > 0
-	? (getCurrentTimeInMinutes() - hoursOffsetInMinutes) % 30 / 30 * 100
-	: 0;
+	const currentTimeTop =
+		getCurrentTimeInMinutes() - hoursOffsetInMinutes > 0
+			? (((getCurrentTimeInMinutes() - hoursOffsetInMinutes) % 30) / 30) * 100
+			: 0;
 	const currentDayCol = ((new Date().getDay() - 1) % 7) + 3;
 
-	
 	const [openModal, setOpenModal] = useState<string | undefined>();
 	const [calEvent, setCalEvent] = useState<CourseSectionSchedule | undefined>();
-	const modalProps = { openModal, setOpenModal, calEvent, setCalEvent};
+	const modalProps = { openModal, setOpenModal, calEvent, setCalEvent };
 
 	const convertToCalendarEvents = (course: CourseSectionSchedule) => {
 		return course.timeBlocks.map((block: SpaceTimeBlock, idx: number) => {
@@ -65,9 +72,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
 						}}
-						onClick={()=>{
-							modalProps.setCalEvent(course)
-							modalProps.setOpenModal('dismissible')
+						onClick={() => {
+							modalProps.setCalEvent(course);
+							modalProps.setOpenModal('dismissible');
 						}}
 					>
 						{course.courseCode}-{course.sectionCode}
@@ -84,9 +91,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
 						}}
-						onClick={()=>{
-							modalProps.setCalEvent(course)
-							modalProps.setOpenModal('dismissible')
+						onClick={() => {
+							modalProps.setCalEvent(course);
+							modalProps.setOpenModal('dismissible');
 						}}
 					>
 						{course.courseCode}-{course.sectionCode}
@@ -100,16 +107,15 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							gridRow: `${timeRow + hoursDuration} / span 1`,
 							height: `${(remainingMinutes / 30) * 100}%`,
 						}}
-						onClick={()=>{
-							modalProps.setCalEvent(course)
-							modalProps.setOpenModal('dismissible')
+						onClick={() => {
+							modalProps.setCalEvent(course);
+							modalProps.setOpenModal('dismissible');
 						}}
 					/>
 				</React.Fragment>
 			);
 		});
 	};
-
 
 	return (
 		<div className="weeklyCalendar">
@@ -146,14 +152,14 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					<div className="filler-col" />
 					{Array.from({ length: 7 }, (_, index) => (
 						<div
-							key={`day-col ${index+1}`}
+							key={`day-col ${index + 1}`}
 							className={`col${index > 4 ? ' weekend' : ''}`}
 							style={{ gridColumn: index + 3 }}
 						></div>
 					))}
 					{Array.from({ length: 18 * 2 + 1 }, (_, index) => (
 						<div
-							key={`day-row ${index+1}`}
+							key={`day-row ${index + 1}`}
 							className="row"
 							style={{ gridRow: index + 1 }}
 						></div>
@@ -162,39 +168,47 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					<div
 						key={'curr-time'}
 						className="current-time"
-						style={{ gridColumn: currentDayCol, gridRow: currentTimeRow, top: `${currentTimeTop}%` }}
+						style={{
+							gridColumn: currentDayCol,
+							gridRow: currentTimeRow,
+							top: `${currentTimeTop}%`,
+						}}
 					>
 						<div className="circle" />
 					</div>
 				</div>
 			</div>
-			<Modal dismissible show={modalProps.openModal === 'dismissible'} onClose={() => modalProps.setOpenModal(undefined)}>
-        <Modal.Header>Course Information</Modal.Header>
-        <Modal.Body>
-          <div className="space-y-6">
+			<Modal
+				dismissible
+				show={modalProps.openModal === 'dismissible'}
+				onClose={() => modalProps.setOpenModal(undefined)}
+			>
+				<Modal.Header>Course Information</Modal.Header>
+				<Modal.Body>
+					<div className="space-y-6">
 						<ul>
 							<li>Course Code: {modalProps.calEvent?.courseCode}</li>
 							<li>Course Name: {modalProps.calEvent?.courseName}</li>
 							<li>Section: {modalProps.calEvent?.sectionCode}</li>
-							<ol key={`time-list-${modalProps.calEvent?.courseCode}`}>Times:
-								{modalProps.calEvent?.timeBlocks?.map((block, idx)=>
-								(<li className="p-1" key={`modal-time ${idx}`}>
-								<ul className="border border-gray-300 rounded p-1">
-									<li>Room: {block.room}</li>
-									<li>Building: {block.building}</li>
-									<li>Location: {block.location}</li>
-									<li>Day: {daysOfWeek[block.day]}</li>
-									<li>Start Time: {convertToAmPm(block.startTime)}</li>
-									<li>End Time: {convertToAmPm(block.endTime)}</li>
-								</ul>
-							</li>
-							))}
+							<ol key={`time-list-${modalProps.calEvent?.courseCode}`}>
+								Times:
+								{modalProps.calEvent?.timeBlocks?.map((block, idx) => (
+									<li className="p-1" key={`modal-time ${idx}`}>
+										<ul className="border border-gray-300 rounded p-1">
+											<li>Room: {block.room}</li>
+											<li>Building: {block.building}</li>
+											<li>Location: {block.location}</li>
+											<li>Day: {daysOfWeek[block.day]}</li>
+											<li>Start Time: {convertToAmPm(block.startTime)}</li>
+											<li>End Time: {convertToAmPm(block.endTime)}</li>
+										</ul>
+									</li>
+								))}
 							</ol>
-								
 						</ul>
-          </div>
-        </Modal.Body>
-      </Modal>
+					</div>
+				</Modal.Body>
+			</Modal>
 		</div>
 	);
 };
