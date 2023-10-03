@@ -20,44 +20,70 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	year,
 }) => {
 	const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-	const hoursOffsetInMinutes = 4 * 60 + 30; // we want to "zero" at 5:30 am, such that 5:30 corresponds to column 1
+	const hoursOffsetInMinutes = 6 * 60; // Adjusted offset to start at 6:00 am
 	const currentTimeRow =
 		getCurrentTimeInMinutes() - hoursOffsetInMinutes > 0
-			? Math.floor((getCurrentTimeInMinutes() - hoursOffsetInMinutes) / 60)
+			? Math.floor((getCurrentTimeInMinutes() - hoursOffsetInMinutes) / 30) + 1
 			: 1;
-	const currentDayCol = ((new Date().getDay() - 1) % 7) + 3; // subtract 1 since in getDay sunday is 0
-	//TODO: make this display courses with 10 minute increment precision
-	const convertToEvents = (course: CourseSectionSchedule) => {
+	const currentDayCol = ((new Date().getDay() - 1) % 7) + 3;
+
+	const convertToCalendarEvents = (course: CourseSectionSchedule) => {
 		return course.timeBlocks.map((block: SpaceTimeBlock, idx: number) => {
-			const hoursOffsetInMinutes = 4 * 60 + 30; // we want to "zero" at 5:30 am, but we want to start at row 1
-			const dayColumn: number = block.day + 3; // 3 is the monday column
-			const timeRow: number = Math.ceil(
-				(subtract24HourTimes('00:00', block.startTime) - hoursOffsetInMinutes) /
-					60,
-			); // 1 corresponds to 5:30 am
-			if (timeRow < 0) {
-				// return early if we can't show this time in the calendar
+			const dayColumn: number = block.day + 3;
+			const timeRow: number =
+				Math.floor(
+					(subtract24HourTimes('00:00', block.startTime) -
+						hoursOffsetInMinutes) /
+						30,
+				) + 1;
+			if (timeRow < 1) { // don't render items that don't show in the calendar times
 				return <></>;
 			}
-			const hoursDuration: number = Math.ceil(
-				subtract24HourTimes(block.startTime, block.endTime) / 60,
+			const hoursDuration: number = Math.floor(
+				subtract24HourTimes(block.startTime, block.endTime) / 30
 			);
+			const remainingMinutes: number = subtract24HourTimes(block.startTime, block.endTime) % 30
+			if (remainingMinutes == 0){
+				return (
+					<div
+						key={`block ${idx}`}
+						className="event"
+						style={{
+							gridColumn: dayColumn,
+							gridRow: `${timeRow} / span ${hoursDuration}`,
+						}}
+					>
+							{course.courseCode}-{course.sectionCode}
+						<br />
+						Room: {block.room}
+					</div>
+				);
+			}
 			return (
-				<div
-					key={`block ${idx}`}
-					className="event"
+				<>
+					<div
+						key={`block ${idx}`}
+						className="event start"
+						style={{
+							gridColumn: dayColumn,
+							gridRow: `${timeRow} / span ${hoursDuration}`
+						}}
+					>
+							{course.courseCode}-{course.sectionCode}
+						<br />
+						Room: {block.room}
+					</div>
+					<div 
+					className="event end" 
 					style={{
-						gridColumn: dayColumn,
-						gridRow: `${timeRow} / span ${hoursDuration}`,
+							gridColumn: dayColumn,
+							gridRow: `${timeRow+hoursDuration} / span 1`,
+							height: `${(remainingMinutes / 30)*100}%`
 					}}
-				>
-					<b>
-						{course.courseCode}-{course.sectionCode}
-					</b>
-					<br />
-					Room: {block.room}
-				</div>
+					/>
+				</>
 			);
+		
 		});
 	};
 
@@ -80,20 +106,13 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					))}
 				</div>
 				<div className="content">
-					{/*  THIS CODE would show all hours, but generally we just want to show the hours where courses would be given
-							 Leaving the code in for a possible toggle option in the future.
-					{Array.from({ length: 23 }, (_, index) => (
-						<div key={index + 1} className="time" style={{ gridRow: index + 1 }}>
-							{convertToAmPm(`${String(index+1).padStart(2)}:00`)}
-						</div>
-					))} */}
-					{Array.from({ length: 18 }, (_, index) => (
+					{Array.from({ length: 18 * 2 }, (_, index) => (
 						<div
-							key={index + 6}
+							key={index + 1}
 							className="time"
 							style={{ gridRow: index + 1 }}
 						>
-							{convertToAmPm(`${String(index + 6).padStart(2)}:30`)}
+							{index % 2 === 0 ? convertToAmPm(`${String(Math.floor(index / 2) + 6).padStart(2)}:30`): ''}
 						</div>
 					))}
 					<div className="filler-col" />
@@ -104,12 +123,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							style={{ gridColumn: index + 3 }}
 						></div>
 					))}
-					{Array.from({ length: 18 }, (_, index) => (
+					{Array.from({ length: 18 * 2 + 1 }, (_, index) => (
 						<div key={index + 1} className="row" style={{ gridRow: index + 1 }}>
-							<div className="line" />
 						</div>
 					))}
-					{courses.map(convertToEvents)}
+					{courses.map(convertToCalendarEvents)}
 					<div
 						className="current-time"
 						style={{ gridColumn: currentDayCol, gridRow: currentTimeRow }}
