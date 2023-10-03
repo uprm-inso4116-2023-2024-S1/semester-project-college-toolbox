@@ -23,7 +23,7 @@ class Document(Base):
     lastModified = Column(DateTime, nullable=False)
 
     userId = Column(
-        Integer,
+        String,
         ForeignKey("User.UserId"),
         nullable=False,
     )
