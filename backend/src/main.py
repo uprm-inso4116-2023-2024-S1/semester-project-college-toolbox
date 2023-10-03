@@ -12,13 +12,12 @@ from src.utils import (
 )
 from fastapi import (
     FastAPI,
-    Response,
-    UploadFile,
-    File,
+    Form,
     Request,
     HTTPException,
     Depends,
     Cookie,
+    UploadFile,
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,8 +30,8 @@ from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
+from src.models.tables.Document import Document
 from src.models.tables.existing_app import ExistingApplication
-from src.models.tables.PDFdocument import PDFdocument
 from src.models.tables.user import User
 from src.utils import get_full_name
 from src.security import (
@@ -81,7 +80,7 @@ def read_root():
 
 # User registration endpoint
 @app.post("/register", response_model=RegisterResponse)
-def register_user(
+async def register_user(
     user_request: RegisterRequest, db: Session = Depends(get_db)
 ) -> RegisterResponse:
     """
@@ -105,6 +104,7 @@ def register_user(
         ProfileImageUrl=user_request.profileImageUrl,
     )
 
+    print(f" ID: {user.UserId}")
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -134,7 +134,7 @@ def register_user(
 
 # Login endpoint
 @app.post("/login", response_model=LoginResponse)
-def login_user(
+async def login_user(
     user_request: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
     """
@@ -206,32 +206,31 @@ def fetch_user(
     return LoginResponse(profile=profile)
 
 
-# PDF document upload endpoint
-@app.post("/ScholarshipApplication/upload")
-async def upload_pdf(request: Request):
-    # new_pdf = PDFdocument(filename, file)
-    # new_pdf.upload_pdf(SessionLocal)
-    # return {"message": "uploaded successfully"}
+@app.post("/upload")
+async def upload_doc(
+    filename: str = Form(...),
+    file: UploadFile = Form(...),
+    auth_token: Annotated[str | None, Cookie()] = None,
+    db: Session = Depends(get_db),
+):
+    userId = get_user_id_from_token(auth_token)
+    data = await file.read()
+    doc = Document(filename, data, "pdf", userId)
+    print(doc)
 
-    # print(await request.form())
-    async with request.form() as form:
-        filename = form["test"].filename
-        print(filename)
-        pdf_data = await form["test"].read()
-
-        doc = PDFdocument(filename, pdf_data)
-        doc.upload_pdf(SessionLocal)
+    doc.upload(db)
+    return {"message": "Document uploaded successfully"}
 
 
-# Get PDF by ID endpoint
+# Get PDF by ID endpoint MODIFY
 @app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")
-def get_pdf_by_id(pdf_id: int):
-    return PDFdocument.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
+async def get_doc_by_id(pdf_id: int):
+    return Document.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
 
-# Delete PDF by ID endpoint
+# Delete PDF by ID endpoint MODIFY
 @app.delete("/ScholarshipApplication/delete/pdf_id/{pdf_id}")
-def delete_pdf_by_id(pdf_id: int):
+async def delete_doc_by_id(pdf_id: int):
     # """
     # deletes a pdf document from the database
 
@@ -244,7 +243,7 @@ def delete_pdf_by_id(pdf_id: int):
     # """
     # try:
     #     with SessionLocal() as session:
-    #         pdf_document = session.query(PDFdocument).filter_by(id=pdf_id).first()
+    #         pdf_document = session.query(Document).filter_by(id=pdf_id).first()
     #         if not pdf_document:
     #             raise HTTPException(
     #                 status_code=404, detail=f"No PDF found with id: {pdf_id}"
@@ -256,15 +255,19 @@ def delete_pdf_by_id(pdf_id: int):
     # except Exception as e:
     #     raise HTTPException(status_code=500, detail=f"Error deleting PDF: {str(e)}")
 
-    return PDFdocument.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
+    return Document.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
 
-# Update PDF by ID endpoint
+# Update PDF by ID endpoint MODIFY
 @app.put(
     "/ScholarshipApplication/update/pdf_id/{pdf_id}/filepath/{filepath: str}/filename/{filename: str}"
 )
+async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
+    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+
+
 def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
-    PDFdocument.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
 
 
 # Create .ics calendar file
