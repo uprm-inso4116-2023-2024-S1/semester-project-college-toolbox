@@ -31,6 +31,7 @@ from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.Document import Document
+from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.user import User
 from src.utils import get_full_name
 from src.security import (
@@ -263,3 +264,24 @@ async def delete_doc_by_id(pdf_id: int):
 )
 async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
     Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+
+
+def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
+    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+
+
+# Create .ics calendar file
+@app.post("/export_calendar")
+def export_calendar(request: ExportCalendarRequest) -> FileResponse:
+    time_blocks = get_section_time_blocks_by_ids(request.section_ids)
+    # assume the time blocks are non conflicting
+    file_name = f"{request.term}-calendar-{uuid4()}.ics"
+    atexit.register(lambda: try_delete_file(file_name))
+    semester = get_semester(Term(request.term), request.year)
+    return create_course_calendar(time_blocks, file_name, semester)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=5670)
