@@ -1,20 +1,33 @@
 ---
 import LayoutSidebar from '../../app/LayoutSidebar.astro';
 import ExportCalendarButton from '../../components/ExportCalendarButton.jsx';
+import WeeklyCalendar from '../../components/WeeklyCalendar';
 ---
 
 <LayoutSidebar>
-    <div class="format dark:format-invert lg:format-lg mt-32">
-        <p
-            class="text-4xl lg:text-8xl dark:text-slate-200 text-slate-600 leading-tight text-center"
-        >
-           <br>
-            <a
-                rel="noopener nofollow"
-                href="https://github.com/uprm-inso4116-2023-2024-S1/semester-project-college-toolbox"
-                class="font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline"
-                >Tuition Scheduler</a
-            >
-						<ExportCalendarButton section_ids={[2191,1378,1334]} term='1erSem' year='2023' client:load />
-        </p>
+    <WeeklyCalendar courses={[{
+			courseCode: "ALEM3041",
+			courseName: "ALEMAN I",
+			sectionId: 25,
+			sectionCode: "030",
+			timeBlocks: [{
+										room:"CH403",
+										day: 0,
+										startTime:"09:30",
+										endTime:"10:20"
+									},
+									{
+										room:"CH403",
+										day: 2,
+										startTime:"09:30",
+										endTime:"10:20"
+									},
+									{
+										room:"CH403",
+										day: 4,
+										startTime:"09:30",
+										endTime:"10:20"
+									}]
+		}]} term='1erSem' year='2023' client:load/>
+    <ExportCalendarButton section_ids={[2191,1378,1334]} term='1erSem' year='2023' client:load />
 </LayoutSidebar>

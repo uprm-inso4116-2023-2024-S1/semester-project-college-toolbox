@@ -40,3 +40,18 @@ export interface ScholarshipApplication {
 	deadline: Date;
 	status: string;
 }
+
+export interface CourseSectionSchedule {
+	courseCode: string;
+	courseName: string;
+	sectionCode: string;
+	sectionId: number;
+	timeBlocks: SpaceTimeBlock[];
+}
+
+export interface SpaceTimeBlock {
+	room: string;
+	day: number; // between 0-6
+	startTime: string; // in 24 hour time
+	endTime: string; // in 24 hour time ie. 17:30
+}
