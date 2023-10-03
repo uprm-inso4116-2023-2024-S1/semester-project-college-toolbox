@@ -42,15 +42,17 @@ export interface ScholarshipApplication {
 }
 
 export interface CourseSectionSchedule {
-	courseCode: string;
-	courseName: string;
-	sectionCode: string;
-	sectionId: number;
+	courseCode: string; // ie. QUIM3132
+	courseName: string; // ie. LABORATORIO DE QUIMICA 1 
+	sectionCode: string; // ie. 066L
+	sectionId: number; // ie. 25
 	timeBlocks: SpaceTimeBlock[];
 }
 
 export interface SpaceTimeBlock {
-	room: string;
+	room: string; // ie. S121
+	building?: string; // building name ie. Edificio Jesus T. Pineiro
+	location?: string; // google maps static pin for building ie. 
 	day: number; // between 0-6
 	startTime: string; // in 24 hour time
 	endTime: string; // in 24 hour time ie. 17:30

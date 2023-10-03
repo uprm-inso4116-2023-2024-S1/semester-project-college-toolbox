@@ -1,4 +1,5 @@
-import React from 'react';
+
+import type React from 'react';
 import './WeeklyCalendar.scss';
 import {
 	convertToAmPm,
@@ -36,14 +37,16 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						hoursOffsetInMinutes) /
 						30,
 				) + 1;
-			if (timeRow < 1) { // don't render items that don't show in the calendar times
+			if (timeRow < 1) {
+				// don't render items that don't show in the calendar times
 				return <></>;
 			}
 			const hoursDuration: number = Math.floor(
-				subtract24HourTimes(block.startTime, block.endTime) / 30
+				subtract24HourTimes(block.startTime, block.endTime) / 30,
 			);
-			const remainingMinutes: number = subtract24HourTimes(block.startTime, block.endTime) % 30
-			if (remainingMinutes == 0){
+			const remainingMinutes: number =
+				subtract24HourTimes(block.startTime, block.endTime) % 30;
+			if (remainingMinutes == 0) {
 				return (
 					<div
 						key={`block ${idx}`}
@@ -53,7 +56,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							gridRow: `${timeRow} / span ${hoursDuration}`,
 						}}
 					>
-							{course.courseCode}-{course.sectionCode}
+						{course.courseCode}-{course.sectionCode}
 						<br />
 						Room: {block.room}
 					</div>
@@ -66,24 +69,23 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						className="event start"
 						style={{
 							gridColumn: dayColumn,
-							gridRow: `${timeRow} / span ${hoursDuration}`
+							gridRow: `${timeRow} / span ${hoursDuration}`,
 						}}
 					>
-							{course.courseCode}-{course.sectionCode}
+						{course.courseCode}-{course.sectionCode}
 						<br />
 						Room: {block.room}
 					</div>
-					<div 
-					className="event end" 
-					style={{
+					<div
+						className="event end"
+						style={{
 							gridColumn: dayColumn,
-							gridRow: `${timeRow+hoursDuration} / span 1`,
-							height: `${(remainingMinutes / 30)*100}%`
-					}}
+							gridRow: `${timeRow + hoursDuration} / span 1`,
+							height: `${(remainingMinutes / 30) * 100}%`,
+						}}
 					/>
 				</>
 			);
-		
 		});
 	};
 
@@ -112,7 +114,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							className="time"
 							style={{ gridRow: index + 1 }}
 						>
-							{index % 2 === 0 ? convertToAmPm(`${String(Math.floor(index / 2) + 6).padStart(2)}:30`): ''}
+							{index % 2 === 0
+								? convertToAmPm(
+										`${String(Math.floor(index / 2) + 6).padStart(2)}:30`,
+								  )
+								: ''}
 						</div>
 					))}
 					<div className="filler-col" />
@@ -124,8 +130,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						></div>
 					))}
 					{Array.from({ length: 18 * 2 + 1 }, (_, index) => (
-						<div key={index + 1} className="row" style={{ gridRow: index + 1 }}>
-						</div>
+						<div
+							key={index + 1}
+							className="row"
+							style={{ gridRow: index + 1 }}
+						></div>
 					))}
 					{courses.map(convertToCalendarEvents)}
 					<div
