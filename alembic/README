@@ -1,1 +1,9 @@
-Generic single-database configuration.
+# Generic single-database configuration.
+
+## To create a new revision locally:
+1. Run `alembic revision --autogenerate -m "<description_of_change>"` in the root directory
+2. Revise and edit the newly created revision script if necessary
+3. Run `alembic upgrade head`
+
+## After pulling from the GitHub repository:
+1. Run `alembic upgrade head`
