@@ -225,7 +225,7 @@ async def upload_doc(
 # Get PDF by ID endpoint MODIFY
 @app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")
 async def get_doc_by_id(pdf_id: int):
-    return Document.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
+    return Document.get_doc_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
 
 # Delete PDF by ID endpoint MODIFY
@@ -255,7 +255,7 @@ async def delete_doc_by_id(pdf_id: int):
     # except Exception as e:
     #     raise HTTPException(status_code=500, detail=f"Error deleting PDF: {str(e)}")
 
-    return Document.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
+    return Document.delete_doc_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
 
 
 # Update PDF by ID endpoint MODIFY
@@ -263,11 +263,7 @@ async def delete_doc_by_id(pdf_id: int):
     "/ScholarshipApplication/update/pdf_id/{pdf_id}/filepath/{filepath: str}/filename/{filename: str}"
 )
 async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
-    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
-
-
-def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
-    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+    Document.update_doc_by_id(pdf_id, filepath, filename, SessionLocal)
 
 
 # Create .ics calendar file
@@ -284,4 +280,4 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=5670)
+    uvicorn.run(app, host="localhost", port=5670)

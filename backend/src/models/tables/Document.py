@@ -5,7 +5,6 @@ from sqlalchemy import (
     String,
     LargeBinary,
     ForeignKey,
-    Sequence,
     DateTime,
 )
 from src.database import Base
@@ -13,7 +12,7 @@ from datetime import datetime
 
 
 class Document(Base):
-    __tablename__ = "document"
+    __tablename__ = "Document"
 
     docId = Column(Integer, primary_key=True, nullable=False)
     filename = Column(String)
@@ -54,18 +53,13 @@ class Document(Base):
                                last modified: {self.lastModified}
               """
 
-    def upload(
-        self,
-        session,
-    ):
+    def upload(self, session):
         """
-        Test for uploading files to database
-        later on these pdfs will likely become different tables
-        such as resume, application, and other documents
+        uploading files to database
+        such as resume, application form, and other documents
 
         Args:
-            filepath (str): filepath from locall computer
-            filename (str): name to label file in database
+            session : session object to access database
 
         Raises:
             HTTPException: general exception raised if error
@@ -82,45 +76,42 @@ class Document(Base):
 
         except Exception as e:
             raise HTTPException(
-                status_code=500, detail=f"Error uploading PDF: {str(e)}"
+                status_code=500, detail=f"Error uploading doc: {str(e)}"
             )
 
     @staticmethod
-    def get_doc_by_id(doc_id: int, SessionLocal):
+    def get_doc_by_id(doc_id: int, session):
         """
 
         gets document from databse by id
 
         Args:
-            doc_id (int): pdf id of document to find
+            doc_id (int): doc id of document to find
+            session (Session): session object
 
         Raises:
-            HTTPException: if pdf not found
+            HTTPException: if doc not found
             HTTPException: if error retreiving from database
 
         Returns:
-            dictionatry: dictionary with filename and pdf_document object
+            document object
         """
         try:
-            with SessionLocal() as session:
-                document = session.query(document).filter_by(id=doc_id).first()
+            document = session.query(document).filter_by(id=doc_id).first()
 
-                if document:
-                    return {
-                        "filename": document.filename,
-                        "document": document,
-                    }
-                else:
-                    raise HTTPException(
-                        status_code=404, detail=f"No Doc found with id: {doc_id}"
-                    )
+            if document:
+                return document
+            else:
+                raise HTTPException(
+                    status_code=404, detail=f"No Doc found with id: {doc_id}"
+                )
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail=f"Error retrieving doc: {str(e)}"
             )
 
     @staticmethod
-    def delete_pdf_by_id(doc_id: int, SessionLocal):
+    def delete_doc_by_id(doc_id: int, session):
         """
         deletes a document from the database
 
@@ -132,8 +123,8 @@ class Document(Base):
             HTTPException: if error deleting from database
         """
         try:
-            with SessionLocal() as session:
-                document = session.query(document).filter_by(id=doc_id).first()
+            with session() as session:
+                document = session.query(Document).filter_by(id=doc_id).first()
 
                 if not document:
                     raise HTTPException(
@@ -150,7 +141,7 @@ class Document(Base):
             )
 
     @staticmethod
-    def update_doc_by_id(doc_id: int, filename: str, file, SessionLocal):
+    def update_doc_by_id(doc_id: int, filename: str, file, session):
         """
 
         updates document from databse by id
@@ -169,8 +160,8 @@ class Document(Base):
             dictionatry: dictionary with filename and document object
         """
         try:
-            with SessionLocal() as session:
-                document = session.query(document).filter_by(id=doc_id).first()
+            with session() as session:
+                document = session.query(Document).filter_by(id=doc_id).first()
 
                 if not document:
                     raise HTTPException(
@@ -190,4 +181,16 @@ class Document(Base):
         except Exception as e:
             raise HTTPException(
                 status_code=500, detail=f"Error retrieving document: {str(e)}"
+            )
+
+    @staticmethod
+    def getAllUserDocs(userId: int, session):
+        try:
+            documents = session.query(Document).filter(Document.userId == userId)
+
+            if documents:
+                return documents
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Error getting all documents : {str(e)}"
             )
