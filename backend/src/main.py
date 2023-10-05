@@ -266,6 +266,15 @@ async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
     Document.update_doc_by_id(pdf_id, filepath, filename, SessionLocal)
 
 
+@app.get("/getAllDocuments")
+def getAllDocuments(
+    db: Session = Depends(get_db),
+    auth_token: Annotated[str | None, Cookie()] = None,
+):
+    userId: str = get_user_id_from_token(auth_token)
+    return Document.getAllUserDocs(userId, db)
+
+
 # Create .ics calendar file
 @app.post("/export_calendar")
 def export_calendar(request: ExportCalendarRequest) -> FileResponse:

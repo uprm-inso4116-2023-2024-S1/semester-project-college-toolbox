@@ -184,11 +184,12 @@ class Document(Base):
             )
 
     @staticmethod
-    def getAllUserDocs(userId: int, session):
+    def getAllUserDocs(userId: String, session):
         try:
             documents = session.query(Document).filter(Document.userId == userId)
 
             if documents:
+                print(documents)
                 return documents
         except Exception as e:
             raise HTTPException(
