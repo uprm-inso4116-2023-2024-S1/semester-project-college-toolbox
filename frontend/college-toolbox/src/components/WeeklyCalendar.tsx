@@ -190,6 +190,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							<li>Course Code: {modalProps.calEvent?.courseCode}</li>
 							<li>Course Name: {modalProps.calEvent?.courseName}</li>
 							<li>Section: {modalProps.calEvent?.sectionCode}</li>
+							<li>Professor: {modalProps.calEvent?.professor}</li>
+							<li>Credits: {modalProps.calEvent?.credits}</li>
 							<ol key={`time-list-${modalProps.calEvent?.courseCode}`}>
 								Times:
 								{modalProps.calEvent?.timeBlocks?.map((block, idx) => (

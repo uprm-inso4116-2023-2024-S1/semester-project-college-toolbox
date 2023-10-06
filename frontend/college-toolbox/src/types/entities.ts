@@ -44,6 +44,8 @@ export interface ScholarshipApplication {
 export interface CourseSectionSchedule {
 	courseCode: string; // ie. QUIM3132
 	courseName: string; // ie. LABORATORIO DE QUIMICA 1
+	professor: string; // ie. Marko Schutz
+	credits: number;
 	sectionCode: string; // ie. 066L
 	sectionId: number; // ie. 25
 	timeBlocks: SpaceTimeBlock[];
