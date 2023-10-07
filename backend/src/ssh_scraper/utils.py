@@ -1,4 +1,12 @@
-from datetime import time, datetime
+from collections import defaultdict
+from typing import List
+from src.models.common.scheduler import TimeBlock, WeekSchedule
+from src.models.requests.calendar import ScheduleFilters
+from src.models.responses.calendar import (
+    CourseSectionSchedule,
+    GeneratedSchedule,
+    SpaceTimeBlock,
+)
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
 from sqlalchemy.orm import Session
@@ -6,41 +14,9 @@ from sqlalchemy import and_
 import copy
 from dataclasses import dataclass, field
 
+from src.utils import get_building_location
 
-@dataclass
-class Semester:
-    title: str
-    start: datetime
-    end: datetime
-
-
-@dataclass
-class TimeBlock:
-    course_id: str
-    section: str
-    room: str
-    day: str
-    start_time: time
-    end_time: time
-
-    def __repr__(self):
-        return f"{self.course_id}-{self.section} {self.start_time.strftime('%I:%M %p')} - {self.end_time.strftime('%I:%M %p')} {self.room}"
-
-
-def make_empty_list():
-    return []
-
-
-@dataclass
-class WeekSchedule:
-    monday: list = field(default_factory=make_empty_list)
-    tuesday: list = field(default_factory=make_empty_list)
-    wednesday: list = field(default_factory=make_empty_list)
-    thursday: list = field(default_factory=make_empty_list)
-    friday: list = field(default_factory=make_empty_list)
-
-    def __repr__(self) -> str:
-        return f"L: {self.monday}\nM: {self.tuesday}\nW: {self.wednesday}\nJ: {self.thursday}\nV: {self.friday}\n"
+day_map = {"L": 0, "M": 1, "W": 2, "J": 3, "V": 4, "S": 5, "D": 6}
 
 
 def get_course_sections(course_id: str, term: Term, year: int) -> list[CourseSection]:
@@ -54,6 +30,28 @@ def get_course_sections(course_id: str, term: Term, year: int) -> list[CourseSec
                         CourseSection.term == term.value,
                     ),
                     CourseSection.year == year,
+                )
+            )
+            .all()
+        )
+
+
+def get_course_by_section(
+    course_id: str, section: str, term: Term, year: int
+) -> list[CourseSection]:
+    with Session(engine) as session:
+        return (
+            session.query(CourseSection)
+            .filter(
+                and_(
+                    and_(
+                        and_(
+                            CourseSection.course_id == course_id,
+                            CourseSection.term == term.value,
+                        ),
+                        CourseSection.year == year,
+                    ),
+                    CourseSection.section == section,
                 )
             )
             .all()
@@ -280,3 +278,139 @@ def check_time_conflict(
         locked_time_block.end_time > new_time_block.start_time
         and locked_time_block.start_time < new_time_block.end_time
     )
+
+
+def convert_room_schedule_to_time_block(
+    room_schedule: RoomSchedule,
+) -> list[SpaceTimeBlock]:
+    blocks = []
+    building, location = get_building_location(room_schedule.room)
+    for day in room_schedule.days:
+        blocks.append(
+            SpaceTimeBlock(
+                room=room_schedule.room,
+                building=building,
+                location=location,
+                day=day_map[day],
+                startTime=str(room_schedule.start_time),
+                endTime=str(room_schedule.end_time),
+            )
+        )
+    return blocks
+
+
+def create_course_section_schedule(
+    course_section: CourseSection, room_schedules: List[RoomSchedule]
+) -> CourseSectionSchedule:
+    time_blocks = []
+    for rs in room_schedules:
+        time_blocks.extend(convert_room_schedule_to_time_block(rs))
+
+    return CourseSectionSchedule(
+        courseCode=course_section.course_id,
+        courseName=course_section.course_name,
+        professor=course_section.professor,
+        credits=course_section.credits,
+        sectionCode=course_section.section,
+        sectionId=course_section.id,
+        timeBlocks=time_blocks,
+    )
+
+
+def schedules_overlap(s1: RoomSchedule, s2: RoomSchedule) -> bool:
+    # Check if the time ranges or days overlap
+    return (
+        not (s1.end_time < s2.start_time or s1.start_time > s2.end_time)
+        and len(set(s1.days) & set(s2.days)) > 0
+    )
+
+
+def has_conflict(
+    section_id: int,
+    schedule: list[int],
+    section_to_schedule: dict[int, list[RoomSchedule]],
+):
+    current_schedule = [section_to_schedule[s] for s in schedule]
+    new_section_schedules = section_to_schedule[section_id]
+    for existing_section_schedules in current_schedule:
+        for existing_room_schedule in existing_section_schedules:
+            for new_schedule in new_section_schedules:
+                if schedules_overlap(new_schedule, existing_room_schedule):
+                    return True
+
+
+def generate_schedules_with_criteria(
+    course_codes: list[str], term: str, year: int, filters: ScheduleFilters
+) -> list[GeneratedSchedule]:
+    # find the course data in the db
+    section_map: dict[int, CourseSection] = {}
+    section_time_map: dict[int, list[RoomSchedule]] = {}
+    course_list = []
+    course_to_sections = defaultdict(list)
+    for code in course_codes:
+        sections = []
+        if "-" in code:
+            # this should realistically only ever find one section
+            course, section = code.split("-")
+            sections = get_course_by_section(
+                course_id=course, section=section, term=Term(term), year=year
+            )
+        else:
+            sections = get_course_sections(course_id=code, term=Term(term), year=year)
+        course_list.append(code.split(sep="-")[0])
+        for section in sections:
+            course_to_sections[course_list[-1]].append(section.id)
+            section_map[section.id] = section
+            section_time_map[section.id] = get_room_schedules(section.id)
+    # Try to build the schedules
+    generated_schedules: set[frozenset[int]] = set()
+    max_schedules = min(25, filters.maxSchedules) if filters.maxSchedules else 5
+
+    def generate_schedules_with_criteria_helper(
+        sections_added=[], courses_added=set(), current_credits=0
+    ):
+        if len(generated_schedules) >= max_schedules:
+            return
+        if filters.minCredits:
+            if current_credits >= filters.minCredits:
+                generated_schedules.add(frozenset(sections_added))
+        else:
+            if len(courses_added) >= len(course_list):
+                generated_schedules.add(frozenset(sections_added))
+
+        for course in course_list:
+            if course in courses_added:
+                continue
+            for section_id in course_to_sections[course]:
+                section = section_map[section_id]
+                if (
+                    filters.maxCredits
+                    and section.credits + current_credits > filters.maxCredits
+                ):
+                    return
+                if not has_conflict(section_id, sections_added, section_time_map):
+                    courses_added.add(course)
+                    sections_added.append(section_id)
+                    generate_schedules_with_criteria_helper(
+                        sections_added=sections_added,
+                        courses_added=courses_added,
+                        current_credits=section.credits + current_credits,
+                    )
+                    sections_added.pop()
+                    courses_added.remove(course)
+
+    generate_schedules_with_criteria_helper()
+    # convert the schedules to the backend response model
+    converted_schedules = []
+    for schedule in generated_schedules:
+        converted_schedule = GeneratedSchedule(courses=[])
+        for section_id in schedule:
+            section_data = section_map[section_id]
+            section_schedules = section_time_map[section_id]
+            course_section_schedule = create_course_section_schedule(
+                section_data, section_schedules
+            )
+            converted_schedule.courses.append(course_section_schedule)
+        converted_schedules.append(converted_schedule)
+
+    return converted_schedules
