@@ -1,9 +1,13 @@
 # src/main.py
 import atexit
 from uuid import uuid4
-from src.models.requests.calendar import ExportCalendarRequest
+from src.models.requests.calendar import ExportCalendarRequest, GenerateSchedulesRequest
+from src.models.responses.calendar import GenerateSchedulesResponse
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.ssh_scraper.utils import (
+    generate_schedules_with_criteria,
+    get_section_time_blocks_by_ids,
+)
 from src.utils import (
     create_course_calendar,
     get_full_name,
@@ -279,6 +283,19 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
     atexit.register(lambda: try_delete_file(file_name))
     semester = get_semester(Term(request.term), request.year)
     return create_course_calendar(time_blocks, file_name, semester)
+
+
+# Generate Schedules
+@app.post("/schedules")
+def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
+    schedules = generate_schedules_with_criteria(
+        course_codes=request.courses,
+        term=request.term,
+        year=request.year,
+        filters=request.filters,
+    )
+
+    return {"schedules": schedules}
 
 
 if __name__ == "__main__":
