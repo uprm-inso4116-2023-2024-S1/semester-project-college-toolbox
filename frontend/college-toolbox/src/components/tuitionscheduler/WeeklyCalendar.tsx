@@ -5,8 +5,8 @@ import {
 	getCurrentTimeInMinutes,
 	subtract24HourTimes,
 	termEnumToString,
-} from '../lib/data';
-import type { CourseSectionSchedule, SpaceTimeBlock } from '../types/entities';
+} from '../../lib/data';
+import type { CourseSectionSchedule, SpaceTimeBlock } from '../../types/entities';
 import React, { useState } from 'react';
 
 interface WeeklyCalendarProps {
@@ -118,7 +118,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	};
 
 	return (
-		<div className="weeklyCalendar">
+		<div>
 			<div className="container">
 				<div className="title">
 					{termEnumToString(term)} {year} Semester
