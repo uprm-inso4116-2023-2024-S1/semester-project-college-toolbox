@@ -19,6 +19,27 @@ const defaultScholarships = [
 		resume: 'Jane_Smith_Resume.pdf',
 		deadline: '2023-11-30',
 	},
+	{
+		id: 3,
+		name: 'Default Scholarship 3',
+		status: 'Waiting',
+		resume: 'Jane_Smith_Resume.pdf',
+		deadline: '2023-11-30',
+	},
+	{
+		id: 4,
+		name: 'Default Scholarship 4',
+		status: 'Denied',
+		resume: 'Jane_Smith_Resume.pdf',
+		deadline: '2023-11-30',
+	},
+	{
+		id: 5,
+		name: 'Default Scholarship 5',
+		status: 'Accepted',
+		resume: 'Jane_Smith_Resume.pdf',
+		deadline: '2023-11-30',
+	},
 ];
 
 const ScholarshipList = () => {
@@ -175,6 +196,9 @@ const ScholarshipList = () => {
 
 	const uniqueYears = getUniqueYears(allScholarships);
 
+	const [searchQuery, setSearchQuery] = useState('');
+
+	// Step 3: Implement a filtering mechanism based on the search query
 	const filteredScholarships = allScholarships
 		.filter(
 			(scholarship) =>
@@ -190,22 +214,59 @@ const ScholarshipList = () => {
 			} else {
 				return scholarship.deadline.startsWith(selectedYearFilter);
 			}
-		});
+		})
+		// Filter scholarships based on the search query (case-insensitive)
+		.filter((scholarship) =>
+			scholarship.name.toLowerCase().includes(searchQuery.toLowerCase()),
+		);
 
 	return (
 		<div style={{ paddingLeft: '20px' }}>
+			<div className="search-bar">
+				<input
+					type="text"
+					placeholder="Search Scholarships"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className="input-field"
+				/>
+			</div>
 			<div className="filter-section">
 				<label>Filter by Status:</label>
-				<select
-					value={selectedStatusFilter}
-					onChange={(e) => setSelectedStatusFilter(e.target.value)}
-					className="input-field"
-				>
-					<option value="All">All</option>
-					<option value="Accepted">Accepted</option>
-					<option value="Denied">Denied</option>
-					<option value="Waiting">Waiting</option>
-				</select>
+				<div className="filter-buttons">
+					<button
+						className={`filter-button ${
+							selectedStatusFilter === 'All' ? 'active' : ''
+						}`}
+						onClick={() => setSelectedStatusFilter('All')}
+					>
+						All
+					</button>
+					<button
+						className={`filter-button ${
+							selectedStatusFilter === 'Accepted' ? 'active' : ''
+						}`}
+						onClick={() => setSelectedStatusFilter('Accepted')}
+					>
+						Accepted
+					</button>
+					<button
+						className={`filter-button ${
+							selectedStatusFilter === 'Denied' ? 'active' : ''
+						}`}
+						onClick={() => setSelectedStatusFilter('Denied')}
+					>
+						Denied
+					</button>
+					<button
+						className={`filter-button ${
+							selectedStatusFilter === 'Waiting' ? 'active' : ''
+						}`}
+						onClick={() => setSelectedStatusFilter('Waiting')}
+					>
+						Waiting
+					</button>
+				</div>
 			</div>
 
 			<div className="filter-section">
@@ -222,6 +283,10 @@ const ScholarshipList = () => {
 						</option>
 					))}
 				</select>
+			</div>
+			{/* Move the filtering status outside of the dropdown */}
+			<div className="filter-status">
+				<p>Filtering by Status: {selectedStatusFilter}</p>
 			</div>
 
 			{isAddingScholarship ? (
@@ -282,42 +347,43 @@ const ScholarshipList = () => {
 					Add Scholarship
 				</button>
 			)}
-
-			{filteredScholarships.map((scholarship) => (
-				<div key={scholarship.id} className="scholarship-card">
-					<ScholarshipCard
-						scholarship_name={scholarship.name}
-						applicationStatus={scholarship.status}
-						applicantResume={scholarship.resume}
-						applicationDeadline={scholarship.deadline}
-						{...scholarship}
-					/>
-					<button
-						onClick={() => showRemoveConfirmation(scholarship.id)}
-						className="remove-button"
-					>
-						Remove
-					</button>
-					{removeConfirmation === scholarship.id && (
-						<div className="remove-confirmation-modal">
-							<p>Are you sure you want to remove this scholarship?</p>
-							<div>
-								<button
-									onClick={() => handleRemoveScholarship(scholarship.id)}
-									className="confirm-button"
-								>
-									Confirm
-								</button>
-								<button onClick={cancelRemove} className="cancel-button">
-									Cancel
-								</button>
+			{/* Use the class name directly */}
+			<div className="scholarship-list-horizontal">
+				{filteredScholarships.map((scholarship) => (
+					<div key={scholarship.id} className="scholarship-card-horizontal">
+						<ScholarshipCard
+							scholarship_name={scholarship.name}
+							applicationStatus={scholarship.status}
+							applicantResume={scholarship.resume}
+							applicationDeadline={scholarship.deadline}
+							{...scholarship}
+						/>
+						<button
+							onClick={() => showRemoveConfirmation(scholarship.id)}
+							className="remove-button"
+						>
+							Remove
+						</button>
+						{removeConfirmation === scholarship.id && (
+							<div className="remove-confirmation-modal">
+								<p>Are you sure you want to remove this scholarship?</p>
+								<div>
+									<button
+										onClick={() => handleRemoveScholarship(scholarship.id)}
+										className="confirm-button"
+									>
+										Confirm
+									</button>
+									<button onClick={cancelRemove} className="cancel-button">
+										Cancel
+									</button>
+								</div>
 							</div>
-						</div>
-					)}
-				</div>
-			))}
+						)}
+					</div>
+				))}
+			</div>
 		</div>
 	);
 };
-
 export default ScholarshipList;
