@@ -41,5 +41,3 @@ class User(Base):
         self.Salt = generate_salt()
         self.EncryptedPassword = hash_password(Password, self.Salt)
         self.ProfileImageUrl = ProfileImageUrl
-
-    schedules = relationship("Schedule", back_populates="user")

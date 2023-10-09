@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, Time, Fo
 from sqlalchemy.orm import declarative_base, relationship
 
 from src.database import Base
+from src.models.tables.user import User
 
 
 class CourseSection(Base):
@@ -56,3 +57,6 @@ class CourseSchedule(Base):
 
     course_section = relationship("CourseSection", back_populates="course_schedules")
     schedule = relationship("Schedule", back_populates="course_schedules")
+
+
+User.schedules = relationship("Schedule", back_populates="user")
