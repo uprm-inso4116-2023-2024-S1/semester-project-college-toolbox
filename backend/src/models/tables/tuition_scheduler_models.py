@@ -41,7 +41,7 @@ class Schedule(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(50))
-    user_id = Column(String, ForeignKey('User.UserId'))
+    user_id = Column(String, ForeignKey("User.UserId"))
 
     course_schedules = relationship("CourseSchedule", back_populates="schedule")
     user = relationship("User", back_populates="schedules")
