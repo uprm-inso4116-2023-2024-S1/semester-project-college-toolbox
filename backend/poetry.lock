@@ -908,6 +908,17 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "ply"
+version = "3.11"
+description = "Python Lex & Yacc"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ply-3.11-py2.py3-none-any.whl", hash = "sha256:096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce"},
+    {file = "ply-3.11.tar.gz", hash = "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"},
+]
+
+[[package]]
 name = "psycopg2-binary"
 version = "2.9.7"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
@@ -1750,4 +1761,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "b6ca0b6c4d2a9267ceacf2c2e4b9149219be71fba9d0c7f4bd0574ba410a255a"
+content-hash = "e981b92e504eed274706e3962ed28d12033a8886b7845ffbc9089f7570637372"
