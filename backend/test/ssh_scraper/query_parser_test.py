@@ -1,6 +1,7 @@
 from src.ssh_scraper.query_parser import parse
 from datetime import time
 
+
 class TestUtils:
     def test_parse_contains(self):
         section, _ = parse("course id : INSO")[0]
@@ -20,4 +21,8 @@ class TestUtils:
 
     def test_parse_selector(self):
         section, _ = parse("course id = CIIC4060 | INSO4116 | CIIC4050")[0]
-        assert section.course_id == "CIIC4060" or section.course_id == "INSO4116" or section.course_id == "CIIC4050"
+        assert (
+            section.course_id == "CIIC4060"
+            or section.course_id == "INSO4116"
+            or section.course_id == "CIIC4050"
+        )
