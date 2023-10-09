@@ -7,7 +7,7 @@ on:
       - develop
     paths:
       - 'backend/**'
-  workflow_dispatch:
+  workflow_dispatch: # Allow manual triggering 
 
 jobs:
   format-and-test:
