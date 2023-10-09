@@ -1,8 +1,10 @@
 ---
 import LayoutSidebar from '../../app/LayoutSidebar.astro';
 import ScheduleHub from '../../components/tuitionscheduler/ScheduleHub';
+import CourseList from '../../components/tuitionscheduler/CourseList.jsx'
 ---
 
 <LayoutSidebar>
-   <ScheduleHub />
+	<ScheduleHub />
+	<CourseList client:load/>
 </LayoutSidebar>
