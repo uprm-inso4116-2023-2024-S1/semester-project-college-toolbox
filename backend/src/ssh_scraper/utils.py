@@ -1,6 +1,7 @@
 from datetime import time, datetime
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
+from src.ssh_scraper.query_parser import parse
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import copy
@@ -280,3 +281,45 @@ def check_time_conflict(
         locked_time_block.end_time > new_time_block.start_time
         and locked_time_block.start_time < new_time_block.end_time
     )
+
+
+def get_section_schedules(
+    query: str, term: Term, year: int
+) -> list[tuple[CourseSection, list[RoomSchedule]]]:
+    section_schedules = []
+
+    with Session(engine) as session:
+        parsed_query = and_(
+            parse(query),
+            and_(CourseSection.term == term.value, CourseSection.year == year),
+        )
+
+        section_ids = set(
+            [
+                course_section.id
+                for course_section in session.query(CourseSection)
+                .join(RoomSchedule)
+                .filter(parsed_query)
+                .all()
+            ]
+        )
+
+        sections = []
+        if section_ids is not None:
+            sections = (
+                session.query(CourseSection)
+                .filter(CourseSection.id.in_(section_ids))
+                .all()
+            )
+
+        for section in sections:
+            section_schedules.append(
+                (
+                    section,
+                    session.query(RoomSchedule)
+                    .filter(RoomSchedule.course_section_id == section.id)
+                    .all(),
+                )
+            )
+
+    return section_schedules

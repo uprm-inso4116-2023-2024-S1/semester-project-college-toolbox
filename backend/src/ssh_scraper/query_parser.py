@@ -1,9 +1,8 @@
 from datetime import datetime, time
-from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
+from src.ssh_scraper.models import CourseSection, RoomSchedule
 from ply import lex
 import ply.yacc as yacc
-from sqlalchemy import and_, or_, not_
-from sqlalchemy.orm import Session
+from sqlalchemy import ColumnExpressionArgument, and_, or_, not_
 
 FIELD_TO_TABLE = {
     "course_id": "CourseSection",
@@ -200,38 +199,5 @@ lexer = lex.lex()
 parser = yacc.yacc()
 
 
-def parse(query: str) -> list[tuple[CourseSection, list[RoomSchedule]]]:
-    section_schedules = []
-
-    with Session(engine) as session:
-        parsed_query = parser.parse(query)
-
-        section_ids = set(
-            [
-                course_section.id
-                for course_section in session.query(CourseSection)
-                .join(RoomSchedule)
-                .filter(parsed_query)
-                .all()
-            ]
-        )
-
-        sections = []
-        if section_ids is not None:
-            sections = (
-                session.query(CourseSection)
-                .filter(CourseSection.id.in_(section_ids))
-                .all()
-            )
-
-        for section in sections:
-            section_schedules.append(
-                (
-                    section,
-                    session.query(RoomSchedule)
-                    .filter(RoomSchedule.course_section_id == section.id)
-                    .all(),
-                )
-            )
-
-    return section_schedules
+def parse(query: str) -> ColumnExpressionArgument[bool]:
+    return parser.parse(query)
