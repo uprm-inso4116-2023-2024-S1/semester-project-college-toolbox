@@ -8,7 +8,7 @@
  `%APPDATA%\pypoetry\venv\Scripts`
 3. cd into `backend/`
 4. Run `poetry install`
-5. Run `poetry run uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
+5. Run `poetry run python src/main.py`
 6. Make desired changes and visit `localhost:5670`
 
 ## Option B: Docker
@@ -17,5 +17,5 @@
 
 1. cd into `backend/`
 2. Run `docker build -t backend-dev-image --target development .`
-3. Run `docker run -it -p 8081:8080 --name backend-dev-container backend-dev-image`
-4. visit `localhost:8081`
+3. Run `docker run -it -p 5670:5670 --name backend-dev-container backend-dev-image`
+4. visit `localhost:5670`

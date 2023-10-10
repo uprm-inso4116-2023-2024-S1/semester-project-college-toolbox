@@ -13,13 +13,12 @@ The two commonly hardest steps are:
 - Installing WSL: if you're running Windows, you will need to install WSL. Pick Ubuntu as the Linux distro to install.
 - Enabling Virtualization: To do this you will need to enter your BIOS and find the virtualization settings. You can enter the BIOS by restarting your computer and mashing the F2, F8, F12, or Del key (it depends LOL). Once in the BIOS, you can lookup a tutorial for enabling it for your particular BIOS (mine was the [MSI Click 5](https://liquidsky.com/how-to-enable-virtualization-msi-click-bios-5/))
 
-2. PostgreSQL [Download](https://www.postgresql.org/download/)
-3. Git Bash or another flavor of Bash
-4. Python
-5. Poetry: `curl -sSL https://install.python-poetry.org | python3 -`
-6. Add the following line to your [PATH](https://gist.github.com/nex3/c395b2f8fd4b02068be37c961301caa7):
+2. Git Bash or another flavor of Bash
+3. Python
+4. Poetry: `curl -sSL https://install.python-poetry.org | python3 -`
+5. Add the following line to your [PATH](https://gist.github.com/nex3/c395b2f8fd4b02068be37c961301caa7):
  `%APPDATA%\Python\Scripts`
-7. Node [Download](https://nodejs.org/en/download)
+6. Node [Download](https://nodejs.org/en/download)
 
 #### 🏠Local Development
 
@@ -27,9 +26,8 @@ The two commonly hardest steps are:
 
 1. Run `cd backend`
 2. Run `poetry install`
-3. Run `poetry shell`
-4. Run `uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
-5. Access http://localhost:5670/api/docs on your browser
+3. Run `poetry run python src/main.py`
+4. Access http://localhost:5670/api/docs on your browser
 
 ##### 📜Scripts
 
@@ -43,8 +41,7 @@ The two commonly hardest steps are:
 
 1. Run `cd backend`
 2. Run `poetry install`
-3. Run `poetry shell`
-4. Run `uvicorn src.main:app --host 0.0.0.0 --port 5670 --reload`
+3. Run `poetry run python src/main.py`
 
 ### Deployment
 
@@ -87,4 +84,4 @@ Diagram TBA
 - Frontend: Astro
 - Backend: FastAPI
 - ORM: SQLalchemy
-- Database: PostgreSQL
+- Database: SQLite
