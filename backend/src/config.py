@@ -1,11 +1,8 @@
 # src/config.py
-from sqlalchemy import URL
+import os
+environment = os.environ.get('CT_ENV', "DEV")
 
-DATABASE_URL = URL.create(
-    drivername="postgresql+psycopg2",
-    username="ct",
-    password="password",  # plain (unescaped) text
-    host="localhost",
-    port=5433,
-    database="ct",
-)
+if environment == "PROD":
+    DATABASE_URL = "sqlite:///database/prod/ct-prod.db"
+else:
+    DATABASE_URL = "sqlite:///database/dev/ct-dev.db"

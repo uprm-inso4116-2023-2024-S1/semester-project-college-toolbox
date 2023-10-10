@@ -25,6 +25,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
 
+from src.config import environment
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
@@ -60,7 +61,20 @@ app.add_middleware(
 )
 
 
-def create_db_models():
+def prepare_db():
+    # copy the prod db to the dev db if running locally
+    if environment == "DEV":
+        import os
+        import shutil
+
+        # Specify the paths to the source (dev) and destination (prod) databases
+        dev_database_path = os.path.join("database", "dev", "ct-dev.db")
+        prod_database_path = os.path.join("database", "prod", "ct-prod.db")
+
+        # Copy the contents of the dev database to the prod database
+        # Only copy if the developer doesn't already have a local dev db
+        if not os.path.exists(dev_database_path) and os.path.exists(prod_database_path):
+            shutil.copy2(prod_database_path, dev_database_path)
     # Create database tables
     Base.metadata.create_all(bind=engine)
 
@@ -286,9 +300,6 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
 
 if __name__ == "__main__":
     import uvicorn
-    import os
 
-    create_db_models()
-    uvicorn.run(
-        app, host="0.0.0.0", port=5670, reload=os.environ.get("CT_ENV") != "PROD"
-    )
+    prepare_db()
+    uvicorn.run(app, host="0.0.0.0", port=5670, reload=environment == "PROD")
