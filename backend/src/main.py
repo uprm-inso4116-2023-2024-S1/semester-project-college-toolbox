@@ -58,8 +58,11 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
-# Create database tables
-Base.metadata.create_all(bind=engine)
+
+
+def create_db_models():
+    # Create database tables
+    Base.metadata.create_all(bind=engine)
 
 
 # Dependency to get the database session
@@ -283,5 +286,9 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
 
 if __name__ == "__main__":
     import uvicorn
+    import os
 
-    uvicorn.run(app, host="0.0.0.0", port=5670)
+    create_db_models()
+    uvicorn.run(
+        app, host="0.0.0.0", port=5670, reload=os.environ.get("CT_ENV") != "PROD"
+    )
