@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 
-function CourseList() {
 
+export interface ScheduleOptions {
+	courses: string[]
+	setCourses: React.Dispatch<React.SetStateAction<string[]>>
+	
+}
+const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
     // State for course list and input values
-    const [courses, setCourses] = useState([]);
     const [courseID, setCourseID] = useState('');
     const [section, setSection] = useState('');
 
@@ -13,7 +17,7 @@ function CourseList() {
         let courseString = `${courseID}`
 
         if (section.trim() !== '') {
-            courseString += ` - ${section}`
+            courseString += `-${section}`
         }
 
         setCourses([...courses, courseString]);
@@ -23,7 +27,7 @@ function CourseList() {
         }
     };
 
-    const deleteCourse = (indexToDelete) => {
+    const deleteCourse = (indexToDelete: number) => {
         // Filter out the course with the specified index
         const updatedCourses = courses.filter((_, index) => index !== indexToDelete);
         setCourses(updatedCourses);
@@ -31,7 +35,7 @@ function CourseList() {
     
 
     return (
-    <section className="p-6 relative">
+    <div className="p-6 relative">
         <div className="grid grid-cols-5 gap-3">
             <div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-lg col-span-2">
 
@@ -40,7 +44,7 @@ function CourseList() {
                 </h2>
 
                 <form>
-                    <div className="grid gap-6 mb-6 md:grid-cols-5">
+                    <div className="grid gap-4 mb-6 md:grid-cols-5">
                         <div className='col-span-2'>
                             <label htmlFor="course_name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Course ID</label>
                             <input  type="text" 
@@ -60,11 +64,13 @@ function CourseList() {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="i.e. 030, 116 (Optional)"/>
                         </div>
-                        <button type="button" 
-                                onClick={addCourse}
-                                className="col-span-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium font-extrabold rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            Add course
-                        </button>
+                        <div className='col-span-1 flex'>
+													<button type="button"
+																	onClick={addCourse}
+																	className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-extrabold rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 my-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 self-end">
+															+
+													</button>
+												</div>
                     </div>
                 </form>
 
@@ -89,18 +95,9 @@ function CourseList() {
             </div>
 
         </div>
-
-        <div className="flex items-center justify-center h-full">
-            <button
-                className="m-auto mt-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium font-extrabold rounded-lg text-2xl w-full sm:w-1/2 md:w-1/3 px-20 py-10 text-center transition-transform transform hover:scale-105 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                Generate schedules
-            </button>
-        </div>
-
-
-    </section>
+    </div>
 
   );
 }
 
-export default CourseList;
+export default ScheduleOptions;

@@ -61,4 +61,13 @@ export interface SpaceTimeBlock {
 	endTime: string; // in 24 hour time ie. 17:30
 }
 
-export type GeneratedSchedule = CourseSectionSchedule[];
+export interface GeneratedSchedule {
+	courses: CourseSectionSchedule[]
+}
+
+export interface ScheduleFilters {
+	maxSchedules?: number
+	minCredits?: number
+	maxCredits?: number
+	customFilters: string[]
+}

@@ -1,4 +1,4 @@
-import { Button, Modal } from 'flowbite-react';
+import { Modal } from 'flowbite-react';
 import './WeeklyCalendar.scss';
 import {
 	convertToAmPm,
@@ -6,17 +6,17 @@ import {
 	subtract24HourTimes,
 	termEnumToString,
 } from '../../lib/data';
-import type { CourseSectionSchedule, SpaceTimeBlock } from '../../types/entities';
+import type { CourseSectionSchedule, GeneratedSchedule, SpaceTimeBlock } from '../../types/entities';
 import React, { useState } from 'react';
 
 interface WeeklyCalendarProps {
-	courses: CourseSectionSchedule[];
+	schedule: GeneratedSchedule | undefined;
 	term: string;
 	year: string;
 }
 
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
-	courses,
+	schedule,
 	term,
 	year,
 }) => {
@@ -164,7 +164,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							style={{ gridRow: index + 1 }}
 						></div>
 					))}
-					{courses.map(convertToCalendarEvents)}
+					{schedule && schedule.courses.map(convertToCalendarEvents)}
 					<div
 						key={'curr-time'}
 						className="current-time"
@@ -198,8 +198,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 									<li className="p-1" key={`modal-time ${idx}`}>
 										<ul className="border border-gray-300 rounded p-1">
 											<li>Room: {block.room}</li>
-											<li>Building: {block.building}</li>
-											<li>Location: {block.location}</li>
+											<li>Building: <a className="text-blue-700 hover:underline" href={block.location}>{block.building}</a></li>
 											<li>Day: {daysOfWeek[block.day]}</li>
 											<li>Start Time: {convertToAmPm(block.startTime)}</li>
 											<li>End Time: {convertToAmPm(block.endTime)}</li>
