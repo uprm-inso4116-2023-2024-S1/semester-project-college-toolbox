@@ -415,6 +415,8 @@ def generate_schedules_with_criteria(
         converted_schedules.append(converted_schedule)
 
     return converted_schedules
+
+
 def get_section_schedules(
     query: str, term: Term, year: int
 ) -> list[tuple[CourseSection, list[RoomSchedule]]]:
