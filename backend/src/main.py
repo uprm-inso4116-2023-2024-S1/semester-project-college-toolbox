@@ -41,9 +41,21 @@ from src.security import (
     TOKEN_EXPIRATION_SECONDS,
 )
 
+from src.repositories.JobApplication import JobRepository
+from src.repositories.ScholarshipApplication import ScholarshipRepository
+
+
 app = FastAPI(
     docs_url="/api/docs",
 )
+
+jobRepo = JobRepository("Job Repository")
+scholarshipRepo = ScholarshipRepository("Scholarship Repository")
+
+# handle related endpoints through dedicated repositrories
+app.include_router(jobRepo)
+app.include_router(scholarshipRepo)
+
 
 # Configure CORS to allow requests from the React frontend
 frontendPort = "2121"

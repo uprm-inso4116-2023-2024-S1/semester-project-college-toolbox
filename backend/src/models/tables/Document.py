@@ -13,7 +13,7 @@ from datetime import datetime
 
 
 class Document(Base):
-    __tablename__ = "document"
+    __tablename__ = "Document"
 
     docId = Column(Integer, primary_key=True, nullable=False)
     filename = Column(String)

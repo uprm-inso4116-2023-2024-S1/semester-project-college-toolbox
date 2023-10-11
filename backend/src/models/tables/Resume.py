@@ -5,8 +5,8 @@ from Document import Document
 
 
 class Resume(Document, Base):
-    __tablename__ = "resume"
+    __tablename__ = "Resume"
 
     id = Column(Integer, primary_key=True)
-    docid = Column(Integer, ForeignKey("document.docId"))
     notes = Column(String)
+    docid = Column(Integer, ForeignKey("Document.docId"))
