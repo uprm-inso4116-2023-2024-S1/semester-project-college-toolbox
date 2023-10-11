@@ -32,7 +32,76 @@ export function asset(path: string) {
 	// Check if process exists and process.env.CI is defined
 	if (typeof process !== 'undefined' && process.env.CI) {
 		return remoteURL;
-	} else {
-		return localURL;
 	}
+	return localURL;
+}
+
+export function convertToAmPm(time24: string): string {
+	// Parse the input time string
+	const [hours, minutes] = time24.split(':').map(Number);
+
+	// Check if it's a valid time
+	if (
+		hours === undefined ||
+		minutes === undefined ||
+		Number.isNaN(hours) ||
+		Number.isNaN(minutes) ||
+		hours < 0 ||
+		hours > 23 ||
+		minutes < 0 ||
+		minutes > 59
+	) {
+		return 'Invalid time';
+	}
+
+	// Convert to am/pm format
+	const period: string = hours >= 12 ? 'PM' : 'AM';
+	const displayHours: number = hours % 12 || 12; // Handle 0 as 12 in 12-hour format
+
+	// Format the result
+	return `${displayHours}:${String(minutes).padStart(2, '0')} ${period}`;
+}
+
+export function termEnumToString(term: string): string {
+	const conversions = {
+		'1erSem': 'Fall',
+		'2doSem': 'Spring',
+		'1erVer': 'First Summer',
+		'2doVer': 'Second Summer',
+	};
+	return (conversions as Record<string, string>)[term] ?? '';
+}
+/** Function that takes two 24 hour times and returns the minutes of difference */
+export function subtract24HourTimes(
+	startTime: string,
+	endTime: string,
+): number {
+	const [startHour, startMinutes] = startTime.split(':').map(Number);
+	const [endHour, endMinutes] = endTime.split(':').map(Number);
+	if (
+		startHour === undefined ||
+		endHour === undefined ||
+		startMinutes === undefined ||
+		endMinutes === undefined
+	) {
+		console.error('invalid time strings inputted');
+		return 0;
+	}
+
+	let totalMinutes = (endHour - startHour) * 60 + (endMinutes - startMinutes);
+
+	// Handle negative minutes
+	if (totalMinutes < 0) {
+		totalMinutes += 24 * 60;
+	}
+
+	return totalMinutes;
+}
+
+export function getCurrentTimeInMinutes(): number {
+	const now = new Date();
+	const hours = now.getHours();
+	const minutes = now.getMinutes();
+
+	return hours * 60 + minutes;
 }
