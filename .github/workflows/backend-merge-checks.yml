@@ -36,7 +36,7 @@ jobs:
         run: |
           poetry run black --check .  # Check for code formatting issues
           if [ $? -ne 0 ]; then
-              echo "Error: Unformatted files found, run 'poetry run black .' from backend/ ."
+              echo "Error: Unformatted files found, run 'poetry run black .' from backend/ ." 1>&2
               exit 1
           fi
 
