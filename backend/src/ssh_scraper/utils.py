@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import List
 from src.models.common.scheduler import TimeBlock, WeekSchedule
 from src.models.requests.schedule import ScheduleFilters
-from src.models.responses.calendar import (
+from src.models.responses.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
     SpaceTimeBlock,

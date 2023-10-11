@@ -1,8 +1,8 @@
 # src/main.py
 import atexit
 from uuid import uuid4
-from src.models.requests.calendar import ExportCalendarRequest, GenerateSchedulesRequest
-from src.models.responses.calendar import GenerateSchedulesResponse
+from src.models.requests.schedule import ExportCalendarRequest, GenerateSchedulesRequest
+from src.models.responses.schedule import GenerateSchedulesResponse
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import (
     generate_schedules_with_criteria,
