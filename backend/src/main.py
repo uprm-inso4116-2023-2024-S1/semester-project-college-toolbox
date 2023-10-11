@@ -74,6 +74,7 @@ def prepare_db():
         # Copy the contents of the dev database to the prod database
         # Only copy if the developer doesn't already have a local dev db
         if not os.path.exists(dev_database_path) and os.path.exists(prod_database_path):
+            os.makedirs(os.path.join("database", "dev"), exist_ok=True)
             shutil.copy2(prod_database_path, dev_database_path)
     # Create database tables
     Base.metadata.create_all(bind=engine)
