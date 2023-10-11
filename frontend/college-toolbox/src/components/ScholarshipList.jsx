@@ -193,7 +193,7 @@ const ScholarshipList = () => {
 		});
 
 	return (
-		<div style={{ paddingLeft: '20px' }}>
+		<div className="scholarship-list" style={{ paddingLeft: '20px' }}>
 			<div className="filter-section">
 				<label>Filter by Status:</label>
 				<select

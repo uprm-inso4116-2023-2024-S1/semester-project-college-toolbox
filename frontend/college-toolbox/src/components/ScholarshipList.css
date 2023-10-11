@@ -75,6 +75,7 @@
 	flex-direction: column;
 	align-items: flex-start;
 	max-width: 200px; /* Adjust the width as needed */
+	margin-top: -1.5rem
 }
 
 .filter-section label {
@@ -94,4 +95,9 @@
 /* Add some spacing between the filter and the add button */
 .add-button {
 	margin-top: 10px;
+}
+
+
+.scholarship-list {
+	margin-top:-7rem;
 }
