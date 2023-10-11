@@ -184,7 +184,7 @@ class Document(Base):
             )
 
     @staticmethod
-    def getAllUserDocs(userId: String, session):
+    def getAllUserDocs(userId: str, session):
         try:
             documents = session.query(Document).filter(Document.userId == userId)
 
