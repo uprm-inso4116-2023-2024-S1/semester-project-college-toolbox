@@ -18,11 +18,9 @@ class DocumentRepository:
             "/getAllDocuments", self.getAllDocuments, methods=["GET"]
         )
         self.router.add_api_route(
-            "/updateDocument", self.updateDocumentById, methods=["PUT"]
+            "/updateDocument", self.updateDocById, methods=["PUT"]
         )
-        self.router.add_api_route(
-            "/deleteDocument", self.deleteDocumentById, methods=["DELETE"]
-        )
+        self.router.add_api_route("/deleteDocument", self.deleteDoc, methods=["DELETE"])
         self.router.add_api_route(
             "/createDocument", self.createDocument, methods=["POST"]
         )

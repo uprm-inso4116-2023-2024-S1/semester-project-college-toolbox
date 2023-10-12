@@ -44,6 +44,7 @@ from src.security import (
 
 from src.repositories.JobApplication import JobRepository
 from src.repositories.ScholarshipApplication import ScholarshipRepository
+from src.repositories.Document import DocumentRepository
 
 
 app = FastAPI(
@@ -234,70 +235,6 @@ def fetch_user(
         profileImageUrl=user.ProfileImageUrl,
     )
     return LoginResponse(profile=profile)
-
-
-@app.post("/upload")
-async def upload_doc(
-    filename: str = Form(...),
-    file: UploadFile = Form(...),
-    auth_token: Annotated[str | None, Cookie()] = None,
-    db: Session = Depends(get_db),
-):
-    userId = get_user_id_from_token(auth_token)
-    data = await file.read()
-    doc = Document(filename, data, "pdf", userId)
-    print(doc)
-
-    doc.upload(db)
-    return {"message": "Document uploaded successfully"}
-
-
-# Get PDF by ID endpoint MODIFY
-@app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")
-async def get_doc_by_id(pdf_id: int):
-    return Document.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
-
-
-# Delete PDF by ID endpoint MODIFY
-@app.delete("/ScholarshipApplication/delete/pdf_id/{pdf_id}")
-async def delete_doc_by_id(pdf_id: int):
-    # """
-    # deletes a pdf document from the database
-
-    # Args:
-    #     pdf_id (int): id of pdf to be deleted
-
-    # Raises:
-    #     HTTPException: if pdf not found
-    #     HTTPException: if error deleting from database
-    # """
-    # try:
-    #     with SessionLocal() as session:
-    #         pdf_document = session.query(Document).filter_by(id=pdf_id).first()
-    #         if not pdf_document:
-    #             raise HTTPException(
-    #                 status_code=404, detail=f"No PDF found with id: {pdf_id}"
-    #             )
-    #         else:
-    #             session.delete(pdf_document)
-    #             session.commit()
-
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f"Error deleting PDF: {str(e)}")
-
-    return Document.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
-
-
-# Update PDF by ID endpoint MODIFY
-@app.put(
-    "/ScholarshipApplication/update/pdf_id/{pdf_id}/filepath/{filepath: str}/filename/{filename: str}"
-)
-async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
-    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
-
-
-def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
-    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
 
 
 # Create .ics calendar file
