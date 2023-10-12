@@ -79,11 +79,8 @@ WORKDIR /app
 # Copy the FastAPI application code into the container
 COPY . /app
 
-# Expose port 8080 for the FastAPI application
-EXPOSE 8080
-
-# Define environment variables for the PostgreSQL connection
-ENV DATABASE_URL=postgresql://ct:password@localhost:5433/ct
+# Expose port 5670 for the FastAPI application
+EXPOSE 5670
 
 # Run the FastAPI application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "5670"]

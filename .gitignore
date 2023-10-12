@@ -5,3 +5,7 @@ __pycache__
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+# local database
+/backend/database/dev/
+# test database
+/backend/database/test/

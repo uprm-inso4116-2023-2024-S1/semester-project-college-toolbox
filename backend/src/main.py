@@ -29,6 +29,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
 
+from src.config import environment
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
@@ -62,8 +63,25 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
-# Create database tables
-Base.metadata.create_all(bind=engine)
+
+
+def prepare_db():
+    # copy the prod db to the dev db if running locally
+    if environment == "DEV":
+        import os
+        import shutil
+
+        # Specify the paths to the source (dev) and destination (prod) databases
+        dev_database_path = os.path.join("database", "dev", "ct-dev.db")
+        prod_database_path = os.path.join("database", "prod", "ct-prod.db")
+
+        # Copy the contents of the dev database to the prod database
+        # Only copy if the developer doesn't already have a local dev db
+        if not os.path.exists(dev_database_path) and os.path.exists(prod_database_path):
+            os.makedirs(os.path.join("database", "dev"), exist_ok=True)
+            shutil.copy2(prod_database_path, dev_database_path)
+    # Create database tables
+    Base.metadata.create_all(bind=engine)
 
 
 # Dependency to get the database session
@@ -301,4 +319,5 @@ def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesRe
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=5670)
+    prepare_db()
+    uvicorn.run(app, host="0.0.0.0", port=5670, reload=environment == "PROD")
