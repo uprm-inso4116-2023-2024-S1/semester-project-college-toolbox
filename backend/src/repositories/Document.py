@@ -30,9 +30,10 @@ class DocumentRepository:
         filename: str,
         data=Form(...),
         filetype: int = Form(...),
-        userId: str = Form(...),
+        auth_token: Annotated[str | None, Cookie()] = None,
     ):
         try:
+            userId = get_user_id_from_token(auth_token)
             document = Document(filename, data, filetype, userId)
         except Exception as e:
             raise HTTPException(

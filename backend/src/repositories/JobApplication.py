@@ -29,11 +29,12 @@ class JobRepository:
 
     def createApplication(
         self,
-        userId: str,
+        auth_token: Annotated[str | None, Cookie()] = None,
         docId: int = Form(...),
         resumeId: int = Form(...),
         status: str = Form(...),
     ):
+        userId = get_user_id_from_token(auth_token)
         try:
             application = JobApplication(userId, resumeId, docId, status)
         except Exception as e:

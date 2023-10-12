@@ -31,12 +31,13 @@ class ScholarshipRepository:
 
     def createApplication(
         self,
-        userId: str,
+        auth_token: Annotated[str | None, Cookie()] = None,
         docId: int = Form(...),
         resumeId: int = Form(...),
         status: str = Form(...),
     ):
         try:
+            userId = get_user_id_from_token(auth_token)
             application = ScholarshipApplication(userId, resumeId, docId, status)
         except Exception as e:
             raise HTTPException(

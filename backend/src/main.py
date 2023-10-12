@@ -258,4 +258,4 @@ if __name__ == "__main__":
     import uvicorn
 
     prepare_db()
-    uvicorn.run(app, host="0.0.0.0", port=5670, reload=environment == "PROD")
+    uvicorn.run(app, host="localhost", port=5670, reload=environment == "PROD")

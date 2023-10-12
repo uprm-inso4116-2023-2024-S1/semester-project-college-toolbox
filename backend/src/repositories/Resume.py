@@ -23,15 +23,18 @@ class ResumeRepository:
         )
         self.router.add_api_route("/createResume", self.createResume, methods=["POST"])
 
-    def createResume(
+    async def createResume(
         self,
-        filename: str,
+        filename: str = Form(...),
         data=Form(...),
-        filetype: int = Form(...),
-        userId: str = Form(...),
+        filetype: str = Form(...),
+        auth_token: Annotated[str | None, Cookie()] = None,
     ):
+        userId = get_user_id_from_token(auth_token)
         try:
+            data = await data.read()
             resume = Resume(filename, data, filetype, userId)
+            print(resume)
         except Exception as e:
             raise HTTPException(
                 status_code=405, detail="could not create Resume from paramteres"
