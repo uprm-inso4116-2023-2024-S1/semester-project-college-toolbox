@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import ScholarshipCard from './ScholarshipCard';
 import { format, parse } from 'date-fns';
 
-import './ScholarshipList.css'; // Import your CSS file
+import './JobApplicationList.css'; // Import your CSS file
 
 const defaultScholarships = [
 	{
 		id: 1,
-		name: 'Default Scholarship 1',
+		name: 'Default Job 1',
 		status: 'Accepted',
 		resume: 'John_Doe_Resume.pdf',
 		deadline: '2023-12-31',
 	},
 	{
 		id: 2,
-		name: 'Default Scholarship 2',
+		name: 'Default Job 2',
 		status: 'Denied',
 		resume: 'Jane_Smith_Resume.pdf',
 		deadline: '2023-11-30',
@@ -271,7 +271,7 @@ const ScholarshipList = () => {
 					</div>
 
 					<button onClick={handleAddScholarship} className="add-button">
-						Submit Scholarship
+						Submit Job
 					</button>
 					<button onClick={handleCancelAddition} className="cancel-button">
 						Cancel
@@ -279,7 +279,7 @@ const ScholarshipList = () => {
 				</div>
 			) : (
 				<button onClick={() => setIsAddingScholarship(true)}>
-					Add Scholarship
+					Add Job
 				</button>
 			)}
 
@@ -300,7 +300,7 @@ const ScholarshipList = () => {
 					</button>
 					{removeConfirmation === scholarship.id && (
 						<div className="remove-confirmation-modal">
-							<p>Are you sure you want to remove this scholarship?</p>
+							<p>Are you sure you want to remove this job?</p>
 							<div>
 								<button
 									onClick={() => handleRemoveScholarship(scholarship.id)}
