@@ -118,7 +118,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	};
 
 	return (
-		<div>
+		<div className='bg-white'>
 			<div className="container">
 				<div className="title">
 					{termEnumToString(term)} {year} Semester
