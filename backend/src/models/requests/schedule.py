@@ -21,3 +21,7 @@ class GenerateSchedulesRequest(BaseModel):
     term: str
     year: int
     filters: ScheduleFilters
+
+class ValidateCourseIDRequest(BaseModel):
+    course_id: str
+    section: Optional[str] = None
