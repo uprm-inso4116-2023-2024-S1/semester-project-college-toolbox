@@ -1,4 +1,5 @@
 # test/test_main.py
+import os
 import pytest
 
 from fastapi.testclient import TestClient
@@ -10,6 +11,7 @@ from src.main import app, get_db
 from src.database import Base
 
 # Test database configuration
+os.makedirs(os.path.join("database", "test"), exist_ok=True)
 engine = create_engine(TEST_DATABASE_URL)
 Base.metadata.create_all(bind=engine)
 
