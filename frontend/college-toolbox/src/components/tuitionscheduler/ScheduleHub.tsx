@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
 import WeeklyCalendar from './WeeklyCalendar';
 import ExportCalendarButton from './ExportCalendarButton';
-import ScheduleOptions from './CourseList.jsx';
+import ScheduleOptions from './CourseList';
 import type { GeneratedSchedule, ScheduleFilters } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
 

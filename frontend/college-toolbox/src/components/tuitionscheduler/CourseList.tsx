@@ -11,7 +11,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
     const [courseID, setCourseID] = useState('');
     const [section, setSection] = useState('');
 
-    const addCourse = (e) => {
+    const addCourse = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (courseID.trim() !== '') {
         let courseString = `${courseID}`
@@ -43,14 +43,13 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
                     Course Selection
                 </h2>
 
-                <form>
+                <form onSubmit={addCourse}>
                     <div className="grid gap-4 mb-6 md:grid-cols-5">
                         <div className='col-span-2'>
                             <label htmlFor="course_name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Course ID</label>
                             <input  type="text" 
                                     id="course_name" 
                                     value={courseID} onChange={(e) => setCourseID(e.target.value.toUpperCase())}
-                                    style={{ textTransform: 'uppercase' }} 
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="i.e. CIIC3015, BIOL3041"
                                     required/>
@@ -60,17 +59,15 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
                             <input  type="text" 
                                     id="course_section" 
                                     value={section} onChange={(e) => setSection(e.target.value.toUpperCase())}
-                                    style={{ textTransform: 'uppercase' }} 
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="i.e. 030, 116 (Optional)"/>
                         </div>
                         <div className='col-span-1 flex'>
-													<button type="button"
-																	onClick={addCourse}
-																	className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-extrabold rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 my-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 self-end">
-															+
-													</button>
-												</div>
+                            <button type="submit"
+                                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-extrabold rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 my-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 self-end">
+                                +
+                            </button>
+                        </div>
                     </div>
                 </form>
 
