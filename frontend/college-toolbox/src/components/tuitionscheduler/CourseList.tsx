@@ -7,32 +7,68 @@ export interface ScheduleOptions {
 	setCourses: React.Dispatch<React.SetStateAction<string[]>>
 	
 }
+
 const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
     // State for course list and input values
     const [courseID, setCourseID] = useState('');
     const [section, setSection] = useState('');
 
-    const addCourse = (e: React.FormEvent<HTMLFormElement>) => {
+
+    const addCourse = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (courseID.trim() !== '') {
-        let courseString = `${courseID}`
+            try {
+                let courseString = `${courseID}`;
 
-        if (section.trim() !== '') {
-            courseString += `-${section}`
-        }
+                if (section.trim() !== '') {
+                    courseString += `-${section}`;
+                }
 
-        setCourses([...courses, courseString]);
-        // Reset input fields
-        setCourseID('');
-        setSection('');
+                const isValid = await validateCourse(courseID, section);
+                if (isValid) {
+                    setCourses([...courses, courseString]);
+    
+                } else {
+                    alert(`The course or section (${courseString}) is invalid. Please try again.`);
+                }
+                // Reset input fields
+                setCourseID('');
+                setSection('');
+            } catch (error) {
+                alert('There was an error validating the course. Please try again later.');
+            }
         }
     };
+
 
     const deleteCourse = (indexToDelete: number) => {
         // Filter out the course with the specified index
         const updatedCourses = courses.filter((_, index) => index !== indexToDelete);
         setCourses(updatedCourses);
     };
+
+
+    async function validateCourse(courseID: string, section: string): Promise<boolean> {
+        const requestBody = {
+            course_id: courseID,
+            section: section
+        };
+    
+        const response = await fetch(`${API_URL}/validate_course_id/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        });
+    
+        if (!response.ok) {
+            throw new Error(`Validation request failed: ${response.statusText}`);
+        }
+    
+        const data: { is_valid: boolean } = await response.json();
+        return data.is_valid;
+    }
     
 
     return (
