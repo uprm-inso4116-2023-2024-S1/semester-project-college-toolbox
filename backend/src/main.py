@@ -53,10 +53,12 @@ app = FastAPI(
 
 jobRepo = JobRepository("Job Repository")
 scholarshipRepo = ScholarshipRepository("Scholarship Repository")
+docRepo = DocumentRepository("Document Repository")
 
 # handle related endpoints through dedicated repositrories
 app.include_router(jobRepo)
 app.include_router(scholarshipRepo)
+app.include_router(docRepo)
 
 
 # Configure CORS to allow requests from the React frontend

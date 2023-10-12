@@ -5,7 +5,6 @@ from sqlalchemy import (
     String,
     LargeBinary,
     ForeignKey,
-    Sequence,
     DateTime,
 )
 from src.database import Base
