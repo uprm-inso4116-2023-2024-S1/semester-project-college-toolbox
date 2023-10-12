@@ -17,27 +17,38 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
     const addCourse = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (courseID.trim() !== '') {
+            if (!isValidCourseFormat(courseID)){
+                alert('Invalid format for course ID. Please check your input and try again.');
+                return
+            }
+            if (!isValidSectionFormat(section)){
+                alert('Invalid format for course section. Please check your input and try again.');
+                return
+            }
+
             try {
                 let courseString = `${courseID}`;
 
                 if (section.trim() !== '') {
+                    
                     courseString += `-${section}`;
                 }
 
                 const isValid = await validateCourse(courseID, section);
                 if (isValid) {
                     setCourses([...courses, courseString]);
-    
+                    // Reset input fields
+                    setCourseID('');
+                    setSection('');
+
                 } else {
-                    alert(`The course or section (${courseString}) is invalid. Please try again.`);
+                    alert(`The course or section (${courseString}) does not exist. Please try again.`);
                 }
-                // Reset input fields
-                setCourseID('');
-                setSection('');
             } catch (error) {
                 alert('There was an error validating the course. Please try again later.');
             }
         }
+    
     };
 
 
@@ -68,6 +79,18 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
     
         const data: { is_valid: boolean } = await response.json();
         return data.is_valid;
+    }
+
+    function isValidCourseFormat(courseID: string): boolean {
+        const courseIDRegex = /^[A-Z]{4}\d{4}$/;
+    
+        return courseIDRegex.test(courseID);
+    }
+
+    function isValidSectionFormat(section: string): boolean {
+        const sectionRegex = /^(\d{3}[A-Z]?)?$/; 
+    
+        return sectionRegex.test(section);
     }
     
 
