@@ -93,6 +93,7 @@ class ScholarshipRepository:
         """
         try:
             userId = get_user_id_from_token(auth_token)
+            # assume a max capacity of applications at a given time to be at most 25
             apps = (
                 self.db.query(ScholarshipApplication)
                 .filter(ScholarshipApplication.userId == userId)
@@ -124,16 +125,16 @@ class ScholarshipRepository:
         Args:
             ScholarshipId (int): Scholarship id
             auth_token (Annotated[str  |  None, Cookie, optional
-            docId (int, optional): _description_. Defaults to Form(...). = doc id
-            resumeId (int, optional): _description_. Defaults to Form(...). = resume id
-            status (int, optional): _description_. Defaults to Form(...). = status
+            docId (int, optional): .= doc id Defaults to Form(...).
+            resumeId (int, optional): = resume id Defaults to Form(...).
+            status (int, optional): = status Defaults to Form(...).
 
         Raises:
-            HTTPException: _description_
-            HTTPException: _description_
+            HTTPException: not found
+            HTTPException: db error
 
         Returns:
-            _type_: _description_
+            _type_:
         """
         userId = get_user_id_from_token(auth_token)
         try:
@@ -143,6 +144,7 @@ class ScholarshipRepository:
                 .first()
             )
             print("old Scholarship: " + oldScholarship)
+            oldScholarship.userId = userId
             oldScholarship.docId = docId
             oldScholarship.resumeId = resumeId
             oldScholarship.status = status

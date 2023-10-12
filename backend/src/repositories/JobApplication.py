@@ -141,6 +141,7 @@ class JobRepository:
                 .first()
             )
             print("old job: " + oldJob)
+            oldJob.userId = userId
             oldJob.docId = docId
             oldJob.resumeId = resumeId
             oldJob.status = status
