@@ -25,7 +25,7 @@ class JobApplication(Base):
 
     resumeId = Column(
         Integer,
-        ForeignKey("Resume.id"),
+        ForeignKey("Resume.resumeId"),
         nullable=False,
     )
 

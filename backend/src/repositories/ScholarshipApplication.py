@@ -22,7 +22,7 @@ class ScholarshipRepository:
         )
         self.router.add_api_route(
             "/deleteScholarshipApplication",
-            self.deleteApplicationById,
+            self.deleteApplication,
             methods=["DELETE"],
         )
         self.router.add_api_route(

@@ -32,6 +32,10 @@ from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.Document import Document
+from src.models.tables.Resume import Resume
+from src.models.tables.JobApplication import JobApplication
+from src.models.tables.ScholarshipApplication import ScholarshipApplication
+
 from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.user import User
 from src.utils import get_full_name
@@ -56,9 +60,9 @@ scholarshipRepo = ScholarshipRepository("Scholarship Repository")
 docRepo = DocumentRepository("Document Repository")
 
 # handle related endpoints through dedicated repositrories
-app.include_router(jobRepo)
-app.include_router(scholarshipRepo)
-app.include_router(docRepo)
+app.include_router(jobRepo.router)
+app.include_router(scholarshipRepo.router)
+app.include_router(docRepo.router)
 
 
 # Configure CORS to allow requests from the React frontend

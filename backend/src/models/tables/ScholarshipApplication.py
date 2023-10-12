@@ -25,7 +25,7 @@ class ScholarshipApplication(Base):
 
     resumeId = Column(
         String,
-        ForeignKey("Resume.id"),
+        ForeignKey("Resume.resumeId"),
         nullable=False,
     )
 

@@ -21,10 +21,10 @@ class JobRepository:
             "/updateJobApplication", self.updateApplicationById, methods=["PUT"]
         )
         self.router.add_api_route(
-            "/deleteJobApplication", self.deleteApplicationById, methods=["DELETE"]
+            "/deleteJobApplication", self.deleteApplication, methods=["DELETE"]
         )
         self.router.add_api_route(
-            "/createJobApplication", self.createJobApplication, methods=["POST"]
+            "/createJobApplication", self.createApplication, methods=["POST"]
         )
 
     def createApplication(
