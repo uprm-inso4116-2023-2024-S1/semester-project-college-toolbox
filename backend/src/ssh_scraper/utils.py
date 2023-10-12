@@ -140,14 +140,27 @@ def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBl
     return time_blocks
 
 
-def validate_course_id(course_id: str):
+def validate_course_id(course_id: str, section : str):
     with Session(engine) as session:
-        return (
-            session.query(CourseSection)
-            .filter(CourseSection.course_id == course_id)
-            .first()
-            is not None
-        )
+        if section:
+            return (
+                session.query(CourseSection)
+                .filter(
+                    and_(
+                        CourseSection.course_id == course_id,
+                        CourseSection.section == section)
+                )
+                .first()
+                is not None
+            )
+        else:
+            return (
+                session.query(CourseSection)
+                .filter(CourseSection.course_id == course_id)
+                .first()
+                is not None
+            )
+            
 
 
 # main call function for schedule generation
