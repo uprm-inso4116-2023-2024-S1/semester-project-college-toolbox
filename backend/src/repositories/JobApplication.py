@@ -10,7 +10,7 @@ from src.repositories.utils.db import get_db
 class JobRepository:
     def __init__(self, name: str):
         self.name = name
-        self.db: Session = next(get_db)
+        self.db: Session = next(get_db())
         self.router = APIRouter()
 
         # add routes using router object here

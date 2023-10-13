@@ -4,13 +4,13 @@ from sqlalchemy.orm import Session
 from src.security import get_user_id_from_token
 from src.models.tables.ScholarshipApplication import ScholarshipApplication
 from datetime import datetime
-from src.repositories.utils.db import get_db
+from src.utils.db import get_db
 
 
 class ScholarshipRepository:
     def __init__(self, name: str):
         self.name = name
-        self.db: Session = next(get_db)
+        self.db: Session = next(get_db())
         self.router = APIRouter()
 
         # add routes using router object here

@@ -1,15 +1,8 @@
 # src/main.py
 import atexit
 from uuid import uuid4
-from src.models.requests.calendar import ExportCalendarRequest
-from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
-from src.utils import (
-    create_course_calendar,
-    get_full_name,
-    get_semester,
-    try_delete_file,
-)
+from sqlalchemy.orm import Session
+from typing import Annotated
 from fastapi import (
     FastAPI,
     Form,
@@ -22,23 +15,32 @@ from fastapi import (
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from sqlalchemy.orm import Session
-from typing import Annotated
+
+from src.models.requests.calendar import ExportCalendarRequest
+from src.ssh_scraper.enums import Term
+from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.utils.calendar import (
+    create_course_calendar,
+    get_full_name,
+    get_semester,
+    try_delete_file,
+)
+from src.utils.db import get_db, prepare_db
 
 from src.config import environment
 from src.database import Base, SessionLocal, engine
+
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
+
 from src.models.tables.Document import Document
 from src.models.tables.Resume import Resume
 from src.models.tables.JobApplication import JobApplication
 from src.models.tables.ScholarshipApplication import ScholarshipApplication
-
 from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.user import User
-from src.utils import get_full_name
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -50,35 +52,6 @@ from src.repositories.JobApplication import JobRepository
 from src.repositories.ScholarshipApplication import ScholarshipRepository
 from src.repositories.Document import DocumentRepository
 from src.repositories.Resume import ResumeRepository
-
-
-def prepare_db():
-    # copy the prod db to the dev db if running locally
-    if environment == "DEV":
-        import os
-        import shutil
-
-        # Specify the paths to the source (dev) and destination (prod) databases
-        dev_database_path = os.path.join("database", "dev", "ct-dev.db")
-        prod_database_path = os.path.join("database", "prod", "ct-prod.db")
-
-        # Copy the contents of the dev database to the prod database
-        # Only copy if the developer doesn't already have a local dev db
-        if not os.path.exists(dev_database_path) and os.path.exists(prod_database_path):
-            os.makedirs(os.path.join("database", "dev"), exist_ok=True)
-            shutil.copy2(prod_database_path, dev_database_path)
-    # Create database tables
-    Base.metadata.create_all(bind=engine)
-
-
-# Dependency to get the database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 app = FastAPI(
     docs_url="/api/docs",
@@ -258,5 +231,5 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
 if __name__ == "__main__":
     import uvicorn
 
-    prepare_db()
-    uvicorn.run(app, host="localhost", port=5670, reload=environment == "PROD")
+    env = prepare_db(environment)
+    uvicorn.run(app, host="localhost", port=5670, reload=env == "PROD")
