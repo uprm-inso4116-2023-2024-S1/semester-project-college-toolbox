@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from src.security import get_user_id_from_token
 from src.models.tables.JobApplication import JobApplication
 from datetime import datetime
-from src.repositories.utils.db import get_db
+from src.utils.db import get_db
 
 
 class JobRepository:
