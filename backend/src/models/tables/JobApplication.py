@@ -44,7 +44,7 @@ class JobApplication(Base):
             filetype (str): _description_
             userId (int, optional): user id . Defaults to 1.
         """
-        self.created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.created = datetime.now()
         self.lastModified = self.created
         self.userId = userId
         self.resumeId = resumeId

@@ -40,7 +40,7 @@ class Document(Base):
         self.data = data
         self.filetype = filetype
 
-        self.created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.created = datetime.now()
         self.lastModified = self.created
         self.userId = userId
 

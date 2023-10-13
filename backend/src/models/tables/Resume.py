@@ -40,13 +40,14 @@ class Resume(Base):
         self.data = data
         self.filetype = filetype
 
-        self.created = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.created = datetime.now()  #  .strftime("%Y-%m-%d %H:%M:%S")
         self.lastModified = self.created
         self.userId = userId
 
     def __repr__(self):
         return f"""
-              Document object: docId: {self.docId}, 
+              Resume object: resumeId: {self.resumeId},
+                                data: {type(self.data)}
                                filename: {self.filename}, 
                                filetype: {self.filetype}
                                created: {self.created}

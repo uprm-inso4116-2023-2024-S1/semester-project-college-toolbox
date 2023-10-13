@@ -51,34 +51,6 @@ from src.repositories.ScholarshipApplication import ScholarshipRepository
 from src.repositories.Document import DocumentRepository
 from src.repositories.Resume import ResumeRepository
 
-app = FastAPI(
-    docs_url="/api/docs",
-)
-
-jobRepo = JobRepository("Job Repository")
-scholarshipRepo = ScholarshipRepository("Scholarship Repository")
-docRepo = DocumentRepository("Document Repository")
-resumeRepo = ResumeRepository("Resume Repository")
-# handle related endpoints through dedicated repositrories
-app.include_router(jobRepo.router)
-app.include_router(scholarshipRepo.router)
-app.include_router(docRepo.router)
-app.include_router(resumeRepo.router)
-
-# Configure CORS to allow requests from the React frontend
-frontendPort = "2121"
-origins = [
-    f"http://localhost:{frontendPort}",
-    "https://uprm-inso4116-2023-2024-s1.github.io",
-]  # Add any other allowed origins as needed
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],  # You can restrict HTTP methods if needed
-    allow_headers=["*"],  # You can restrict headers if needed
-)
-
 
 def prepare_db():
     # copy the prod db to the dev db if running locally
@@ -106,6 +78,35 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+app = FastAPI(
+    docs_url="/api/docs",
+)
+
+jobRepo = JobRepository("Job Repository")
+scholarshipRepo = ScholarshipRepository("Scholarship Repository")
+docRepo = DocumentRepository("Document Repository")
+resumeRepo = ResumeRepository("Resume Repository")
+# handle related endpoints through dedicated repositrories
+app.include_router(jobRepo.router)
+app.include_router(scholarshipRepo.router)
+app.include_router(docRepo.router)
+app.include_router(resumeRepo.router)
+
+# Configure CORS to allow requests from the React frontend
+frontendPort = "2121"
+origins = [
+    f"http://localhost:{frontendPort}",
+    "https://uprm-inso4116-2023-2024-s1.github.io",
+]  # Add any other allowed origins as needed
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # You can restrict HTTP methods if needed
+    allow_headers=["*"],  # You can restrict headers if needed
+)
 
 
 # API endpoints

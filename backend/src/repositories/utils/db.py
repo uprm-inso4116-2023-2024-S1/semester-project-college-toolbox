@@ -9,10 +9,10 @@ def get_db() -> Session:
     get database session object
 
     Returns:
-        Session: _description_
+        Session:
 
     Yields:
-        Iterator[Session]: _description_
+        Iterator[Session]: db session
     """
     db = SessionLocal()
     try:

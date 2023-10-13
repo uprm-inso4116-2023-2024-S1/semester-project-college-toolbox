@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Cookie, HTTPException, Form
+from fastapi import APIRouter, Depends, Cookie, HTTPException, Form, Request
 from typing import Annotated
 from sqlalchemy.orm import Session
 from src.security import get_user_id_from_token
@@ -10,9 +10,8 @@ from src.repositories.utils.db import get_db
 class ResumeRepository:
     def __init__(self, name: str):
         self.name = name
-        self.db: Session = Depends(get_db)
         self.router = APIRouter()
-
+        self.db = next(get_db())
         # add routes using router object here
         self.router.add_api_route("/getAllResumes", self.getAllResumes, methods=["GET"])
         self.router.add_api_route(
@@ -44,7 +43,7 @@ class ResumeRepository:
             self.db.add(resume)
             self.db.commit()
         except Exception as e:
-            raise HTTPException(status_code=500, detail="database error" + str(e))
+            raise HTTPException(status_code=500)
 
     def getById(self, resumeId: int):
         """
@@ -128,8 +127,9 @@ class ResumeRepository:
             )
 
         try:
-            self.db.add(oldresume)
-            self.db.commit()
+            with self.db.begin():
+                self.db.add(oldresume)
+                self.db.commit()
             return {"message": "success"}
         except HTTPException as e:
             raise HTTPException(
