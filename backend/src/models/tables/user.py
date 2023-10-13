@@ -1,7 +1,8 @@
 # src/models/user.py
-import uuid
+from sqlalchemy import Column, Integer, Sequence, String
+from sqlalchemy.orm import relationship
 
-from sqlalchemy import Column, String
+import uuid
 
 from src.database import Base
 from src.security import generate_salt, hash_password
