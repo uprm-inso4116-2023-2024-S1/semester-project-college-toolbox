@@ -5,21 +5,19 @@ import Grid from '../../components/Grid.jsx';
 import spotifyIcon from '../../images/spotifyIcon.png';
 import cheggIcon from '../../images/cheggIcon.png';
 import quizletIcon from '../../images/quizletIcon.png';
+import SolutionsHub from '../../components/ExistingSolutions/SolutionsHub'
 ---
 
 <LayoutSidebar>
+	<SolutionsHub/ client:load>
+</LayoutSidebar>
+
+
+
+
+<!-- <LayoutSidebar>
     <div class="format dark:format-invert lg:format-lg mt-32">
-        <p
-            class="text-4xl lg:text-8xl dark:text-slate-200 text-slate-600 leading-tight text-center"
-        >
-           <br>
-            <a
-                rel="noopener nofollow"
-                class="font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline"
-                >Existing Solutions</a
-            >
-        </p>
-			<!-- Filter section -->
+			
 		<div class="filters"></div>
 			<h2 class="font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline">
 				Filters:
@@ -30,10 +28,11 @@ import quizletIcon from '../../images/quizletIcon.png';
 			<br>
 			<DropDownCheckbox filterType={'Other'} targetId={'other'} data={['testing']} dataId={'openOther'} client:idle/>
 		</div>		
-	<!-- Grid for apps section -->
+	
 		<Grid imgLink={spotifyIcon} appLink={'https://open.spotify.com/'} description={"Spotify is a digital music, podcast, and video service that gives you access to millions of songs and other content from creators all over the world.\n"} name={"Spotify"} client:load/>
 		<Grid imgLink={cheggIcon} appLink={'https://www.chegg.com/'} description={"Get step-by-step Textbook Solutions or ask homework questions to get expert answers, plus textbook rentals, writing & citation help, exam prep and more.\n"} name={"Chegg"} client:load/>
 		<Grid imgLink={quizletIcon} appLink={'https://quizlet.com/'} description={"Quizlet makes AI-powered learning tools that let you study anything. Start learning today with our online flashcards, games and expert-written solutions.\n"} name={"Quizlet"} client:load/>
 	</div>
-</LayoutSidebar>
+</LayoutSidebar> -->
+
 
