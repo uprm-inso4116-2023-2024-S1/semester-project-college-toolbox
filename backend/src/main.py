@@ -29,6 +29,7 @@ from src.config import environment
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.responses.existing_app import ExistingApplicationResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.Document import Document
@@ -286,6 +287,13 @@ async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
 
 def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
     Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+
+# Get all Existing Applications endpoint
+@app.get("/ExistingApplication/get/all")
+async def get_all_existing_applications(db: Session = Depends(get_db)) -> list[ExistingApplicationResponse]:
+    # Should return a list of tables/existing_app.py
+    data = db.query(ExistingApplication).all()
+    return [ExistingApplicationResponse(**d.__dict__) for d in data]
 
 
 # Create .ics calendar file
