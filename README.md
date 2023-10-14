@@ -43,6 +43,10 @@ The two commonly hardest steps are:
 2. Run `poetry install`
 3. Run `poetry run python src/main.py`
 
+##### Testing
+1. Run `cd backend`
+2. Run `poetry run pytest`
+
 ### Deployment
 
 #### Frontend
