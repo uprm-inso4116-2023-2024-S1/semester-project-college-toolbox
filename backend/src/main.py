@@ -288,9 +288,12 @@ async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
 def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
     Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
 
+
 # Get all Existing Applications endpoint
 @app.get("/ExistingApplication/get/all")
-async def get_all_existing_applications(db: Session = Depends(get_db)) -> list[ExistingApplicationResponse]:
+async def get_all_existing_applications(
+    db: Session = Depends(get_db),
+) -> list[ExistingApplicationResponse]:
     # Should return a list of tables/existing_app.py
     data = db.query(ExistingApplication).all()
     return [ExistingApplicationResponse(**d.__dict__) for d in data]

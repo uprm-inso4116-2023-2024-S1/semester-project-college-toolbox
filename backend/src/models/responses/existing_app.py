@@ -1,5 +1,6 @@
-#src/models/responses/existing_app.py
+# src/models/responses/existing_app.py
 from pydantic import BaseModel
+
 
 class ExistingApplicationResponse(BaseModel):
     Name: str | None = None
