@@ -140,7 +140,7 @@ def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBl
     return time_blocks
 
 
-def validate_course_id(course_id: str, section: str):
+def validate_course_id(course_id: str, section: str = None):
     with Session(engine) as session:
         if section:
             return (
