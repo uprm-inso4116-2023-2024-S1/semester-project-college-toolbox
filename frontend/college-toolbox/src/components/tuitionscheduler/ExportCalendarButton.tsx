@@ -1,5 +1,5 @@
 import React from 'react';
-import { API_URL } from '../app/constants';
+import { API_URL } from '../../app/constants';
 
 
 interface ExportButtonProps {
@@ -8,7 +8,7 @@ interface ExportButtonProps {
 	year: string
 }
 
-const ExportButton: React.FC<ExportButtonProps> = ({ section_ids, term, year  }) => {
+const ExportCalendarButton: React.FC<ExportButtonProps> = ({ section_ids, term, year  }) => {
   const handleDownloadClick = async () => {
     try {
 
@@ -58,4 +58,4 @@ const ExportButton: React.FC<ExportButtonProps> = ({ section_ids, term, year  })
   );
 };
 
-export default ExportButton;
+export default ExportCalendarButton;

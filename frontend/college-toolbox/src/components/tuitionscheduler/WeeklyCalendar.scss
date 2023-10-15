@@ -1,3 +1,4 @@
+// WeeklyCalendar.scss
 $container-width: 100%; // You can adjust this as needed
 $container-height: 100%; // You can adjust this as needed
 
@@ -125,7 +126,7 @@ body {
 }
 
 .weekend {
-	background-color: #f1f3f4;
+	background-color: #efefef;
 }
 
 .current-time {

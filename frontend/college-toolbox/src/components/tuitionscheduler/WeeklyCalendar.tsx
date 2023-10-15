@@ -1,22 +1,26 @@
-import { Button, Modal } from 'flowbite-react';
+import { Modal } from 'flowbite-react';
 import './WeeklyCalendar.scss';
 import {
 	convertToAmPm,
 	getCurrentTimeInMinutes,
 	subtract24HourTimes,
 	termEnumToString,
-} from '../lib/data';
-import type { CourseSectionSchedule, SpaceTimeBlock } from '../types/entities';
+} from '../../lib/data';
+import type {
+	CourseSectionSchedule,
+	GeneratedSchedule,
+	SpaceTimeBlock,
+} from '../../types/entities';
 import React, { useState } from 'react';
 
 interface WeeklyCalendarProps {
-	courses: CourseSectionSchedule[];
+	schedule: GeneratedSchedule | undefined;
 	term: string;
 	year: string;
 }
 
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
-	courses,
+	schedule,
 	term,
 	year,
 }) => {
@@ -39,7 +43,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 		getCurrentTimeInMinutes() - hoursOffsetInMinutes > 0
 			? (((getCurrentTimeInMinutes() - hoursOffsetInMinutes) % 30) / 30) * 100
 			: 0;
-	const currentDayCol = ((new Date().getDay() - 1) % 7) + 3;
+	const currentDayCol = ((new Date().getDay()+6)%7) + 3; // Sunday 
 
 	const [openModal, setOpenModal] = useState<string | undefined>();
 	const [calEvent, setCalEvent] = useState<CourseSectionSchedule | undefined>();
@@ -118,7 +122,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	};
 
 	return (
-		<div className="weeklyCalendar">
+		<div className="bg-white">
 			<div className="container">
 				<div className="title">
 					{termEnumToString(term)} {year} Semester
@@ -164,7 +168,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							style={{ gridRow: index + 1 }}
 						></div>
 					))}
-					{courses.map(convertToCalendarEvents)}
+					{schedule && schedule.courses.map(convertToCalendarEvents)}
 					<div
 						key={'curr-time'}
 						className="current-time"
@@ -185,7 +189,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			>
 				<Modal.Header>Course Information</Modal.Header>
 				<Modal.Body>
-					<div className="space-y-6">
+					<div className="space-y-6 dark:text-white">
 						<ul>
 							<li>Course Code: {modalProps.calEvent?.courseCode}</li>
 							<li>Course Name: {modalProps.calEvent?.courseName}</li>
@@ -198,8 +202,15 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 									<li className="p-1" key={`modal-time ${idx}`}>
 										<ul className="border border-gray-300 rounded p-1">
 											<li>Room: {block.room}</li>
-											<li>Building: {block.building}</li>
-											<li>Location: {block.location}</li>
+											<li>
+												Building:{' '}
+												<a
+													className="text-blue-700 hover:underline"
+													href={block.location}
+												>
+													{block.building}
+												</a>
+											</li>
 											<li>Day: {daysOfWeek[block.day]}</li>
 											<li>Start Time: {convertToAmPm(block.startTime)}</li>
 											<li>End Time: {convertToAmPm(block.endTime)}</li>
