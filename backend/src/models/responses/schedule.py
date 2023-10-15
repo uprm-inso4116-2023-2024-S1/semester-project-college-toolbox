@@ -27,7 +27,7 @@ class GeneratedSchedule(BaseModel):
 
 class GenerateSchedulesResponse(BaseModel):
     schedules: List[GeneratedSchedule]
-    
+
 
 class ValidateCourseIDResponse(BaseModel):
     is_valid: bool

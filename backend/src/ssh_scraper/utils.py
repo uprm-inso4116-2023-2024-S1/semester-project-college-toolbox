@@ -140,7 +140,7 @@ def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBl
     return time_blocks
 
 
-def validate_course_id(course_id: str, section : str):
+def validate_course_id(course_id: str, section: str):
     with Session(engine) as session:
         if section:
             return (
@@ -148,7 +148,8 @@ def validate_course_id(course_id: str, section : str):
                 .filter(
                     and_(
                         CourseSection.course_id == course_id,
-                        CourseSection.section == section)
+                        CourseSection.section == section,
+                    )
                 )
                 .first()
                 is not None
@@ -160,7 +161,6 @@ def validate_course_id(course_id: str, section : str):
                 .first()
                 is not None
             )
-            
 
 
 # main call function for schedule generation
@@ -363,13 +363,17 @@ def generate_schedules_with_criteria(
     course_to_sections = defaultdict(list)
     for course in courses:
         sections = []
-        course_code, section_code = course.code.split("-", 1) if "-" in course.code else (course.code, None)
+        course_code, section_code = (
+            course.code.split("-", 1) if "-" in course.code else (course.code, None)
+        )
         if section_code:
             sections = get_course_by_section(
                 course_id=course_code, section=section_code, term=Term(term), year=year
             )
         else:
-            sections = get_course_sections(course_id=course_code, term=Term(term), year=year)
+            sections = get_course_sections(
+                course_id=course_code, term=Term(term), year=year
+            )
         course_list.append(course_code)
         for course_section in sections:
             course_to_sections[course_list[-1]].append(course_section.id)
