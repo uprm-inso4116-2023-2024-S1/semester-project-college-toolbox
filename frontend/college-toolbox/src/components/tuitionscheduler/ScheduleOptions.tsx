@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
+import type { FilteredCourse } from '../../types/entities';
 
 
 export interface ScheduleOptions {
-	courses: string[]
-	setCourses: React.Dispatch<React.SetStateAction<string[]>>
+	courses: FilteredCourse[]
+	setCourses: React.Dispatch<React.SetStateAction<FilteredCourse[]>>
 	
 }
 
@@ -36,7 +37,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
 
                 const isValid = await validateCourse(courseID, section);
                 if (isValid) {
-                    setCourses([...courses, courseString]);
+                    setCourses([...courses, {code: courseString}]);
                     // Reset input fields
                     setCourseID('');
                     setSection('');
@@ -146,10 +147,11 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
           </div>
         </form>
         {(courses.length > 0) && <div className="space-y-2 overflow-y-auto h-52 mt-1">
-          {courses.map((course, idx) => (
+          {courses.map((course: FilteredCourse, idx) => (
             <div key={idx} className="bg-gray-50 dark:bg-gray-800 p-2 rounded border dark:border-gray-700 flex justify-between items-center">
-              <span className="text-gray-900 dark:text-white">{course}</span>
-							<button className="  rounded-sm w-6 h-6 focus:outline-none hover:bg-gray-300 dark:hover:bg-gray-500 dark:text-gray-300">
+              <span className="text-gray-900 dark:text-white">{course.code}</span>
+							{ // Leave filter icon invisible until course filters are implemented
+							/* <button className="  rounded-sm w-6 h-6 focus:outline-none hover:bg-gray-300 dark:hover:bg-gray-500 dark:text-gray-300">
 								<svg
 									className="w-6 h-6 text-gray-800 dark:text-white"
 									aria-hidden="true"
@@ -165,7 +167,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
 										d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"
 									/>
 								</svg>
-							</button>
+							</button> */}
               <button
                 onClick={() => deleteCourse(idx)}
                 className="bg-red-500 text-white rounded-lg w-6 h-6 focus:outline-none hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800 dark:text-gray-300"

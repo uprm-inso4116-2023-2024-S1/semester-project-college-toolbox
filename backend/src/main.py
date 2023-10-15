@@ -308,7 +308,7 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
 @app.post("/schedules")
 def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
     schedules = generate_schedules_with_criteria(
-        course_codes=request.courses,
+        courses=request.courses,
         term=request.term,
         year=request.year,
         filters=request.filters,

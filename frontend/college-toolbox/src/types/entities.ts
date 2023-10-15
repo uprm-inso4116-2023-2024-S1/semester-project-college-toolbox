@@ -65,9 +65,12 @@ export interface GeneratedSchedule {
 	courses: CourseSectionSchedule[]
 }
 
+export interface FilteredCourse {
+	code: string,
+	filter?: string,
+}
 export interface ScheduleFilters {
 	maxSchedules?: number
 	minCredits?: number
 	maxCredits?: number
-	customFilters: string[]
 }
