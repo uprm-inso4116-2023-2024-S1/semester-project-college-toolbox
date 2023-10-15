@@ -1,3 +1,4 @@
+from datetime import time
 from src.ssh_scraper.enums import Term
 
 from src.ssh_scraper.utils import *

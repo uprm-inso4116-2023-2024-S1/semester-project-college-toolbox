@@ -41,6 +41,7 @@ export interface ScholarshipApplication {
 	status: string;
 }
 
+
 export interface CourseSectionSchedule {
 	courseCode: string; // ie. QUIM3132
 	courseName: string; // ie. LABORATORIO DE QUIMICA 1
@@ -58,4 +59,18 @@ export interface SpaceTimeBlock {
 	day: number; // between 0-6 0->Monday 6->Sunday
 	startTime: string; // in 24 hour time
 	endTime: string; // in 24 hour time ie. 17:30
+}
+
+export interface GeneratedSchedule {
+	courses: CourseSectionSchedule[]
+}
+
+export interface FilteredCourse {
+	code: string,
+	filter?: string,
+}
+export interface ScheduleFilters {
+	maxSchedules?: number
+	minCredits?: number
+	maxCredits?: number
 }

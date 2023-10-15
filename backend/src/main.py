@@ -1,9 +1,21 @@
 # src/main.py
 import atexit
 from uuid import uuid4
-from src.models.requests.calendar import ExportCalendarRequest
+from src.models.requests.schedule import (
+    ExportCalendarRequest,
+    GenerateSchedulesRequest,
+    ValidateCourseIDRequest,
+)
+from src.models.responses.schedule import (
+    GenerateSchedulesResponse,
+    ValidateCourseIDResponse,
+)
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.ssh_scraper.utils import (
+    generate_schedules_with_criteria,
+    get_section_time_blocks_by_ids,
+    validate_course_id,
+)
 from src.utils import (
     create_course_calendar,
     get_full_name,
@@ -308,6 +320,28 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
     atexit.register(lambda: try_delete_file(file_name))
     semester = get_semester(Term(request.term), request.year)
     return create_course_calendar(time_blocks, file_name, semester)
+
+
+# Generate Schedules
+@app.post("/schedules")
+def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
+    schedules = generate_schedules_with_criteria(
+        courses=request.courses,
+        term=request.term,
+        year=request.year,
+        filters=request.filters,
+    )
+
+    return {"schedules": schedules}
+
+
+# Validating courses for schedule generation
+@app.post("/validate_course_id", response_model=ValidateCourseIDResponse)
+def validate_course_id_endpoint(
+    request: ValidateCourseIDRequest,
+) -> ValidateCourseIDResponse:
+    is_valid = validate_course_id(request.course_id, request.section)
+    return {"is_valid": is_valid}
 
 
 if __name__ == "__main__":
