@@ -168,3 +168,6 @@ def test_existing_application_get_all_endpoint(test_db):
     assert len(response.json()) == len(expected_responses)
     for i in range(len(response.json())):
         assert response.json()[i] == expected_responses[i].model_dump()
+
+    # Close the database connection
+    db.close()
