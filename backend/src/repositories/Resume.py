@@ -45,7 +45,7 @@ class ResumeRepository:
         except Exception as e:
             raise HTTPException(status_code=500)
 
-    def getById(self, resumeId: int):
+    async def getById(self, resumeId: int):
         """
         get Resume by id
 
@@ -67,7 +67,7 @@ class ResumeRepository:
 
         return resume
 
-    def getAllResumes(
+    async def getAllResumes(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -98,7 +98,7 @@ class ResumeRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    def updateResumeById(
+    async def updateResumeById(
         self,
         resumeId: int,
         filename: str = Form(...),
@@ -136,7 +136,7 @@ class ResumeRepository:
                 status_code=500, detail="Error updating resume  " + str(e)
             )
 
-    def deleteResume(self, resumeId: int = Form(...)):
+    async def deleteResume(self, resumeId: int = Form(...)):
         resume = self.getById(resumeId)
 
         if resume:

@@ -29,7 +29,7 @@ class ScholarshipRepository:
             "/createScholarshipApplication", self.createApplication, methods=["POST"]
         )
 
-    def createApplication(
+    async def createApplication(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
         docId: int = Form(...),
@@ -50,7 +50,7 @@ class ScholarshipRepository:
         except Exception as e:
             raise HTTPException(status_code=500, detail="database error" + str(e))
 
-    def getById(self, scholarshipId):
+    async def getById(self, scholarshipId):
         """
         get scholarship application by id
 
@@ -76,7 +76,7 @@ class ScholarshipRepository:
 
         return Scholarship
 
-    def getAllApplications(
+    async def getAllApplications(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -112,7 +112,7 @@ class ScholarshipRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    def updateApplicationById(
+    async def updateApplicationById(
         self,
         ScholarshipId: int,
         auth_token: Annotated[str | None, Cookie()] = None,
@@ -170,7 +170,7 @@ class ScholarshipRepository:
                 detail="Error updating Scholarship application " + str(e),
             )
 
-    def deleteApplication(self, applicationId: int = Form(...)):
+    async def deleteApplication(self, applicationId: int = Form(...)):
         Scholarship = self.getById(applicationId)
 
         if Scholarship:

@@ -25,7 +25,7 @@ class DocumentRepository:
             "/createDocument", self.createDocument, methods=["POST"]
         )
 
-    def createDocument(
+    async def createDocument(
         self,
         filename: str,
         data=Form(...),
@@ -46,7 +46,7 @@ class DocumentRepository:
         except Exception as e:
             raise HTTPException(status_code=500, detail="database error" + str(e))
 
-    def getById(self, docId: int):
+    async def getById(self, docId: int):
         """
         get Document by id
 
@@ -68,7 +68,7 @@ class DocumentRepository:
 
         return doc
 
-    def getAllDocuments(
+    async def getAllDocuments(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -99,7 +99,7 @@ class DocumentRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    def updateDocById(
+    async def updateDocById(
         self,
         docId: int,
         filename: str = Form(...),
@@ -134,7 +134,7 @@ class DocumentRepository:
                 status_code=500, detail="Error updating Doc application " + str(e)
             )
 
-    def deleteDoc(self, docId: int = Form(...)):
+    async def deleteDoc(self, docId: int = Form(...)):
         Doc = self.getById(docId)
 
         if Doc:

@@ -27,7 +27,7 @@ class JobRepository:
             "/createJobApplication", self.createApplication, methods=["POST"]
         )
 
-    def createApplication(
+    async def createApplication(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
         docId: int = Form(...),
@@ -48,7 +48,7 @@ class JobRepository:
         except Exception as e:
             raise HTTPException(status_code=500, detail="database error" + str(e))
 
-    def getById(self, jobId):
+    async def getById(self, jobId):
         """
         get job application by id
 
@@ -74,7 +74,7 @@ class JobRepository:
 
         return job
 
-    def getAllApplications(
+    async def getAllApplications(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -109,7 +109,7 @@ class JobRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    def updateApplicationById(
+    async def updateApplicationById(
         self,
         jobId: int,
         auth_token: Annotated[str | None, Cookie()] = None,
@@ -165,7 +165,7 @@ class JobRepository:
                 status_code=500, detail="Error updating job application " + str(e)
             )
 
-    def deleteApplication(self, applicationId: int = Form(...)):
+    async def deleteApplication(self, applicationId: int = Form(...)):
         job = self.getById(applicationId)
 
         if job:
