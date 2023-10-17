@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from src.database import Base
 
-from Document import Document
+from .Document import Document
 
 
 class Resume(Document, Base):
