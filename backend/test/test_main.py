@@ -171,4 +171,3 @@ def test_existing_application_get_all_endpoint(test_db):
 
     # Close the database connection
     db.close()
-    
