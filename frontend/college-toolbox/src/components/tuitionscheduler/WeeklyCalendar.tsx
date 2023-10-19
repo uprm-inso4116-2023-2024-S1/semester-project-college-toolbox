@@ -27,7 +27,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	const shortDaysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 	const daysOfWeek = [
 		'Monday',
-		'Tueday',
+		'Tuesday',
 		'Wednesday',
 		'Thursday',
 		'Friday',
