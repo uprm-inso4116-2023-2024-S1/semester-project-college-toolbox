@@ -8,7 +8,7 @@ from uuid import uuid4
 from fastapi.responses import FileResponse
 from src.models.tables.user import User
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import Semester, TimeBlock
+from src.models.common.scheduler import Semester, TimeBlock
 
 
 def get_full_name(user: User) -> str:
@@ -79,7 +79,9 @@ def next_weekday_date(start_date: datetime, weekday: int):
     return start_date + timedelta(days_ahead)
 
 
-def get_building_location(room: str) -> Tuple[Optional[str], Optional[str]]:
+def get_building_location(room: str) -> Tuple[str, str]:
+    if not room:
+        return ("", "")
     room_code = re.sub(r"\d+", "", room)
     room_to_building_location = {
         "AE": ("Administración de Empresas", "https://goo.gl/maps/uS2sHKErq9muJFx6A"),
@@ -122,7 +124,7 @@ def get_building_location(room: str) -> Tuple[Optional[str], Optional[str]]:
         "SA": ("ROTC", "https://goo.gl/maps/tqmxZpN2g138SMma8"),
     }
     if room_code not in room_to_building_location:
-        return (None, None)
+        return ("", "")
     return room_to_building_location[room_code]
 
 

@@ -1,35 +1,8 @@
 ---
 import LayoutSidebar from '../../app/LayoutSidebar.astro';
-import ExportCalendarButton from '../../components/ExportCalendarButton.jsx';
-import WeeklyCalendar from '../../components/WeeklyCalendar';
+import ScheduleHub from '../../components/tuitionscheduler/ScheduleHub';
 ---
 
 <LayoutSidebar>
-    <WeeklyCalendar courses={[{
-			courseCode: "ALEM3041",
-			courseName: "ALEMAN I",
-			professor: 'Albert',
-			credits: 3,
-			sectionId: 25,
-			sectionCode: "030",
-			timeBlocks: [{
-										room:"CH403",
-										day: 0,
-										startTime:"09:30",
-										endTime:"10:20"
-									},
-									{
-										room:"CH403",
-										day: 2,
-										startTime:"09:30",
-										endTime:"10:20"
-									},
-									{
-										room:"CH403",
-										day: 4,
-										startTime:"09:30",
-										endTime:"10:20"
-									}]
-		}]} term='1erSem' year='2023' client:load/>
-    <ExportCalendarButton section_ids={[2191,1378,1334]} term='1erSem' year='2023' client:load />
+	<ScheduleHub client:load/>
 </LayoutSidebar>
