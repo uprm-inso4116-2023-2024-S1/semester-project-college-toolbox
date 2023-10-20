@@ -18,7 +18,7 @@ from src.ssh_scraper.utils import (
     get_section_time_blocks_by_ids,
     validate_course_id,
 )
-from src.utils import (
+from src.utils.calendar import (
     create_course_calendar,
     get_full_name,
     get_semester,
