@@ -37,7 +37,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from src.models.requests.calendar import ExportCalendarRequest
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import get_section_time_blocks_by_ids
 from src.utils.calendar import (
