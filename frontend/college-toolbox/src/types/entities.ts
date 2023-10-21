@@ -74,3 +74,11 @@ export interface ScheduleFilters {
 	minCredits?: number
 	maxCredits?: number
 }
+
+export interface CourseInformation {
+	courseCode?: string;
+	startTime?: string;
+	endTime?: string;
+	days?: string;
+	professor?: string;
+}

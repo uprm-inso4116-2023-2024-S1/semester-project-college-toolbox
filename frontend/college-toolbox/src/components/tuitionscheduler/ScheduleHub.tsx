@@ -3,7 +3,7 @@ import WeeklyCalendar from './WeeklyCalendar';
 import ExportCalendarButton from './ExportCalendarButton';
 import ScheduleOptions from './ScheduleOptions';
 import ScheduleNavigator from './ScheduleNavigator';
-import type { FilteredCourse, GeneratedSchedule, ScheduleFilters } from '../../types/entities';
+import type { CourseInformation, FilteredCourse, GeneratedSchedule, ScheduleFilters } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
 
 interface ScheduleHubProps {}
@@ -13,6 +13,7 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 	const [schedules, setSchedules] = useState<GeneratedSchedule[]>([]);
 	const [currentScheduleIdx, setCurrentScheduleIdx] = useState<number>(0);
 	const [filters, setFilters] = useState<ScheduleFilters>({});
+	const [coursesInfo, setCoursesInfo] = useState<CourseInformation[]>([]);
 	useEffect(() => {
 		setCurrentScheduleIdx(0);
 	}, [schedules]);
@@ -44,6 +45,8 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 				<ScheduleOptions
 					courses={selectedCourses}
 					setCourses={setSelectedCourses}
+					coursesInfo={coursesInfo}
+					setCoursesInfo={setCoursesInfo}
 				/>
 			</div>
 			<div className="col-span-7">

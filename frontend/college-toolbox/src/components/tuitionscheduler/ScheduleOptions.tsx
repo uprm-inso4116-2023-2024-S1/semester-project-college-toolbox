@@ -1,19 +1,81 @@
 import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
-import type { FilteredCourse } from '../../types/entities';
-
+import type { CourseInformation, FilteredCourse } from '../../types/entities';
+import { Modal } from 'flowbite-react';
 
 export interface ScheduleOptions {
 	courses: FilteredCourse[]
 	setCourses: React.Dispatch<React.SetStateAction<FilteredCourse[]>>
-	
+	coursesInfo: CourseInformation[]
+  setCoursesInfo: React.Dispatch<React.SetStateAction<CourseInformation[]>>
 }
 
-const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
+const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses, coursesInfo, setCoursesInfo}) => {
     // State for course list and input values
     const [courseID, setCourseID] = useState('');
     const [section, setSection] = useState('');
 
+    // State for modal
+    const [openModal, setOpenModal] = useState<string | undefined>();
+    const [courseInfo, setCourseInfo] = useState<CourseInformation | undefined>(undefined);
+    const [selectedDays, setSelectedDays] = useState<string[]>([]);
+    const [index, setIndex] = useState<number>(0);
+    const daysOfWeek = ['L', 'M', 'W', 'J', 'V', 'S', 'D'];
+
+    const modalProps = { openModal, setOpenModal, courseInfo, setCourseInfo, index, setIndex, selectedDays, setSelectedDays };
+
+
+    const handleDayClick = (day: string) => {
+      if (modalProps.selectedDays.includes(day)) {
+        modalProps.setSelectedDays(modalProps.selectedDays.filter(d => d !== day));
+      } else {
+        modalProps.setSelectedDays([...modalProps.selectedDays, day]);
+      }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      modalProps.setCourseInfo(prevState => ({
+        ...prevState,
+        [name]: value
+      }));
+    };
+
+    const saveCourseInfo = () => {
+      const updatedCoursesInfo = [...coursesInfo];
+      if(!modalProps.courseInfo) return;
+
+      modalProps.courseInfo.days = modalProps.selectedDays.join(', ');
+      
+      if(!modalProps.courseInfo.startTime || !modalProps.courseInfo.endTime || !modalProps.courseInfo.days || !modalProps.courseInfo.professor) {
+        alert('Please fill out all fields.');
+        return;
+      }
+
+      if (modalProps.courseInfo?.endTime && modalProps.courseInfo?.startTime > modalProps.courseInfo?.endTime) {
+        alert('Start time cannot be later than end time.');
+        return;
+      }
+
+      if (modalProps.courseInfo?.startTime && modalProps.courseInfo?.endTime < modalProps.courseInfo?.startTime) {
+        alert('End time cannot be earlier than start time.');
+        return;
+      }
+      
+      // Save days string that was selected in the modal
+      updatedCoursesInfo[modalProps.index] = modalProps.courseInfo;
+      setCoursesInfo(updatedCoursesInfo);
+      // Reset variables for next course
+      modalProps.setSelectedDays([]);
+      modalProps.setCourseInfo({
+        courseCode: '',
+        startTime: '',
+        endTime: '',
+        days: '',
+        professor: ''
+      });
+      setOpenModal(undefined);
+    }
 
     const addCourse = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -38,6 +100,13 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
                 const isValid = await validateCourse(courseID, section);
                 if (isValid) {
                     setCourses([...courses, {code: courseString}]);
+                    setCoursesInfo([...coursesInfo, {
+                      courseCode: courseString,
+                      startTime: '',
+                      endTime: '',
+                      days: '',
+                      professor: ''
+                    }])
                     // Reset input fields
                     setCourseID('');
                     setSection('');
@@ -57,6 +126,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
         // Filter out the course with the specified index
         const updatedCourses = courses.filter((_, index) => index !== indexToDelete);
         setCourses(updatedCourses);
+        const updatedCoursesInfo = coursesInfo.filter((_, index) => index !== indexToDelete);
+        setCoursesInfo(updatedCoursesInfo);
     };
 
 
@@ -147,11 +218,20 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
           </div>
         </form>
         {(courses.length > 0) && <div className="space-y-2 overflow-y-auto h-52 mt-1">
-          {courses.map((course: FilteredCourse, idx) => (
+          {courses.map((_course: FilteredCourse, idx) => (
             <div key={idx} className="bg-gray-50 dark:bg-gray-800 p-2 rounded border dark:border-gray-700 flex justify-between items-center">
-              <span className="text-gray-900 dark:text-white">{course.code}</span>
+              <span className="text-gray-900 dark:text-white">{_course.code}</span>
 							{ // Leave filter icon invisible until course filters are implemented
-							/* <button className="  rounded-sm w-6 h-6 focus:outline-none hover:bg-gray-300 dark:hover:bg-gray-500 dark:text-gray-300">
+							 <button 
+                className="  rounded-sm w-6 h-6 focus:outline-none hover:bg-gray-300 dark:hover:bg-gray-500 dark:text-gray-300"
+                onClick={() => {
+                    modalProps.setIndex(idx);
+                    modalProps.setCourseInfo(coursesInfo[idx]);
+                    modalProps.setSelectedDays(coursesInfo[idx]?.days?.split(', ') || []);
+                    modalProps.setOpenModal('dismissible');
+                  }   
+                }
+               >
 								<svg
 									className="w-6 h-6 text-gray-800 dark:text-white"
 									aria-hidden="true"
@@ -167,7 +247,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
 										d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25"
 									/>
 								</svg>
-							</button> */}
+							</button> }
               <button
                 onClick={() => deleteCourse(idx)}
                 className="bg-red-500 text-white rounded-lg w-6 h-6 focus:outline-none hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800 dark:text-gray-300"
@@ -182,6 +262,63 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({courses, setCourses}) => {
       <div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-lg col-span-3">
         <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white p-1 mb-5">Filters</h2>
       </div>
+
+      <Modal
+				dismissible
+				show={modalProps.openModal === 'dismissible'}
+				onClose={() => modalProps.setOpenModal(undefined)}
+			>
+				<Modal.Header>Course Information: {modalProps.courseInfo?.courseCode}</Modal.Header>
+        {/* add a modal body that lets you input the course information for the current courseInfo */}
+				<Modal.Body>
+          <div className="bg-white p-8 rounded">
+            Start Time
+            <input
+              type="time"
+              placeholder="Start Time"
+              name="startTime"
+              value={modalProps.courseInfo?.startTime}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 mb-4 w-full"
+            />
+            End Time
+            <input
+              type="time"
+              placeholder="End Time"
+              name="endTime"
+              value={modalProps.courseInfo?.endTime}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 mb-4 w-full"
+            />
+            Days
+            <div className="flex justify-center space-x-4 mb-4">
+              {daysOfWeek.map((day, index) => (
+                <div
+                  key={index}
+                  className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full cursor-pointer ${
+                    modalProps.selectedDays.includes(day) ? 'bg-blue-500 text-white' : 'bg-white'
+                  }`}
+                  onClick={() => handleDayClick(day)}
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+            Professor
+            <input
+              type="text"
+              placeholder="Professor"
+              name="professor"
+              value={modalProps.courseInfo?.professor}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 mb-4 w-full"
+            />
+            <button onClick={saveCourseInfo} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+              Save
+            </button>
+          </div>              
+        </Modal.Body>
+			</Modal>
     </div>
   );
 };
