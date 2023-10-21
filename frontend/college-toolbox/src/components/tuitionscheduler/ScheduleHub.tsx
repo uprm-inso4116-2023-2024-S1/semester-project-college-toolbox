@@ -3,7 +3,11 @@ import WeeklyCalendar from './WeeklyCalendar';
 import ExportCalendarButton from './ExportCalendarButton';
 import ScheduleOptions from './ScheduleOptions';
 import ScheduleNavigator from './ScheduleNavigator';
-import type { FilteredCourse, GeneratedSchedule, ScheduleFilters } from '../../types/entities';
+import type {
+	FilteredCourse,
+	GeneratedSchedule,
+	ScheduleFilters,
+} from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
 
 interface ScheduleHubProps {}
