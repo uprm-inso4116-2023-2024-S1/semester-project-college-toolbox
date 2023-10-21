@@ -13,11 +13,15 @@ class ScheduleFilters(BaseModel):
     maxSchedules: Optional[int] = None
     minCredits: Optional[int] = None
     maxCredits: Optional[int] = None
-    customFilters: list[str]
+
+
+class FilteredCourse(BaseModel):
+    code: str
+    filter: Optional[str] = None
 
 
 class GenerateSchedulesRequest(BaseModel):
-    courses: list[str]
+    courses: list[FilteredCourse]
     term: str
     year: int
     filters: ScheduleFilters

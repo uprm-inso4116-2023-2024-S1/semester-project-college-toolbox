@@ -28,7 +28,7 @@ const ScheduleNavigator: FC<ScheduleNavigatorProps> = ({
 			>
 				&lt;
 			</button>
-			<span className="mx-4">{`${currentState + 1}/${totalItems}`}</span>
+			<span className="mx-4 dark:text-white">{`${currentState + 1}/${totalItems}`}</span>
 			<button
 				className="px-4 py-2 bg-blue-500 text-white rounded"
 				onClick={handleIncrement}

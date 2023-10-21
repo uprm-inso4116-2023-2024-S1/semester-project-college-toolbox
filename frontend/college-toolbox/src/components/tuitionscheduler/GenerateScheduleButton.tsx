@@ -1,11 +1,15 @@
 import React from 'react';
 import { API_URL } from '../../app/constants';
-import type { GeneratedSchedule, ScheduleFilters } from '../../types/entities';
+import type {
+	FilteredCourse,
+	GeneratedSchedule,
+	ScheduleFilters,
+} from '../../types/entities';
 
 interface GenerateScheduleButtonProps {
 	setSchedules: React.Dispatch<React.SetStateAction<GeneratedSchedule[]>>;
 	filters: ScheduleFilters;
-	courses: string[] | undefined;
+	courses: FilteredCourse[] | undefined;
 	term: string;
 	year: string;
 }

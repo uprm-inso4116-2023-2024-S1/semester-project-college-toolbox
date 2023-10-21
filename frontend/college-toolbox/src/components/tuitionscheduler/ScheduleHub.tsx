@@ -3,18 +3,16 @@ import WeeklyCalendar from './WeeklyCalendar';
 import ExportCalendarButton from './ExportCalendarButton';
 import ScheduleOptions from './ScheduleOptions';
 import ScheduleNavigator from './ScheduleNavigator';
-import type { GeneratedSchedule, ScheduleFilters } from '../../types/entities';
+import type { FilteredCourse, GeneratedSchedule, ScheduleFilters } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
 
 interface ScheduleHubProps {}
 
 const ScheduleHub: React.FC<ScheduleHubProps> = () => {
-	const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+	const [selectedCourses, setSelectedCourses] = useState<FilteredCourse[]>([]);
 	const [schedules, setSchedules] = useState<GeneratedSchedule[]>([]);
 	const [currentScheduleIdx, setCurrentScheduleIdx] = useState<number>(0);
-	const [filters, setFilters] = useState<ScheduleFilters>({
-		customFilters: [],
-	});
+	const [filters, setFilters] = useState<ScheduleFilters>({});
 	useEffect(() => {
 		setCurrentScheduleIdx(0);
 	}, [schedules]);

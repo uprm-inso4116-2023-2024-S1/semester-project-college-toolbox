@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List
 from src.models.common.scheduler import TimeBlock, WeekSchedule
-from src.models.requests.schedule import ScheduleFilters
+from src.models.requests.schedule import FilteredCourse, ScheduleFilters
 from src.models.responses.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
@@ -140,7 +140,7 @@ def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBl
     return time_blocks
 
 
-def validate_course_id(course_id: str, section : str):
+def validate_course_id(course_id: str, section: str = None):
     with Session(engine) as session:
         if section:
             return (
@@ -148,7 +148,8 @@ def validate_course_id(course_id: str, section : str):
                 .filter(
                     and_(
                         CourseSection.course_id == course_id,
-                        CourseSection.section == section)
+                        CourseSection.section == section,
+                    )
                 )
                 .first()
                 is not None
@@ -160,7 +161,6 @@ def validate_course_id(course_id: str, section : str):
                 .first()
                 is not None
             )
-            
 
 
 # main call function for schedule generation
@@ -302,7 +302,7 @@ def convert_room_schedule_to_time_block(
     for day in room_schedule.days:
         blocks.append(
             SpaceTimeBlock(
-                room=room_schedule.room,
+                room=room_schedule.room if room_schedule.room else "",
                 building=building,
                 location=location,
                 day=day_map[day],
@@ -354,28 +354,31 @@ def has_conflict(
 
 
 def generate_schedules_with_criteria(
-    course_codes: list[str], term: str, year: int, filters: ScheduleFilters
+    courses: list[FilteredCourse], term: str, year: int, filters: ScheduleFilters
 ) -> list[GeneratedSchedule]:
     # find the course data in the db
     section_map: dict[int, CourseSection] = {}
     section_time_map: dict[int, list[RoomSchedule]] = {}
     course_list = []
     course_to_sections = defaultdict(list)
-    for code in course_codes:
+    for course in courses:
         sections = []
-        if "-" in code:
-            # this should realistically only ever find one section
-            course, section = code.split("-")
+        course_code, section_code = (
+            course.code.split("-", 1) if "-" in course.code else (course.code, None)
+        )
+        if section_code:
             sections = get_course_by_section(
-                course_id=course, section=section, term=Term(term), year=year
+                course_id=course_code, section=section_code, term=Term(term), year=year
             )
         else:
-            sections = get_course_sections(course_id=code, term=Term(term), year=year)
-        course_list.append(code.split(sep="-")[0])
-        for section in sections:
-            course_to_sections[course_list[-1]].append(section.id)
-            section_map[section.id] = section
-            section_time_map[section.id] = get_room_schedules(section.id)
+            sections = get_course_sections(
+                course_id=course_code, term=Term(term), year=year
+            )
+        course_list.append(course_code)
+        for course_section in sections:
+            course_to_sections[course_list[-1]].append(course_section.id)
+            section_map[course_section.id] = course_section
+            section_time_map[course_section.id] = get_room_schedules(course_section.id)
     # Try to build the schedules
     generated_schedules: set[frozenset[int]] = set()
     max_schedules = min(25, filters.maxSchedules) if filters.maxSchedules else 5

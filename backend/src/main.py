@@ -1,8 +1,15 @@
 # src/main.py
 import atexit
 from uuid import uuid4
-from src.models.requests.schedule import ExportCalendarRequest, GenerateSchedulesRequest, ValidateCourseIDRequest
-from src.models.responses.schedule import GenerateSchedulesResponse, ValidateCourseIDResponse
+from src.models.requests.schedule import (
+    ExportCalendarRequest,
+    GenerateSchedulesRequest,
+    ValidateCourseIDRequest,
+)
+from src.models.responses.schedule import (
+    GenerateSchedulesResponse,
+    ValidateCourseIDResponse,
+)
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import (
     generate_schedules_with_criteria,
@@ -34,6 +41,7 @@ from src.config import environment
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.responses.existing_app import ExistingApplicationResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 from src.models.tables.Document import Document
@@ -293,6 +301,16 @@ def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
     Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
 
 
+# Get all Existing Applications endpoint
+@app.get("/ExistingApplication/get/all")
+async def get_all_existing_applications(
+    db: Session = Depends(get_db),
+) -> list[ExistingApplicationResponse]:
+    # Should return a list of tables/existing_app.py
+    data = db.query(ExistingApplication).all()
+    return [ExistingApplicationResponse(**d.__dict__) for d in data]
+
+
 # Create .ics calendar file
 @app.post("/export_calendar")
 def export_calendar(request: ExportCalendarRequest) -> FileResponse:
@@ -308,7 +326,7 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
 @app.post("/schedules")
 def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
     schedules = generate_schedules_with_criteria(
-        course_codes=request.courses,
+        courses=request.courses,
         term=request.term,
         year=request.year,
         filters=request.filters,
@@ -316,9 +334,12 @@ def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesRe
 
     return {"schedules": schedules}
 
+
 # Validating courses for schedule generation
 @app.post("/validate_course_id", response_model=ValidateCourseIDResponse)
-def validate_course_id_endpoint(request: ValidateCourseIDRequest) -> ValidateCourseIDResponse:
+def validate_course_id_endpoint(
+    request: ValidateCourseIDRequest,
+) -> ValidateCourseIDResponse:
     is_valid = validate_course_id(request.course_id, request.section)
     return {"is_valid": is_valid}
 

@@ -27,7 +27,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	const shortDaysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 	const daysOfWeek = [
 		'Monday',
-		'Tueday',
+		'Tuesday',
 		'Wednesday',
 		'Thursday',
 		'Friday',
@@ -43,7 +43,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 		getCurrentTimeInMinutes() - hoursOffsetInMinutes > 0
 			? (((getCurrentTimeInMinutes() - hoursOffsetInMinutes) % 30) / 30) * 100
 			: 0;
-	const currentDayCol = ((new Date().getDay() - 1) % 7) + 3;
+	const currentDayCol = ((new Date().getDay()+6)%7) + 3; // Sunday 
 
 	const [openModal, setOpenModal] = useState<string | undefined>();
 	const [calEvent, setCalEvent] = useState<CourseSectionSchedule | undefined>();
@@ -189,7 +189,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			>
 				<Modal.Header>Course Information</Modal.Header>
 				<Modal.Body>
-					<div className="space-y-6">
+					<div className="space-y-6 dark:text-white">
 						<ul>
 							<li>Course Code: {modalProps.calEvent?.courseCode}</li>
 							<li>Course Name: {modalProps.calEvent?.courseName}</li>
