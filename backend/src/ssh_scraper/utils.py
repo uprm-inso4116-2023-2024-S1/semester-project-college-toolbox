@@ -362,23 +362,17 @@ def generate_schedules_with_criteria(
     course_list = []
     course_to_sections = defaultdict(list)
     for course in courses:
-        sections = []
-        course_code, section_code = (
+        course_code, _ = (
             course.code.split("-", 1) if "-" in course.code else (course.code, None)
         )
-        if section_code:
-            sections = get_course_by_section(
-                course_id=course_code, section=section_code, term=Term(term), year=year
-            )
-        else:
-            sections = get_course_sections(
-                course_id=course_code, term=Term(term), year=year
-            )
+        section_schedules = get_section_schedules(
+            get_query_from_filters(course, filters), Term(term), year
+        )
         course_list.append(course_code)
-        for course_section in sections:
-            course_to_sections[course_list[-1]].append(course_section.id)
-            section_map[course_section.id] = course_section
-            section_time_map[course_section.id] = get_room_schedules(course_section.id)
+        for section, schedules in section_schedules:
+            course_to_sections[course_code].append(section.id)
+            section_map[section.id] = section
+            section_time_map[section.id] = schedules
     # Try to build the schedules
     generated_schedules: set[frozenset[int]] = set()
     max_schedules = min(25, filters.maxSchedules) if filters.maxSchedules else 5
@@ -473,3 +467,17 @@ def get_section_schedules(
             )
 
     return section_schedules
+
+
+def get_query_from_filters(
+    course: FilteredCourse, filters: ScheduleFilters = None
+) -> str:
+    query = ""
+    if "-" in course.code:
+        code, section = course.code.split("-", 1)
+        query += f"(course id = {code}, section = {section})"
+    else:
+        query += f"course id = {course.code}"
+    if course.filter is not None and course.filter != "":
+        query += f", {course.filter}"
+    return query
