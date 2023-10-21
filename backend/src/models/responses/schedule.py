@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 class SpaceTimeBlock(BaseModel):
     room: str
-    building: Optional[str] = None
-    location: Optional[str] = None
+    building: str
+    location: str
     day: int
     startTime: str
     endTime: str

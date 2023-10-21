@@ -302,7 +302,7 @@ def convert_room_schedule_to_time_block(
     for day in room_schedule.days:
         blocks.append(
             SpaceTimeBlock(
-                room=room_schedule.room,
+                room=room_schedule.room if room_schedule.room else "",
                 building=building,
                 location=location,
                 day=day_map[day],
