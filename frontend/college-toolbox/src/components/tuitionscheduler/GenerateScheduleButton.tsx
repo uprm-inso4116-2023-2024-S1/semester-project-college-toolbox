@@ -6,6 +6,7 @@ import type {
 	ScheduleFilters,
 } from '../../types/entities';
 import { fi } from 'date-fns/locale';
+import { convertCourseInformationToTextFilter } from '../../lib/data';
 
 interface GenerateScheduleButtonProps {
 	setSchedules: React.Dispatch<React.SetStateAction<GeneratedSchedule[]>>;
@@ -30,7 +31,7 @@ const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
 			// TODO: we need to convert the course filters to a neat query string (to feed directly into Course Query CFG).
 			const coursesWithTextFilters = courses.map( (course) => ({
 				code: course.code,
-				filters: '' // TODO: convert CourseFilters to string representation.
+				filters: convertCourseInformationToTextFilter(course.filters) // TODO: convert CourseFilters to string representation.
 			}))
 			const response = await fetch(`${API_URL}/schedules`, {
 				method: 'POST',

@@ -2,7 +2,11 @@
 // GraphQL, Databases, REST APIs, CDNs, proxies, S3, Matrix, IPFS, you name it…
 
 import { API_URL, REMOTE_ASSETS_BASE_URL } from '../app/constants.js';
-import type { Endpoint, EndpointsToOperations } from '../types/entities.js';
+import type {
+	CourseFilters,
+	Endpoint,
+	EndpointsToOperations,
+} from '../types/entities.js';
 
 export async function fetchData<Selected extends Endpoint>(endpoint: Selected) {
 	const apiEndpoint = `${API_URL}${endpoint}`;
@@ -104,4 +108,32 @@ export function getCurrentTimeInMinutes(): number {
 	const minutes = now.getMinutes();
 
 	return hours * 60 + minutes;
+}
+
+export function convertCourseInformationToTextFilter(
+	info: CourseFilters | undefined,
+): string {
+	if (info == undefined) {
+		return '';
+	}
+	let filters = [];
+	if (info.days) {
+		filters.push(
+			'not days : ' +
+				'LMWJVSD'
+					.split('')
+					.filter((d) => !info.days?.includes(d))
+					.join(' | '),
+		);
+	}
+	if (info.startTime) {
+		filters.push(`start time >= ${info.startTime}`);
+	}
+	if (info.endTime) {
+		filters.push(`end time <= ${info.endTime}`);
+	}
+	if (info.professor) {
+		filters.push(`professor : ${info.professor}`);
+	}
+	return filters.join(', ');
 }
