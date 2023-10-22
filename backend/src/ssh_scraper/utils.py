@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List
 from src.models.common.scheduler import TimeBlock, WeekSchedule
-from src.models.requests.schedule import FilteredCourse, ScheduleFilters
+from src.models.requests.schedule import FilteredCourse, ScheduleGenerationOptions
 from src.models.responses.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
@@ -354,7 +354,10 @@ def has_conflict(
 
 
 def generate_schedules_with_criteria(
-    courses: list[FilteredCourse], term: str, year: int, filters: ScheduleFilters
+    courses: list[FilteredCourse],
+    term: str,
+    year: int,
+    options: ScheduleGenerationOptions,
 ) -> list[GeneratedSchedule]:
     # find the course data in the db
     section_map: dict[int, CourseSection] = {}
@@ -362,34 +365,28 @@ def generate_schedules_with_criteria(
     course_list = []
     course_to_sections = defaultdict(list)
     for course in courses:
-        sections = []
-        course_code, section_code = (
+        course_code, _ = (
             course.code.split("-", 1) if "-" in course.code else (course.code, None)
         )
-        if section_code:
-            sections = get_course_by_section(
-                course_id=course_code, section=section_code, term=Term(term), year=year
-            )
-        else:
-            sections = get_course_sections(
-                course_id=course_code, term=Term(term), year=year
-            )
+        section_schedules = get_section_schedules(
+            get_query_from_filters(course), Term(term), year
+        )
         course_list.append(course_code)
-        for course_section in sections:
-            course_to_sections[course_list[-1]].append(course_section.id)
-            section_map[course_section.id] = course_section
-            section_time_map[course_section.id] = get_room_schedules(course_section.id)
+        for section, schedules in section_schedules:
+            course_to_sections[course_code].append(section.id)
+            section_map[section.id] = section
+            section_time_map[section.id] = schedules
     # Try to build the schedules
     generated_schedules: set[frozenset[int]] = set()
-    max_schedules = min(25, filters.maxSchedules) if filters.maxSchedules else 5
+    max_schedules = min(25, options.maxSchedules) if options.maxSchedules else 5
 
     def generate_schedules_with_criteria_helper(
         sections_added=[], courses_added=set(), current_credits=0
     ):
         if len(generated_schedules) >= max_schedules:
             return
-        if filters.minCredits:
-            if current_credits >= filters.minCredits:
+        if options.minCredits:
+            if current_credits >= options.minCredits:
                 generated_schedules.add(frozenset(sections_added))
         else:
             if len(courses_added) >= len(course_list):
@@ -401,8 +398,8 @@ def generate_schedules_with_criteria(
             for section_id in course_to_sections[course]:
                 section = section_map[section_id]
                 if (
-                    filters.maxCredits
-                    and section.credits + current_credits > filters.maxCredits
+                    options.maxCredits
+                    and section.credits + current_credits > options.maxCredits
                 ):
                     return
                 if not has_conflict(section_id, sections_added, section_time_map):
@@ -473,3 +470,15 @@ def get_section_schedules(
             )
 
     return section_schedules
+
+
+def get_query_from_filters(course: FilteredCourse) -> str:
+    query = ""
+    if "-" in course.code:
+        code, section = course.code.split("-", 1)
+        query += f"(course id = {code}, section = {section})"
+    else:
+        query += f"course id = {course.code}"
+    if course.filters is not None and course.filters != "":
+        query += f", {course.filters}"
+    return query
