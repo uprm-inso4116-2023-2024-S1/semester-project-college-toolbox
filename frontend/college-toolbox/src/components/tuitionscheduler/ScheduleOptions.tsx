@@ -57,8 +57,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	const saveCourseInfo = () => {
 		if (!modalProps.courseFilters) return;
 		if (
-			(modalProps.courseFilters?.startTime ?? '') >
-			(modalProps.courseFilters?.endTime ?? '')
+			(modalProps.courseFilters?.startTime ?? '00:00') >
+			(modalProps.courseFilters?.endTime ?? '23:59')
 		) {
 			alert('Start time cannot be later than end time.');
 			return;
