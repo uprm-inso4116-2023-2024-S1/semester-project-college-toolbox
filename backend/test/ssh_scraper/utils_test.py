@@ -164,5 +164,7 @@ class TestGetQueryFromFilters:
         assert query == "course id = INSO4116"
 
     def test_with_section(self):
-        query = get_query_from_filters(FilteredCourse(code="PSIC3001-116", filters=None))
+        query = get_query_from_filters(
+            FilteredCourse(code="PSIC3001-116", filters=None)
+        )
         assert query == "(course id = PSIC3001, section = 116)"
