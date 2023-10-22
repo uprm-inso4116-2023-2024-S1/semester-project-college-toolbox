@@ -9,7 +9,7 @@ class ExportCalendarRequest(BaseModel):
     year: str
 
 
-class ScheduleFilters(BaseModel):
+class ScheduleGenerationOptions(BaseModel):
     maxSchedules: Optional[int] = None
     minCredits: Optional[int] = None
     maxCredits: Optional[int] = None
@@ -17,14 +17,14 @@ class ScheduleFilters(BaseModel):
 
 class FilteredCourse(BaseModel):
     code: str
-    filter: Optional[str] = None
+    filters: Optional[str] = None
 
 
 class GenerateSchedulesRequest(BaseModel):
     courses: list[FilteredCourse]
     term: str
     year: int
-    filters: ScheduleFilters
+    options: ScheduleGenerationOptions
 
 
 class ValidateCourseIDRequest(BaseModel):

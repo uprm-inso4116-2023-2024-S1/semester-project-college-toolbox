@@ -155,14 +155,14 @@ class TestGetSectionSechedules:
 class TestGetQueryFromFilters:
     def test_course_code(self):
         query = get_query_from_filters(
-            FilteredCourse(code="PSIC3001", filter="professor : Gustavo G. Cortina")
+            FilteredCourse(code="PSIC3001", filters="professor : Gustavo G. Cortina")
         )
         assert query == "course id = PSIC3001, professor : Gustavo G. Cortina"
 
     def test_no_filters(self):
-        query = get_query_from_filters(FilteredCourse(code="INSO4116", filter=None))
+        query = get_query_from_filters(FilteredCourse(code="INSO4116", filters=None))
         assert query == "course id = INSO4116"
 
     def test_with_section(self):
-        query = get_query_from_filters(FilteredCourse(code="PSIC3001-116", filter=None))
+        query = get_query_from_filters(FilteredCourse(code="PSIC3001-116", filters=None))
         assert query == "(course id = PSIC3001, section = 116)"

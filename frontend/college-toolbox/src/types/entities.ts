@@ -68,7 +68,7 @@ export interface FilteredCourse {
 	code: string;
 	filters?: CourseFilters;
 }
-export interface ScheduleFilters {
+export interface ScheduleGenerationOptions {
 	maxSchedules?: number;
 	minCredits?: number;
 	maxCredits?: number;

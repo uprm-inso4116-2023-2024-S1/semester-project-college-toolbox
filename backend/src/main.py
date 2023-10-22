@@ -329,7 +329,7 @@ def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesRe
         courses=request.courses,
         term=request.term,
         year=request.year,
-        filters=request.filters,
+        options=request.options,
     )
 
     return {"schedules": schedules}
