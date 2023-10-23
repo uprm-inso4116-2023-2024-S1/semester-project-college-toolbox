@@ -23,7 +23,12 @@ term_input = ""
 
 
 def get_term_year(skip: int) -> (str, int):
-    terms = [Term.SECOND_SEMESTER, Term.FIRST_SUMMER, Term.SECOND_SUMMER, Term.FIRST_SEMESTER]
+    terms = [
+        Term.SECOND_SEMESTER,
+        Term.FIRST_SUMMER,
+        Term.SECOND_SUMMER,
+        Term.FIRST_SEMESTER,
+    ]
     now = datetime.now()
     index = terms.index(TERMS[(now.month - 1) % len(TERMS)])
     term = terms[(index + skip) % len(terms)].value
