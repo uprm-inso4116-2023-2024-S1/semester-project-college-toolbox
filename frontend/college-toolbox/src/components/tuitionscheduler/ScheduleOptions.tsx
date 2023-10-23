@@ -89,7 +89,10 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	};
 
 	const saveCourseInfo = () => {
-		if (!modalProps.courseFilters) return;
+		if (!modalProps.courseFilters) {
+			setOpenModal(undefined);
+			return;
+		}
 		if (
 			(modalProps.courseFilters?.startTime ?? '00:00') >
 			(modalProps.courseFilters?.endTime ?? '23:59')
@@ -103,7 +106,6 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		updatedCoursesInfo[modalProps.index]!.filters = modalProps.courseFilters;
 		setCourses(updatedCoursesInfo);
 		setOpenModal(undefined);
-		console.log(modalProps.courseFilters);
 	};
 
 	const addCourse = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -131,13 +133,15 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 
 				const isValid = await validateCourse(courseID, section);
 				if (isValid) {
-                    const newCourses = [...courses];
-					const prevIdx = newCourses.findIndex((course)=> course.code.split('-')[0] == courseID)
-                    if (prevIdx != -1){
-                        newCourses[prevIdx] = { code: courseString };
-                    } else {
-                        newCourses.push( { code: courseString })
-                    }
+					const newCourses = [...courses];
+					const prevIdx = newCourses.findIndex(
+						(course) => course.code.split('-')[0] == courseID,
+					);
+					if (prevIdx != -1) {
+						newCourses[prevIdx] = { code: courseString };
+					} else {
+						newCourses.push({ code: courseString });
+					}
 					setCourses(newCourses);
 					// Reset input fields
 					setCourseID('');
@@ -433,38 +437,43 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 				onClose={() => modalProps.setOpenModal(undefined)}
 			>
 				<Modal.Header>
-					Course Information: {!courses[modalProps.index]?.code}
+					Course Filters: {courses[modalProps.index]?.code}
 				</Modal.Header>
-				{/* add a modal body that lets you input the course information for the current courseInfo */}
 				<Modal.Body>
-					<div className="bg-white p-8 rounded">
-						Earliest Start Time
-						<input
-							type="time"
-							placeholder="Earliest Start Time"
-							name="startTime"
-							value={modalProps.courseFilters?.startTime}
-							onChange={handleFiltersChange}
-							className="border border-gray-300 p-2 mb-4 w-full"
-						/>
-						Latest End Time
-						<input
-							type="time"
-							placeholder="Latest End Time"
-							name="endTime"
-							value={modalProps.courseFilters?.endTime}
-							onChange={handleFiltersChange}
-							className="border border-gray-300 p-2 mb-4 w-full"
-						/>
+					<div className="bg-white dark:bg-gray-700 p-8 rounded dark:text-white">
+						<div className="grid grid-cols-2 gap-4">
+							<div>
+								Earliest Start Time
+								<input
+									type="time"
+									placeholder="Earliest Start Time"
+									name="startTime"
+									value={modalProps.courseFilters?.startTime}
+									onChange={handleFiltersChange}
+									className="border border-gray-300 p-2 mb-4 w-full rounded-md dark:text-black dark:bg-gray-200"
+								/>
+							</div>
+							<div>
+								Latest End Time
+								<input
+									type="time"
+									placeholder="Latest End Time"
+									name="endTime"
+									value={modalProps.courseFilters?.endTime}
+									onChange={handleFiltersChange}
+									className="border border-gray-300 p-2 mb-4 w-full dark:text-black dark:bg-gray-200"
+								/>
+							</div>
+						</div>
 						Days
 						<div className="flex justify-center space-x-4 mb-4">
 							{daysOfWeek.map((day, index) => (
 								<div
 									key={index}
-									className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full cursor-pointer ${
+									className={`w-10 h-10 flex items-center justify-center border border-gray-300 dark:border-gray-800 rounded-full cursor-pointer ${
 										modalProps.courseFilters?.days?.includes(day)
 											? 'bg-blue-500 text-white'
-											: 'bg-white'
+											: 'bg-white dark:bg-gray-700'
 									}`}
 									onClick={() => handleDayClick(day)}
 								>
@@ -479,11 +488,11 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 							name="professor"
 							value={modalProps.courseFilters?.professor}
 							onChange={handleFiltersChange}
-							className="border border-gray-300 p-2 mb-4 w-full"
+							className="border border-gray-300 p-2 mb-4 w-full dark:bg-gray-200"
 						/>
 						<button
 							onClick={saveCourseInfo}
-							className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+							className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded "
 						>
 							Save
 						</button>
