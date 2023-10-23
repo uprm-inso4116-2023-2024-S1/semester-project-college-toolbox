@@ -396,7 +396,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 								htmlFor="min-creds-range"
 								className="block text-sm font-medium text-gray-900 dark:text-white"
 							>
-								Minimun Credits: {options.minCredits}
+								Minimum Credits: {options.minCredits}
 							</label>
 							<input
 								id="min-creds-range"
