@@ -131,7 +131,14 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 
 				const isValid = await validateCourse(courseID, section);
 				if (isValid) {
-					setCourses([...courses, { code: courseString }]);
+                    const newCourses = [...courses];
+					const prevIdx = newCourses.findIndex((course)=> course.code.split('-')[0] == courseID)
+                    if (prevIdx != -1){
+                        newCourses[prevIdx] = { code: courseString };
+                    } else {
+                        newCourses.push( { code: courseString })
+                    }
+					setCourses(newCourses);
 					// Reset input fields
 					setCourseID('');
 					setSection('');
