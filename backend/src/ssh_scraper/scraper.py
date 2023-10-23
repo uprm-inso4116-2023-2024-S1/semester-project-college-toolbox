@@ -2,6 +2,7 @@ import paramiko
 import time
 import re
 import sys
+from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
 from datetime import time as Time, datetime
@@ -230,27 +231,22 @@ async def find_sections_multiple(courses: list[str], session, skip: int):
         course = courses[i]
         try:
             term, year = get_term_year(skip)
-            course_sections = (
-                session.query(CourseSection)
+            course_section_ids = (
+                session.query(CourseSection.id)
                 .filter(
-                    CourseSection.course_id == course
-                    and CourseSection.term == term
-                    and CourseSection.year == year
+                    and_(
+                        CourseSection.course_id == course,
+                        and_(CourseSection.term == term, CourseSection.year == year),
+                    )
                 )
                 .all()
             )
-            room_schedules = []
-            for course_section in course_sections:
-                room_schedules += (
-                    session.query(RoomSchedule)
-                    .filter(RoomSchedule.course_section_id == course_section.id)
-                    .all()
-                )
-
-            for room_schedule in room_schedules:
-                session.delete(room_schedule)
-            for course_section in course_sections:
-                session.delete(course_section)
+            session.query(CourseSection).filter(
+                CourseSection.id.in_(course_section_ids)
+            ).delete()
+            session.query(RoomSchedule).filter(
+                RoomSchedule.course_section_id.in_(course_section_ids)
+            ).delete()
 
             sections = await find_sections(chan, course, skip)
             for section in sections:
