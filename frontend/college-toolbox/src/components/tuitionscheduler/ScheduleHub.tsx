@@ -9,6 +9,7 @@ import type {
 	ScheduleGenerationOptions,
 } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
+import { getDefaultOptions } from '../../lib/data';
 
 interface ScheduleHubProps {}
 
@@ -16,7 +17,9 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 	const [selectedCourses, setSelectedCourses] = useState<FilteredCourse[]>([]);
 	const [schedules, setSchedules] = useState<GeneratedSchedule[]>([]);
 	const [currentScheduleIdx, setCurrentScheduleIdx] = useState<number>(0);
-	const [options, setOptions] = useState<ScheduleGenerationOptions>({});
+	const [options, setOptions] = useState<ScheduleGenerationOptions>(
+		getDefaultOptions(),
+	);
 	useEffect(() => {
 		setCurrentScheduleIdx(0);
 	}, [schedules]);
@@ -27,15 +30,15 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 				<div className="flex items-center justify-center">
 					<ExportCalendarButton
 						section_ids={[2191, 1378, 1334]}
-						term="1erSem"
-						year="2023"
+						term={options.term}
+						year={options.year}
 					/>
 					<GenerateScheduleButton
 						options={options}
 						setSchedules={setSchedules}
 						courses={selectedCourses}
-						term="1erSem"
-						year="2023"
+						term={options.term}
+						year={options.year}
 					/>
 				</div>
 				{schedules && schedules.length > 0 && (
@@ -48,13 +51,15 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 				<ScheduleOptions
 					courses={selectedCourses}
 					setCourses={setSelectedCourses}
+					options={options}
+					setOptions={setOptions}
 				/>
 			</div>
 			<div className="col-span-7">
 				<WeeklyCalendar
 					schedule={schedules[currentScheduleIdx]}
-					term="1erSem"
-					year="2023"
+					term={options.term}
+					year={options.year}
 				/>
 			</div>
 		</section>
