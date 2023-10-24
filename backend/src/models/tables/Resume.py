@@ -10,6 +10,7 @@ from sqlalchemy import (
 from src.database import Base
 from datetime import datetime
 
+
 class Resume(Base):
     __tablename__ = "Resume"
 
