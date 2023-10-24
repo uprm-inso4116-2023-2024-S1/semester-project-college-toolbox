@@ -221,7 +221,7 @@ const ScholarshipList = () => {
 		);
 
 	return (
-
+		<div>
 			<div className="filter-section">
 				<label>Filter by Status:</label>
 				<div className="filter-buttons">
@@ -259,7 +259,6 @@ const ScholarshipList = () => {
 					</button>
 				</div>
 			</div>
-
 			<div className="filter-section">
 				<label>Filter by Year:</label>
 				<select
@@ -279,7 +278,6 @@ const ScholarshipList = () => {
 			<div className="filter-status">
 				<p>Filtering by Status: {selectedStatusFilter}</p>
 			</div>
-
 			{isAddingScholarship ? (
 				<div className="add-scholarship-section">
 					<div>
@@ -325,7 +323,6 @@ const ScholarshipList = () => {
 							className="input-field"
 						/>
 					</div>
-
 					<button onClick={handleAddScholarship} className="add-button">
 						Submit Scholarship
 					</button>
