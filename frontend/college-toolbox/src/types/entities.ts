@@ -69,6 +69,8 @@ export interface FilteredCourse {
 	filters?: CourseFilters;
 }
 export interface ScheduleGenerationOptions {
+	term: string;
+	year: string;
 	maxSchedules?: number;
 	minCredits?: number;
 	maxCredits?: number;

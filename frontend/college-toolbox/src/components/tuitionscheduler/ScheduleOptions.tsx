@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../app/constants';
-import type { CourseFilters, FilteredCourse } from '../../types/entities';
+import type {
+	CourseFilters,
+	FilteredCourse,
+	ScheduleGenerationOptions,
+} from '../../types/entities';
 import { Modal } from 'flowbite-react';
+import ToggleSwitch from '../ToggleSwitch';
 
 export interface ScheduleOptions {
 	courses: FilteredCourse[];
 	setCourses: React.Dispatch<React.SetStateAction<FilteredCourse[]>>;
+	options: ScheduleGenerationOptions;
+	setOptions: React.Dispatch<React.SetStateAction<ScheduleGenerationOptions>>;
 }
 
 const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	courses,
 	setCourses,
+	options,
+	setOptions,
 }) => {
 	// State for course list and input values
 	const [courseID, setCourseID] = useState('');
@@ -21,7 +30,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	const [courseFilters, setCourseFilters] = useState<CourseFilters | undefined>(
 		undefined,
 	);
-	const [selectedDays, setSelectedDays] = useState<string[]>([]);
+	const [creditBasedGeneration, setCreditBasedGeneration] =
+		useState<boolean>(false);
 	const [index, setIndex] = useState<number>(0);
 	const daysOfWeek = ['L', 'M', 'W', 'J', 'V', 'S', 'D'];
 
@@ -32,9 +42,9 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		setCourseFilters,
 		index,
 		setIndex,
-		selectedDays,
-		setSelectedDays,
 	};
+
+	const currentYear = new Date().getFullYear();
 
 	const handleDayClick = (day: string) => {
 		let days = modalProps.courseFilters?.days ?? '';
@@ -46,7 +56,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		setCourseFilters({ ...modalProps.courseFilters, days });
 	};
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFiltersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 		modalProps.setCourseFilters((prevState) => ({
 			...prevState,
@@ -54,8 +64,35 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		}));
 	};
 
+	const handleOptionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target;
+		setOptions((prevState) => ({
+			...prevState,
+			[name]: value,
+		}));
+	};
+
+	const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		const { name, value } = e.target;
+		setOptions((prevState) => ({
+			...prevState,
+			[name]: value,
+		}));
+	};
+
+	const handleToggle = () => {
+		setCreditBasedGeneration(!creditBasedGeneration);
+		if (!creditBasedGeneration) {
+			// Remove the min and max credit fields
+			setOptions(({ minCredits, maxCredits, ...rest }) => rest);
+		}
+	};
+
 	const saveCourseInfo = () => {
-		if (!modalProps.courseFilters) return;
+		if (!modalProps.courseFilters) {
+			setOpenModal(undefined);
+			return;
+		}
 		if (
 			(modalProps.courseFilters?.startTime ?? '00:00') >
 			(modalProps.courseFilters?.endTime ?? '23:59')
@@ -69,7 +106,6 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		updatedCoursesInfo[modalProps.index]!.filters = modalProps.courseFilters;
 		setCourses(updatedCoursesInfo);
 		setOpenModal(undefined);
-		console.log(modalProps.courseFilters);
 	};
 
 	const addCourse = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -97,7 +133,16 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 
 				const isValid = await validateCourse(courseID, section);
 				if (isValid) {
-					setCourses([...courses, { code: courseString }]);
+					const newCourses = [...courses];
+					const prevIdx = newCourses.findIndex(
+						(course) => course.code.split('-')[0] == courseID,
+					);
+					if (prevIdx != -1) {
+						newCourses[prevIdx] = { code: courseString };
+					} else {
+						newCourses.push({ code: courseString });
+					}
+					setCourses(newCourses);
 					// Reset input fields
 					setCourseID('');
 					setSection('');
@@ -161,13 +206,13 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 
 	return (
 		<div className="relative">
-			<div className="bg-gray-200 dark:bg-gray-800 rounded-lg col-span-2 p-1">
+			<div className="bg-gray-200 dark:bg-gray-800 rounded-lg col-span-2 p-4">
 				<h2 className="text-xl font-extrabold text-gray-900 dark:text-white p-1 mb-1">
 					Course Selection
 				</h2>
 
 				<form onSubmit={addCourse}>
-					<div className="grid grid-cols-10 gap-px">
+					<div className="grid grid-cols-10 gap-1">
 						<div className="col-span-4">
 							<label
 								htmlFor="course_name"
@@ -218,7 +263,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 					</div>
 				</form>
 				{courses.length > 0 && (
-					<div className="space-y-2 overflow-y-auto h-52 mt-1">
+					<div className="space-y-2 overflow-y-auto max-h-52 mt-1">
 						{courses.map((_course: FilteredCourse, idx) => (
 							<div
 								key={idx}
@@ -267,9 +312,123 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 			</div>
 
 			<div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-lg col-span-3">
-				<h2 className="text-3xl font-extrabold text-gray-900 dark:text-white p-1 mb-5">
-					Filters
+				<h2 className="text-xl font-extrabold text-gray-900 dark:text-white p-1 mb-5">
+					Schedule Generation Options
 				</h2>
+				<div className="grid grid-cols-1 gap-1">
+					<div className="grid grid-cols-8 gap-1">
+						<div className="col-span-4">
+							<label
+								htmlFor="term"
+								className="block mb-2 ml-1 text-sm font-medium text-gray-900 dark:text-white p-1 overflow-ellipsis"
+							>
+								Term <span className="text-red-600">*</span>
+							</label>
+							<select
+								id="term"
+								name="term"
+								value={options.term}
+								onChange={handleSelectChange}
+								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+								required
+							>
+								<option value="1erSem">Fall</option>
+								<option value="2doSem">Spring</option>
+								<option value="1erVer">First Summer</option>
+								<option value="2doVer">Second Summer</option>
+							</select>
+						</div>
+						<div className="col-span-4">
+							<label
+								htmlFor="year"
+								className="block mb-2 ml-1 text-sm font-medium text-gray-900 dark:text-white p-1 overflow-ellipsis"
+							>
+								Year <span className="text-red-600">*</span>
+							</label>
+							<select
+								id="year"
+								name="year"
+								value={options.year}
+								onChange={handleSelectChange}
+								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+								required
+							>
+								<option value={`${currentYear - 1}`}>
+									{currentYear - 1}-{currentYear}
+								</option>
+								<option value={`${currentYear}`}>
+									{currentYear}-{currentYear + 1}
+								</option>
+							</select>
+						</div>
+					</div>
+					<div className="grid grid-cols-2 gap-4 justify-center items-center">
+						<label
+							htmlFor="max-schedules-range"
+							className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+						>
+							Maximum Schedules Generated: {options.maxSchedules ?? 5}
+						</label>
+						<input
+							id="max-schedules-range"
+							name="maxSchedules"
+							type="range"
+							min="1"
+							max="25"
+							value={options.maxSchedules ?? 5}
+							step="1"
+							className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+							onChange={handleOptionsChange}
+						/>
+					</div>
+					<span className="text-sm font-medium text-gray-900 dark:text-gray-300">
+						Toggle Credit Constrained Generation
+					</span>
+					<ToggleSwitch
+						id="credit-gen-toggle"
+						checked={creditBasedGeneration}
+						onChange={handleToggle}
+						className="border border-gray-400 rounded-full"
+					/>
+					{creditBasedGeneration && (
+						<div className="grid grid-cols-2 gap-4 justify-center items-center">
+							<label
+								htmlFor="min-creds-range"
+								className="block text-sm font-medium text-gray-900 dark:text-white"
+							>
+								Minimum Credits: {options.minCredits}
+							</label>
+							<input
+								id="min-creds-range"
+								name="minCredits"
+								type="range"
+								min="0"
+								max="21"
+								value={options.minCredits ?? 12}
+								step="1"
+								className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+								onChange={handleOptionsChange}
+							/>
+							<label
+								htmlFor="max-creds-range"
+								className="block text-sm font-medium text-gray-900 dark:text-white"
+							>
+								Maximum Credits: {options.maxCredits}
+							</label>
+							<input
+								id="max-creds-range"
+								name="maxCredits"
+								type="range"
+								min="0"
+								max="21"
+								value={options.maxCredits ?? 18}
+								step="1"
+								className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+								onChange={handleOptionsChange}
+							/>
+						</div>
+					)}
+				</div>
 			</div>
 
 			<Modal
@@ -278,38 +437,43 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 				onClose={() => modalProps.setOpenModal(undefined)}
 			>
 				<Modal.Header>
-					Course Information: {!courses[modalProps.index]?.code}
+					Course Filters: {courses[modalProps.index]?.code}
 				</Modal.Header>
-				{/* add a modal body that lets you input the course information for the current courseInfo */}
 				<Modal.Body>
-					<div className="bg-white p-8 rounded">
-						Earliest Start Time
-						<input
-							type="time"
-							placeholder="Earliest Start Time"
-							name="startTime"
-							value={modalProps.courseFilters?.startTime}
-							onChange={handleChange}
-							className="border border-gray-300 p-2 mb-4 w-full"
-						/>
-						Latest End Time
-						<input
-							type="time"
-							placeholder="Latest End Time"
-							name="endTime"
-							value={modalProps.courseFilters?.endTime}
-							onChange={handleChange}
-							className="border border-gray-300 p-2 mb-4 w-full"
-						/>
+					<div className="bg-white dark:bg-gray-700 p-8 rounded dark:text-white">
+						<div className="grid grid-cols-2 gap-4">
+							<div>
+								Earliest Start Time
+								<input
+									type="time"
+									placeholder="Earliest Start Time"
+									name="startTime"
+									value={modalProps.courseFilters?.startTime}
+									onChange={handleFiltersChange}
+									className="border border-gray-300 p-2 mb-4 w-full rounded-md dark:text-black dark:bg-gray-200"
+								/>
+							</div>
+							<div>
+								Latest End Time
+								<input
+									type="time"
+									placeholder="Latest End Time"
+									name="endTime"
+									value={modalProps.courseFilters?.endTime}
+									onChange={handleFiltersChange}
+									className="border border-gray-300 p-2 mb-4 w-full dark:text-black dark:bg-gray-200"
+								/>
+							</div>
+						</div>
 						Days
 						<div className="flex justify-center space-x-4 mb-4">
 							{daysOfWeek.map((day, index) => (
 								<div
 									key={index}
-									className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full cursor-pointer ${
+									className={`w-10 h-10 flex items-center justify-center border border-gray-300 dark:border-gray-800 rounded-full cursor-pointer ${
 										modalProps.courseFilters?.days?.includes(day)
 											? 'bg-blue-500 text-white'
-											: 'bg-white'
+											: 'bg-white dark:bg-gray-700'
 									}`}
 									onClick={() => handleDayClick(day)}
 								>
@@ -323,12 +487,12 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 							placeholder="Professor"
 							name="professor"
 							value={modalProps.courseFilters?.professor}
-							onChange={handleChange}
-							className="border border-gray-300 p-2 mb-4 w-full"
+							onChange={handleFiltersChange}
+							className="border border-gray-300 p-2 mb-4 w-full dark:bg-gray-200"
 						/>
 						<button
 							onClick={saveCourseInfo}
-							className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+							className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded "
 						>
 							Save
 						</button>

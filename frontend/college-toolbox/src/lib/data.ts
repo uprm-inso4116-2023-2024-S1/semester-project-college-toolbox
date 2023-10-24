@@ -6,6 +6,7 @@ import type {
 	CourseFilters,
 	Endpoint,
 	EndpointsToOperations,
+	ScheduleGenerationOptions,
 } from '../types/entities.js';
 
 export async function fetchData<Selected extends Endpoint>(endpoint: Selected) {
@@ -120,10 +121,10 @@ export function convertCourseInformationToTextFilter(
 	if (info.days) {
 		filters.push(
 			'not days : ' +
-				'LMWJVSD'
-					.split('')
-					.filter((d) => !info.days?.includes(d))
-					.join(' | '),
+			'LMWJVSD'
+				.split('')
+				.filter((d) => !info.days?.includes(d))
+				.join(' | '),
 		);
 	}
 	if (info.startTime) {
@@ -136,4 +137,22 @@ export function convertCourseInformationToTextFilter(
 		filters.push(`professor : ${info.professor}`);
 	}
 	return filters.join(', ');
+}
+
+export function getDefaultOptions(): ScheduleGenerationOptions {
+	const currentYear = new Date().getFullYear()
+	const currentMonth = new Date().getMonth()
+	if (currentMonth < 6) { // Jan - May (1-5)
+		return { term: "2doSem", year: `${currentYear - 1}` }
+	}
+	else if (currentMonth == 6) { // June (6)
+		return { term: "1erVer", year: `${currentYear - 1}` }
+	}
+	else if (currentMonth == 7) { // July (7)
+		return { term: "2doVer", year: `${currentYear - 1}` }
+	}
+	else {// August - Dec (8-12)
+		return { term: "1erSem", year: `${currentYear}` }
+	}
+
 }

@@ -1,5 +1,4 @@
 import { Modal } from 'flowbite-react';
-import './WeeklyCalendar.scss';
 import {
 	convertToAmPm,
 	getCurrentTimeInMinutes,
@@ -43,7 +42,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 		getCurrentTimeInMinutes() - hoursOffsetInMinutes > 0
 			? (((getCurrentTimeInMinutes() - hoursOffsetInMinutes) % 30) / 30) * 100
 			: 0;
-	const currentDayCol = ((new Date().getDay()+6)%7) + 3; // Sunday 
+	const currentDayCol = ((new Date().getDay() + 6) % 7) + 3; // Sunday
 
 	const [openModal, setOpenModal] = useState<string | undefined>();
 	const [calEvent, setCalEvent] = useState<CourseSectionSchedule | undefined>();
@@ -71,7 +70,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 				return (
 					<div
 						key={`block ${idx}`}
-						className="event"
+						className="z-10 bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white rounded-b-[5px] hover:cursor-pointer"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
@@ -90,7 +89,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			return (
 				<React.Fragment key={`block-fragment ${idx}`}>
 					<div
-						className="event start"
+						className="bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
@@ -105,7 +104,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						Room: {block.room}
 					</div>
 					<div
-						className="event end"
+						className="z-10 bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow + hoursDuration} / span 1`,
@@ -122,28 +121,28 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	};
 
 	return (
-		<div className="bg-white">
-			<div className="container">
-				<div className="title">
+		<div className="bg-white dark:bg-gray-800 box-border">
+			<div className="flex-1 w-full grid grid-rows-[3em_3em_auto]">
+				<div className="bg-[#217346] text-center grid place-content-center text-white dark:text-gray-50 sticky top-0 z-10">
 					{termEnumToString(term)} {year} Semester
 				</div>
-				<div className="days">
-					<div className="filler" />
-					<div className="filler" />
+				<div className="bg-gray-100 dark:bg-gray-600 grid place-content-center text-center grid-cols-[4em_10px_repeat(7,1fr)] sticky top-12 z-20 border-b-2 border-gray-200 dark:border-gray-500 text-black dark:text-gray-50">
+					<div />
+					<div />
 					{shortDaysOfWeek.map((day, index) => (
 						<div
 							key={`day-header ${index}`}
-							className={`day${index + 3 === currentDayCol ? ' current' : ''}`}
+							className={`border-l border-gray-300 dark:border-gray-400 ${index + 3 === currentDayCol ? ' font-bold' : ''}`}
 						>
 							{day}
 						</div>
 					))}
 				</div>
-				<div className="content">
+				<div className="grid grid-cols-[4em_10px_repeat(7,1fr)] grid-rows-[repeat(37,2em)] ">
 					{Array.from({ length: 18 * 2 }, (_, index) => (
 						<div
 							key={`hours ${index + 1}`}
-							className="time"
+							className="col-span-1 text-right self-end relative bottom-[-1ex] text-gray-800 dark:text-gray-200 text-xs pr-2"
 							style={{ gridRow: index + 1 }}
 						>
 							{index % 2 === 0
@@ -153,32 +152,32 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 								: ''}
 						</div>
 					))}
-					<div className="filler-col" />
+					<div className="col-span-1 row-span-full col-start-2 border-r border-gray-200 dark:border-gray-500" />
 					{Array.from({ length: 7 }, (_, index) => (
 						<div
 							key={`day-col ${index + 1}`}
-							className={`col${index > 4 ? ' weekend' : ''}`}
+							className={`border-r border-gray-200 dark:border-gray-500 col-span-1 row-span-full${index > 4 ? '  bg-gray-100 dark:bg-gray-600' : ''}`}
 							style={{ gridColumn: index + 3 }}
 						></div>
 					))}
 					{Array.from({ length: 18 * 2 + 1 }, (_, index) => (
 						<div
 							key={`day-row ${index + 1}`}
-							className="row"
+							className="z-0 col-start-2 col-span-full border-b-2 border-gray-200 dark:border-gray-500 relative"
 							style={{ gridRow: index + 1 }}
 						></div>
 					))}
 					{schedule && schedule.courses.map(convertToCalendarEvents)}
 					<div
 						key={'curr-time'}
-						className="current-time"
+						className="z-10 border-t-2 border-red-500 relative"
 						style={{
 							gridColumn: currentDayCol,
 							gridRow: currentTimeRow,
 							top: `${currentTimeTop}%`,
 						}}
 					>
-						<div className="circle" />
+						<div className="w-[12px] h-[12px] border border-solid border-red-500 rounded-full bg-red-500 relative top-[-7px] left-[-6px]" />
 					</div>
 				</div>
 			</div>
