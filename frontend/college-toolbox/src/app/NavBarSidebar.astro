@@ -6,6 +6,7 @@ import { asset, url } from '../lib/data.js';
 import ColorModeSwitcher from '../components/ColorModeSwitcher.astro';
 import SearchInput from '../components/SearchInput.astro';
 import UserDropdown from '../components/UserDropdown.jsx';
+import ToolboxLogo from '../components/ToolboxLogo.jsx';
 
 ---
 
@@ -45,11 +46,9 @@ import UserDropdown from '../components/UserDropdown.jsx';
 					>
 				</button>
 				<a href="/" class="flex ml-2 md:mr-24">
-					<img
-						src={asset("docs/assets/toolboxImg.svg")}
-						class="h-8 mr-3"
-						alt="toolbox logo"
-					/>
+					<div class="h-8 mr-4">
+						<ToolboxLogo />
+					</div>
 					<span
 						class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
 						>College Toolbox</span
@@ -557,3 +556,4 @@ import UserDropdown from '../components/UserDropdown.jsx';
 		</div>
 	</div>
 </nav>
+../components/ToolboxLogo.tsx/index.js
