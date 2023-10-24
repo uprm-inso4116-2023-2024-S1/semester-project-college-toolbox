@@ -1,9 +1,0 @@
-# Generic single-database configuration.
-
-## To create a new revision locally:
-1. Run `poetry run alembic --config src/alembic.ini revision --autogenerate -m "<insert description>"` from the backend/ directory
-2. Revise and edit the newly created revision script if necessary
-3. Run `alembic upgrade head`
-
-## After pulling from the GitHub repository:
-1. Run `alembic upgrade head`
