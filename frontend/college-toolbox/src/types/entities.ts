@@ -74,3 +74,14 @@ export interface ScheduleFilters {
 	minCredits?: number
 	maxCredits?: number
 }
+
+export interface ResourcesModel {
+    Name: string;
+    Description: string;
+    URL: string;
+    Icon: string;
+    Type: string;
+    Rating: number;
+    RatingCount: number;
+}
+
