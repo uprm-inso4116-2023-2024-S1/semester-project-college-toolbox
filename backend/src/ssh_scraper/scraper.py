@@ -24,7 +24,7 @@ failures = set()
 term_input = ""
 
 
-def get_term_year(term: str=None) -> (str, int):
+def get_term_year(term: str = None) -> (str, int):
     now = datetime.now()
     current_term = TERMS[now.month - 1]
     if term is None:
@@ -229,8 +229,9 @@ async def find_sections_multiple(courses: list[str], session, term: str):
         course = courses[i]
         try:
             term, year = get_term_year(term)
-            course_section_ids = [course_section.id for course_section in 
-                session.query(CourseSection)
+            course_section_ids = [
+                course_section.id
+                for course_section in session.query(CourseSection)
                 .filter(
                     and_(
                         CourseSection.course_id == course,
