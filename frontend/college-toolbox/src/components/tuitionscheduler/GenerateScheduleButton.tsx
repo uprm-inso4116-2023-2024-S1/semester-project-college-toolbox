@@ -3,19 +3,21 @@ import { API_URL } from '../../app/constants';
 import type {
 	FilteredCourse,
 	GeneratedSchedule,
-	ScheduleFilters,
+	ScheduleGenerationOptions,
 } from '../../types/entities';
+import { fi } from 'date-fns/locale';
+import { convertCourseInformationToTextFilter } from '../../lib/data';
 
 interface GenerateScheduleButtonProps {
 	setSchedules: React.Dispatch<React.SetStateAction<GeneratedSchedule[]>>;
-	filters: ScheduleFilters;
+	options: ScheduleGenerationOptions;
 	courses: FilteredCourse[] | undefined;
 	term: string;
 	year: string;
 }
 
 const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
-	filters,
+	options,
 	setSchedules,
 	courses,
 	term,
@@ -26,12 +28,22 @@ const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
 			return;
 		}
 		try {
+			// TODO: we need to convert the course filters to a neat query string (to feed directly into Course Query CFG).
+			const coursesWithTextFilters = courses.map((course) => ({
+				code: course.code,
+				filters: convertCourseInformationToTextFilter(course.filters), // TODO: convert CourseFilters to string representation.
+			}));
 			const response = await fetch(`${API_URL}/schedules`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ filters, courses, term, year }),
+				body: JSON.stringify({
+					options,
+					courses: coursesWithTextFilters,
+					term,
+					year,
+				}),
 				credentials: 'include',
 			});
 
@@ -43,7 +55,6 @@ const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
 			// update the Generated Schedules
 			const schedulesResponse = await response.json();
 			setSchedules(schedulesResponse.schedules);
-			console.log(schedulesResponse);
 		} catch (error) {
 			console.error('An error occurred:', error);
 		} finally {

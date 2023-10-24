@@ -1,5 +1,6 @@
 from datetime import time
 from src.ssh_scraper.enums import Term
+from src.models.requests.schedule import FilteredCourse
 
 from src.ssh_scraper.utils import *
 
@@ -149,3 +150,21 @@ class TestGetSectionSechedules:
             or section.course_id == "INSO4116"
             or section.course_id == "CIIC4050"
         )
+
+
+class TestGetQueryFromFilters:
+    def test_course_code(self):
+        query = get_query_from_filters(
+            FilteredCourse(code="PSIC3001", filters="professor : Gustavo G. Cortina")
+        )
+        assert query == "course id = PSIC3001, professor : Gustavo G. Cortina"
+
+    def test_no_filters(self):
+        query = get_query_from_filters(FilteredCourse(code="INSO4116", filters=None))
+        assert query == "course id = INSO4116"
+
+    def test_with_section(self):
+        query = get_query_from_filters(
+            FilteredCourse(code="PSIC3001-116", filters=None)
+        )
+        assert query == "(course id = PSIC3001, section = 116)"
