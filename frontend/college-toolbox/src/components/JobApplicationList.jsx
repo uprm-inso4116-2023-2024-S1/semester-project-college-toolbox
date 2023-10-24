@@ -2,41 +2,20 @@ import React, { useState, useEffect } from 'react';
 import ScholarshipCard from './ScholarshipCard';
 import { format, parse } from 'date-fns';
 
-import './ScholarshipList.css'; // Import your CSS file
+import './JobApplicationList.css'; // Import your CSS file
 
 const defaultScholarships = [
 	{
 		id: 1,
-		name: 'Default Scholarship 1',
+		name: 'Default Job 1',
 		status: 'Accepted',
 		resume: 'John_Doe_Resume.pdf',
 		deadline: '2023-12-31',
 	},
 	{
 		id: 2,
-		name: 'Default Scholarship 2',
+		name: 'Default Job 2',
 		status: 'Denied',
-		resume: 'Jane_Smith_Resume.pdf',
-		deadline: '2023-11-30',
-	},
-	{
-		id: 3,
-		name: 'Default Scholarship 3',
-		status: 'Waiting',
-		resume: 'Jane_Smith_Resume.pdf',
-		deadline: '2023-11-30',
-	},
-	{
-		id: 4,
-		name: 'Default Scholarship 4',
-		status: 'Denied',
-		resume: 'Jane_Smith_Resume.pdf',
-		deadline: '2023-11-30',
-	},
-	{
-		id: 5,
-		name: 'Default Scholarship 5',
-		status: 'Accepted',
 		resume: 'Jane_Smith_Resume.pdf',
 		deadline: '2023-11-30',
 	},
@@ -196,9 +175,6 @@ const ScholarshipList = () => {
 
 	const uniqueYears = getUniqueYears(allScholarships);
 
-	const [searchQuery, setSearchQuery] = useState('');
-
-	// Step 3: Implement a filtering mechanism based on the search query
 	const filteredScholarships = allScholarships
 		.filter(
 			(scholarship) =>
@@ -214,50 +190,22 @@ const ScholarshipList = () => {
 			} else {
 				return scholarship.deadline.startsWith(selectedYearFilter);
 			}
-		})
-		// Filter scholarships based on the search query (case-insensitive)
-		.filter((scholarship) =>
-			scholarship.name.toLowerCase().includes(searchQuery.toLowerCase()),
-		);
+		});
 
 	return (
-
+		<div className="scholarship-list" style={{ paddingLeft: '20px' }}>
 			<div className="filter-section">
 				<label>Filter by Status:</label>
-				<div className="filter-buttons">
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'All' ? 'active' : ''
-						}`}
-						onClick={() => setSelectedStatusFilter('All')}
-					>
-						All
-					</button>
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'Accepted' ? 'active' : ''
-						}`}
-						onClick={() => setSelectedStatusFilter('Accepted')}
-					>
-						Accepted
-					</button>
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'Denied' ? 'active' : ''
-						}`}
-						onClick={() => setSelectedStatusFilter('Denied')}
-					>
-						Denied
-					</button>
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'Waiting' ? 'active' : ''
-						}`}
-						onClick={() => setSelectedStatusFilter('Waiting')}
-					>
-						Waiting
-					</button>
-				</div>
+				<select
+					value={selectedStatusFilter}
+					onChange={(e) => setSelectedStatusFilter(e.target.value)}
+					className="input-field"
+				>
+					<option value="All">All</option>
+					<option value="Accepted">Accepted</option>
+					<option value="Denied">Denied</option>
+					<option value="Waiting">Waiting</option>
+				</select>
 			</div>
 
 			<div className="filter-section">
@@ -274,10 +222,6 @@ const ScholarshipList = () => {
 						</option>
 					))}
 				</select>
-			</div>
-			{/* Move the filtering status outside of the dropdown */}
-			<div className="filter-status">
-				<p>Filtering by Status: {selectedStatusFilter}</p>
 			</div>
 
 			{isAddingScholarship ? (
@@ -327,7 +271,7 @@ const ScholarshipList = () => {
 					</div>
 
 					<button onClick={handleAddScholarship} className="add-button">
-						Submit Scholarship
+						Submit Job
 					</button>
 					<button onClick={handleCancelAddition} className="cancel-button">
 						Cancel
@@ -335,46 +279,45 @@ const ScholarshipList = () => {
 				</div>
 			) : (
 				<button onClick={() => setIsAddingScholarship(true)}>
-					Add Scholarship
+					Add Job
 				</button>
 			)}
-			{/* Use the class name directly */}
-			<div className="scholarship-list-horizontal">
-				{filteredScholarships.map((scholarship) => (
-					<div key={scholarship.id} className="scholarship-card-horizontal">
-						<ScholarshipCard
-							scholarship_name={scholarship.name}
-							applicationStatus={scholarship.status}
-							applicantResume={scholarship.resume}
-							applicationDeadline={scholarship.deadline}
-							{...scholarship}
-						/>
-						<button
-							onClick={() => showRemoveConfirmation(scholarship.id)}
-							className="remove-button"
-						>
-							Remove
-						</button>
-						{removeConfirmation === scholarship.id && (
-							<div className="remove-confirmation-modal">
-								<p>Are you sure you want to remove this scholarship?</p>
-								<div>
-									<button
-										onClick={() => handleRemoveScholarship(scholarship.id)}
-										className="confirm-button"
-									>
-										Confirm
-									</button>
-									<button onClick={cancelRemove} className="cancel-button">
-										Cancel
-									</button>
-								</div>
+
+			{filteredScholarships.map((scholarship) => (
+				<div key={scholarship.id} className="scholarship-card">
+					<ScholarshipCard
+						scholarship_name={scholarship.name}
+						applicationStatus={scholarship.status}
+						applicantResume={scholarship.resume}
+						applicationDeadline={scholarship.deadline}
+						{...scholarship}
+					/>
+					<button
+						onClick={() => showRemoveConfirmation(scholarship.id)}
+						className="remove-button"
+					>
+						Remove
+					</button>
+					{removeConfirmation === scholarship.id && (
+						<div className="remove-confirmation-modal">
+							<p>Are you sure you want to remove this job?</p>
+							<div>
+								<button
+									onClick={() => handleRemoveScholarship(scholarship.id)}
+									className="confirm-button"
+								>
+									Confirm
+								</button>
+								<button onClick={cancelRemove} className="cancel-button">
+									Cancel
+								</button>
 							</div>
-						)}
-					</div>
-				))}
-			</div>
+						</div>
+					)}
+				</div>
+			))}
 		</div>
 	);
 };
+
 export default ScholarshipList;

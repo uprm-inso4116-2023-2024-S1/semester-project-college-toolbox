@@ -2,7 +2,12 @@
 // GraphQL, Databases, REST APIs, CDNs, proxies, S3, Matrix, IPFS, you name it…
 
 import { API_URL, REMOTE_ASSETS_BASE_URL } from '../app/constants.js';
-import type { Endpoint, EndpointsToOperations } from '../types/entities.js';
+import type {
+	CourseFilters,
+	Endpoint,
+	EndpointsToOperations,
+	ScheduleGenerationOptions,
+} from '../types/entities.js';
 
 export async function fetchData<Selected extends Endpoint>(endpoint: Selected) {
 	const apiEndpoint = `${API_URL}${endpoint}`;
@@ -104,4 +109,50 @@ export function getCurrentTimeInMinutes(): number {
 	const minutes = now.getMinutes();
 
 	return hours * 60 + minutes;
+}
+
+export function convertCourseInformationToTextFilter(
+	info: CourseFilters | undefined,
+): string {
+	if (info == undefined) {
+		return '';
+	}
+	let filters = [];
+	if (info.days) {
+		filters.push(
+			'not days : ' +
+			'LMWJVSD'
+				.split('')
+				.filter((d) => !info.days?.includes(d))
+				.join(' | '),
+		);
+	}
+	if (info.startTime) {
+		filters.push(`start time >= ${info.startTime}`);
+	}
+	if (info.endTime) {
+		filters.push(`end time <= ${info.endTime}`);
+	}
+	if (info.professor) {
+		filters.push(`professor : ${info.professor}`);
+	}
+	return filters.join(', ');
+}
+
+export function getDefaultOptions(): ScheduleGenerationOptions {
+	const currentYear = new Date().getFullYear()
+	const currentMonth = new Date().getMonth()
+	if (currentMonth < 6) { // Jan - May (1-5)
+		return { term: "2doSem", year: `${currentYear - 1}` }
+	}
+	else if (currentMonth == 6) { // June (6)
+		return { term: "1erVer", year: `${currentYear - 1}` }
+	}
+	else if (currentMonth == 7) { // July (7)
+		return { term: "2doVer", year: `${currentYear - 1}` }
+	}
+	else {// August - Dec (8-12)
+		return { term: "1erSem", year: `${currentYear}` }
+	}
+
 }

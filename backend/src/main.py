@@ -1,10 +1,24 @@
 # src/main.py
 import atexit
 from uuid import uuid4
-from src.models.requests.calendar import ExportCalendarRequest
+from sqlalchemy.orm import Session
+from typing import Annotated
+from src.models.requests.schedule import (
+    ExportCalendarRequest,
+    GenerateSchedulesRequest,
+    ValidateCourseIDRequest,
+)
+from src.models.responses.schedule import (
+    GenerateSchedulesResponse,
+    ValidateCourseIDResponse,
+)
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
-from src.utils import (
+from src.ssh_scraper.utils import (
+    generate_schedules_with_criteria,
+    get_section_time_blocks_by_ids,
+    validate_course_id,
+)
+from src.utils.calendar import (
     create_course_calendar,
     get_full_name,
     get_semester,
@@ -22,18 +36,32 @@ from fastapi import (
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from sqlalchemy.orm import Session
-from typing import Annotated
 
+from src.ssh_scraper.enums import Term
+from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.utils.calendar import (
+    create_course_calendar,
+    get_full_name,
+    get_semester,
+    try_delete_file,
+)
+from src.utils.db import get_db, prepare_db
+
+from src.config import environment
 from src.database import Base, SessionLocal, engine
+
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.responses.existing_app import ExistingApplicationResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
+
 from src.models.tables.Document import Document
+from src.models.tables.Resume import Resume
+from src.models.tables.JobApplication import JobApplication
+from src.models.tables.ScholarshipApplication import ScholarshipApplication
 from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.user import User
-from src.utils import get_full_name
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -41,9 +69,24 @@ from src.security import (
     TOKEN_EXPIRATION_SECONDS,
 )
 
+from src.repositories.JobApplication import JobRepository
+from src.repositories.ScholarshipApplication import ScholarshipRepository
+from src.repositories.Document import DocumentRepository
+from src.repositories.Resume import ResumeRepository
+
 app = FastAPI(
     docs_url="/api/docs",
 )
+
+jobRepo = JobRepository("Job Repository")
+scholarshipRepo = ScholarshipRepository("Scholarship Repository")
+docRepo = DocumentRepository("Document Repository")
+resumeRepo = ResumeRepository("Resume Repository")
+# handle related endpoints through dedicated repositrories
+app.include_router(jobRepo.router)
+app.include_router(scholarshipRepo.router)
+app.include_router(docRepo.router)
+app.include_router(resumeRepo.router)
 
 # Configure CORS to allow requests from the React frontend
 frontendPort = "2121"
@@ -58,17 +101,6 @@ app.add_middleware(
     allow_methods=["*"],  # You can restrict HTTP methods if needed
     allow_headers=["*"],  # You can restrict headers if needed
 )
-# Create database tables
-Base.metadata.create_all(bind=engine)
-
-
-# Dependency to get the database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # API endpoints
@@ -206,68 +238,14 @@ def fetch_user(
     return LoginResponse(profile=profile)
 
 
-@app.post("/upload")
-async def upload_doc(
-    filename: str = Form(...),
-    file: UploadFile = Form(...),
-    auth_token: Annotated[str | None, Cookie()] = None,
+# Get all Existing Applications endpoint
+@app.get("/ExistingApplication/get/all")
+async def get_all_existing_applications(
     db: Session = Depends(get_db),
-):
-    userId = get_user_id_from_token(auth_token)
-    data = await file.read()
-    doc = Document(filename, data, "pdf", userId)
-    print(doc)
-
-    doc.upload(db)
-    return {"message": "Document uploaded successfully"}
-
-
-# Get PDF by ID endpoint MODIFY
-@app.get("/ScholarshipApplication/get/pdf_id/{pdf_id}")
-async def get_doc_by_id(pdf_id: int):
-    return Document.get_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
-
-
-# Delete PDF by ID endpoint MODIFY
-@app.delete("/ScholarshipApplication/delete/pdf_id/{pdf_id}")
-async def delete_doc_by_id(pdf_id: int):
-    # """
-    # deletes a pdf document from the database
-
-    # Args:
-    #     pdf_id (int): id of pdf to be deleted
-
-    # Raises:
-    #     HTTPException: if pdf not found
-    #     HTTPException: if error deleting from database
-    # """
-    # try:
-    #     with SessionLocal() as session:
-    #         pdf_document = session.query(Document).filter_by(id=pdf_id).first()
-    #         if not pdf_document:
-    #             raise HTTPException(
-    #                 status_code=404, detail=f"No PDF found with id: {pdf_id}"
-    #             )
-    #         else:
-    #             session.delete(pdf_document)
-    #             session.commit()
-
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f"Error deleting PDF: {str(e)}")
-
-    return Document.delete_pdf_by_id(pdf_id=pdf_id, SessionLocal=SessionLocal)
-
-
-# Update PDF by ID endpoint MODIFY
-@app.put(
-    "/ScholarshipApplication/update/pdf_id/{pdf_id}/filepath/{filepath: str}/filename/{filename: str}"
-)
-async def update_doc_by_id(pdf_id: int, filepath: str, filename: str):
-    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
-
-
-def update_pdf_by_id(pdf_id: int, filepath: str, filename: str):
-    Document.update_pdf_by_id(pdf_id, filepath, filename, SessionLocal)
+) -> list[ExistingApplicationResponse]:
+    # Should return a list of tables/existing_app.py
+    data = db.query(ExistingApplication).all()
+    return [ExistingApplicationResponse(**d.__dict__) for d in data]
 
 
 # Create .ics calendar file
@@ -281,7 +259,30 @@ def export_calendar(request: ExportCalendarRequest) -> FileResponse:
     return create_course_calendar(time_blocks, file_name, semester)
 
 
+# Generate Schedules
+@app.post("/schedules")
+def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
+    schedules = generate_schedules_with_criteria(
+        courses=request.courses,
+        term=request.term,
+        year=request.year,
+        options=request.options,
+    )
+
+    return {"schedules": schedules}
+
+
+# Validating courses for schedule generation
+@app.post("/validate_course_id", response_model=ValidateCourseIDResponse)
+def validate_course_id_endpoint(
+    request: ValidateCourseIDRequest,
+) -> ValidateCourseIDResponse:
+    is_valid = validate_course_id(request.course_id, request.section)
+    return {"is_valid": is_valid}
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=5670)
+    env = prepare_db(environment)
+    uvicorn.run(app, host="localhost", port=5670, reload=env == "PROD")

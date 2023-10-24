@@ -88,10 +88,11 @@ const ScholarshipCard = ({
 		if (uploadedFile) {
 			setResumeFileName(uploadedFile.name);
 			const formData = new FormData();
-			formData.append("file", uploadedFile);
 			formData.append("filename", uploadedFile.name)
+			formData.append("data", uploadedFile);
+			formData.append("filetype", "pdf")
 			console.log('FormData:', formData);
-			fetch(`${API_URL}/upload`, {
+			fetch(`${API_URL}/createResume`, {
 				method: 'POST',
 				body: formData,
 				credentials: "include"

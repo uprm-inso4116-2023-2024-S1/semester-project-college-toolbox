@@ -1,14 +1,8 @@
+from datetime import time
 from src.ssh_scraper.enums import Term
+from src.models.requests.schedule import FilteredCourse
 
 from src.ssh_scraper.utils import *
-
-
-def course_section_to_str(section):
-    return f"Course Id: {section.course_id}, Course Name: {section.course_name}, Section: {section.section}, Professor: {section.professor}"
-
-
-def room_schedule_to_str(schedule):
-    return f"Room: {schedule.room}, Days: {schedule.days}, Time: {schedule.start_time}-{schedule.end_time}"
 
 
 class TestUtils:
@@ -118,3 +112,59 @@ class TestSchedulingFunctions:
             assert len(s.wednesday) == 1
             assert len(s.thursday) == 2
             assert len(s.friday) == 1
+
+
+class TestGetSectionSechedules:
+    def setup_method(self):
+        self.term = Term.FIRST_SEMESTER
+        self.year = 2023
+
+    def test_contains(self):
+        section, _ = get_section_schedules("course id : INSO", self.term, self.year)[0]
+        assert "INSO" in section.course_id
+
+    def test_separator(self):
+        section, schedules = get_section_schedules(
+            "course id : CIIC, days = LW", self.term, self.year
+        )[0]
+        assert "CIIC" in section.course_id and schedules[0].days == "LW"
+
+    def test_or(self):
+        section, schedules = get_section_schedules(
+            "start time >= 12:00pm or section : D", self.term, self.year
+        )[0]
+        assert "D" in section.section or schedules[0].start_time >= time(12)
+
+    def test_not(self):
+        section, _ = get_section_schedules(
+            "not course id : INSO", self.term, self.year
+        )[0]
+        assert "INSO" not in section.course_id
+
+    def test_selector(self):
+        section, _ = get_section_schedules(
+            "course id = CIIC4060 | INSO4116 | CIIC4050", self.term, self.year
+        )[0]
+        assert (
+            section.course_id == "CIIC4060"
+            or section.course_id == "INSO4116"
+            or section.course_id == "CIIC4050"
+        )
+
+
+class TestGetQueryFromFilters:
+    def test_course_code(self):
+        query = get_query_from_filters(
+            FilteredCourse(code="PSIC3001", filters="professor : Gustavo G. Cortina")
+        )
+        assert query == "course id = PSIC3001, professor : Gustavo G. Cortina"
+
+    def test_no_filters(self):
+        query = get_query_from_filters(FilteredCourse(code="INSO4116", filters=None))
+        assert query == "course id = INSO4116"
+
+    def test_with_section(self):
+        query = get_query_from_filters(
+            FilteredCourse(code="PSIC3001-116", filters=None)
+        )
+        assert query == "(course id = PSIC3001, section = 116)"
