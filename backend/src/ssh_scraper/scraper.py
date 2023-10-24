@@ -18,22 +18,20 @@ TERMS = (
     + [Term.SECOND_SUMMER]
     + [Term.FIRST_SEMESTER] * 5
 )
+COURSES_LIST_FILE = "src/ssh_scraper/courses.txt"
 
 failures = set()
 term_input = ""
 
 
-def get_term_year(skip: int) -> (str, int):
-    terms = [
-        Term.SECOND_SEMESTER,
-        Term.FIRST_SUMMER,
-        Term.SECOND_SUMMER,
-        Term.FIRST_SEMESTER,
-    ]
+def get_term_year(term: str=None) -> (str, int):
     now = datetime.now()
-    index = terms.index(TERMS[(now.month - 1) % len(TERMS)])
-    term = terms[(index + skip) % len(terms)].value
-    year = now.year + (index + skip) // len(terms)
+    current_term = TERMS[now.month - 1]
+    if term is None:
+        term = current_term.value
+    year = now.year
+    if current_term == Term.SECOND_SEMESTER and Term(term) == Term.SECOND_SEMESTER:
+        year -= 1
     return (term, year)
 
 
@@ -51,12 +49,12 @@ async def send_input(chan, inputs: list[(str, int)]) -> str:
     )
 
 
-async def setup(chan, skip):
+async def setup(chan, term: str):
     global term_input
     terms_page = await send_input(chan, [("5", -1), ("6", 1.5)])
     terms = re.findall(r"\d\=[0-9A-Za-z]+", terms_page)
     terms = {term.split("=")[1]: term.split("=")[0] for term in terms}
-    term_input = terms[get_term_year(skip)[0]]
+    term_input = terms[term]
     await send_input(chan, [(term_input, -1)])
 
 
@@ -94,7 +92,7 @@ def parse_time(time: str) -> (Time, Time):
     )
 
 
-def parse_lines(lines: str, skip: int) -> dict:
+def parse_lines(lines: str, term: str) -> dict:
     split_lines = lines.split("\n")
 
     course_id = split_lines[0].replace(" ", "")
@@ -142,7 +140,7 @@ def parse_lines(lines: str, skip: int) -> dict:
     capacity = int(split_lines[i + 2])
     usage = int(split_lines[i + 3])
 
-    term, year = get_term_year(skip)
+    term, year = get_term_year(term)
 
     course_section = CourseSection(
         course_id=course_id,
@@ -172,7 +170,7 @@ def parse_lines(lines: str, skip: int) -> dict:
             )
         )
 
-    return {"course_section": course_section, "room_schedules": room_schedules}
+    return (course_section, room_schedules)
 
 
 def format_sections_output(course: str, sections: str) -> str:
@@ -184,7 +182,7 @@ def format_sections_output(course: str, sections: str) -> str:
     return sections[i:j].replace(course, "\n" + course)
 
 
-async def find_sections(chan, course: str, skip: int) -> list[dict]:
+async def find_sections(chan, course: str, term: str) -> list[dict]:
     output = format_sections_output(
         course, await send_input(chan, [(course, -1), ("\n", -1), ("\n", 5)])
     )[1:]
@@ -210,10 +208,10 @@ async def find_sections(chan, course: str, skip: int) -> list[dict]:
     i = output.find("* Totales")
     output = output[:i]
 
-    return [parse_lines(line, skip) for line in output.split("\n\n")]
+    return [parse_lines(line, term) for line in output.split("\n\n")]
 
 
-async def find_sections_multiple(courses: list[str], session, skip: int):
+async def find_sections_multiple(courses: list[str], session, term: str):
     if len(courses) == 0:
         return
 
@@ -224,15 +222,15 @@ async def find_sections_multiple(courses: list[str], session, skip: int):
 
     chan = ssh.invoke_shell()
     print(f"Opened channel {hex(id(chan))}")
-    await setup(chan, skip)
+    await setup(chan, term)
 
     i = 0
     while i < len(courses):
         course = courses[i]
         try:
-            term, year = get_term_year(skip)
-            course_section_ids = (
-                session.query(CourseSection.id)
+            term, year = get_term_year(term)
+            course_section_ids = [course_section.id for course_section in 
+                session.query(CourseSection)
                 .filter(
                     and_(
                         CourseSection.course_id == course,
@@ -240,7 +238,7 @@ async def find_sections_multiple(courses: list[str], session, skip: int):
                     )
                 )
                 .all()
-            )
+            ]
             session.query(CourseSection).filter(
                 CourseSection.id.in_(course_section_ids)
             ).delete()
@@ -248,10 +246,10 @@ async def find_sections_multiple(courses: list[str], session, skip: int):
                 RoomSchedule.course_section_id.in_(course_section_ids)
             ).delete()
 
-            sections = await find_sections(chan, course, skip)
-            for section in sections:
-                session.add(section["course_section"])
-                for room_schedule in section["room_schedules"]:
+            sections = await find_sections(chan, course, term)
+            for section, room_schedules in sections:
+                session.add(section)
+                for room_schedule in room_schedules:
                     session.add(room_schedule)
 
             session.commit()
@@ -262,7 +260,7 @@ async def find_sections_multiple(courses: list[str], session, skip: int):
             ssh.connect("rumad.uprm.edu", username="estudiante", password="")
             await asyncio.sleep(1)
             chan = ssh.invoke_shell()
-            await setup(chan, skip)
+            await setup(chan, term)
         except Exception:
             print(f"Exception occurred while scraping course {course}")
             failures.add(course)
@@ -296,9 +294,9 @@ def split_list_into_sublists(
 
 async def main():
     global failures
-    skip = int(sys.argv[2]) if len(sys.argv) > 2 else 0
+    term = sys.argv[1] if len(sys.argv) > 1 else None
 
-    with open(sys.argv[1]) as file:
+    with open(COURSES_LIST_FILE) as file:
         courses_list = split_list_into_sublists(
             [line.strip() for line in file], TASK_COUNT
         )
@@ -310,7 +308,7 @@ async def main():
         while True:
             tasks = []
             for courses in courses_list:
-                tasks.append(find_sections_multiple(courses, session, skip))
+                tasks.append(find_sections_multiple(courses, session, term))
 
             await asyncio.gather(*tasks)
 
