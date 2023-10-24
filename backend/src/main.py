@@ -16,11 +16,13 @@ from src.ssh_scraper.utils import (
     get_section_time_blocks_by_ids,
     validate_course_id,
 )
+
 from src.utils import (
     create_course_calendar,
     get_full_name,
     get_semester,
     try_delete_file,
+    filter_apps_by_prefix,
 )
 from fastapi import (
     FastAPI,
@@ -41,6 +43,7 @@ from src.config import environment
 from src.database import Base, SessionLocal, engine
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.requests.resources import PrefixFilterRequest
 from src.models.responses.existing_app import ExistingApplicationResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
@@ -309,6 +312,15 @@ async def get_all_existing_applications(
     # Should return a list of tables/existing_app.py
     data = db.query(ExistingApplication).all()
     return [ExistingApplicationResponse(**d.__dict__) for d in data]
+
+
+@app.post("/ExistingApplication/filter/prefix")
+async def filter_existing_applications_by_prefix(request_data: PrefixFilterRequest, db: Session = Depends(get_db)) -> list[ExistingApplicationResponse]:
+    """Retrieve all applications that start with a specific prefix."""
+    all_apps = db.query(ExistingApplication).all()
+    filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
+    return [ExistingApplicationResponse(**app.__dict__) for app in filtered_apps]
+
 
 
 # Create .ics calendar file

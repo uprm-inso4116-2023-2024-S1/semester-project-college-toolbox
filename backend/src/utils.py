@@ -9,6 +9,8 @@ from fastapi.responses import FileResponse
 from src.models.tables.user import User
 from src.ssh_scraper.enums import Term
 from src.models.common.scheduler import Semester, TimeBlock
+from src.models.tables.existing_app import ExistingApplication
+
 
 
 def get_full_name(user: User) -> str:
@@ -195,3 +197,8 @@ def create_course_calendar(
         ics_filename,
         headers={"Content-Disposition": f"attachment; filename={ics_filename}"},
     )
+
+
+def filter_apps_by_prefix(search_prefix: str, apps: list[ExistingApplication]) -> list[ExistingApplication]:
+    """Filter out applications based on their name prefix."""
+    return [app for app in apps if app.Name.lower().startswith(search_prefix.lower())]
