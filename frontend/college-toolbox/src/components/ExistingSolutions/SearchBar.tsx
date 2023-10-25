@@ -2,18 +2,34 @@ import React, { useState, useRef, useEffect} from 'react';
 import { API_URL } from '../../app/constants';
 import type { ResourcesModel } from '../../types/entities';
 
-const SearchBar: React.FC = () => {
+const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }) => {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [suggestions, setSuggestions] = useState<ResourcesModel[]>([]);
     const searchRef = useRef<HTMLFormElement>(null);
     const [searchValue, setSearchValue] = useState<string>('');
 
+    const resetSearchBar = () => {
+        setIsActive(false);
+        setSearchValue('');
+        setSuggestions([]);
+    }
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        resetSearchBar();
+        onSearch(searchValue);
+    };
+
+    const handleSuggestionSearch = (e: React.FormEvent, suggestion_value : string) => {
+        e.preventDefault();
+        resetSearchBar();
+        onSearch(suggestion_value);
+    };
 
     // click handler to check if click is outside the search component
     const handleClickOutside = (event: globalThis.MouseEvent) => {
         if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
             setIsActive(false);
-            console.log("inactive");
         }
     };
     
@@ -68,7 +84,7 @@ const SearchBar: React.FC = () => {
     
 
     return (
-        <form className='mt-4 mx-4' ref={searchRef}>
+        <form className='mt-4 mx-4' ref={searchRef} onSubmit={handleSubmit}>
             <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
             <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -96,9 +112,7 @@ const SearchBar: React.FC = () => {
                             <div key={index} className="flex items-center justify-between p-2 hover:bg-gray-200 cursor-pointer bg-opacity-80 dark:hover:bg-gray-700 dark:text-white">
                                 <button 
                                     className="flex-grow flex items-center justify-start focus:outline-none"
-                                    onClick={() => {
-                                        console.log(app.Name + " was clicked!"); 
-                                    }}
+                                    onClick={(e) => handleSuggestionSearch(e, app.Name)}
                                 >
                                     <div className="rounded-full bg-white w-8 h-8 mr-2"> 
                                         <img 
