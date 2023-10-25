@@ -140,7 +140,7 @@ def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBl
     return time_blocks
 
 
-def validate_course_id(course_id: str, section: str = None):
+def validate_course_id(course_id: str, term: str, year: str, section: str = None):
     with Session(engine) as session:
         if section:
             return (
@@ -149,6 +149,8 @@ def validate_course_id(course_id: str, section: str = None):
                     and_(
                         CourseSection.course_id == course_id,
                         CourseSection.section == section,
+                        CourseSection.term == term,
+                        CourseSection.year == year,
                     )
                 )
                 .first()
@@ -157,7 +159,13 @@ def validate_course_id(course_id: str, section: str = None):
         else:
             return (
                 session.query(CourseSection)
-                .filter(CourseSection.course_id == course_id)
+                .filter(
+                    and_(
+                        CourseSection.course_id == course_id,
+                        CourseSection.term == term,
+                        CourseSection.year == year,
+                    )
+                )
                 .first()
                 is not None
             )

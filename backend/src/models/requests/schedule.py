@@ -30,3 +30,5 @@ class GenerateSchedulesRequest(BaseModel):
 class ValidateCourseIDRequest(BaseModel):
     course_id: str
     section: Optional[str] = None
+    term: str
+    year: str
