@@ -75,7 +75,7 @@
 	flex-direction: column;
 	align-items: flex-start;
 	max-width: 200px; /* Adjust the width as needed */
-	margin-top: -1.5rem
+	margin-top: -1.5rem;
 }
 
 .filter-section label {
@@ -97,3 +97,37 @@
 	margin-top: 10px;
 }
 
+/* CSS for horizontal filter buttons */
+.filter-buttons {
+	display: flex; /* Make the buttons flex containers */
+	gap: 10px; /* Add spacing between buttons */
+}
+
+.filter-button {
+	/* Style for individual filter buttons */
+	padding: 5px 10px;
+	background-color: #ccc;
+	border: none;
+	cursor: pointer;
+}
+
+.filter-button.active {
+	/* Style for the active filter button */
+	background-color: #007bff;
+	color: #fff;
+}
+/* Add a CSS class for horizontal display */
+/* Add a CSS class for horizontal display */
+.scholarship-list-container {
+	padding: 16px;
+}
+
+/* Adjust the CSS for the horizontal scholarship card container */
+.scholarship-list-horizontal {
+	display: flex;
+	flex-wrap: nowrap; /* Prevent the cards from wrapping */
+	justify-content: flex-start; /* Add space between scholarship cards */
+	overflow-x: auto; /* Enable horizontal scrolling */
+	gap: 10px; /* Adjust the gap between scholarship cards as needed */
+	width: 300%; /* Adjust the width as needed */
+}

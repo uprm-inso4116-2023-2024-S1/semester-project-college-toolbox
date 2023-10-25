@@ -222,8 +222,19 @@ const ScholarshipList = () => {
 
 	return (
 		<div>
+			<div className="search-bar">
+				<input
+					type="text"
+					placeholder="Search Scholarships"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className="input-field"
+				/>
+			</div>
 			<div className="filter-section">
-				<label>Filter by Status:</label>
+				<div className="filter-status">
+					<p>Filtering by Status: {selectedStatusFilter}</p>
+				</div>
 				<div className="filter-buttons">
 					<button
 						className={`filter-button ${
@@ -275,9 +286,7 @@ const ScholarshipList = () => {
 				</select>
 			</div>
 			{/* Move the filtering status outside of the dropdown */}
-			<div className="filter-status">
-				<p>Filtering by Status: {selectedStatusFilter}</p>
-			</div>
+
 			{isAddingScholarship ? (
 				<div className="add-scholarship-section">
 					<div>
