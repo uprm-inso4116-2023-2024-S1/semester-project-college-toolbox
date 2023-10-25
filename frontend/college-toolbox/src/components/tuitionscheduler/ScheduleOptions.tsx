@@ -78,6 +78,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 			...prevState,
 			[name]: value,
 		}));
+		setCourses([]);
 	};
 
 	const handleToggle = () => {
@@ -131,7 +132,12 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 					courseString += `-${section}`;
 				}
 
-				const isValid = await validateCourse(courseID, section);
+				const isValid = await validateCourse(
+					courseID,
+					section,
+					options.term,
+					options.year,
+				);
 				if (isValid) {
 					const newCourses = [...courses];
 					const prevIdx = newCourses.findIndex(
@@ -170,10 +176,14 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	async function validateCourse(
 		courseID: string,
 		section: string,
+		term: string,
+		year: string,
 	): Promise<boolean> {
 		const requestBody = {
 			course_id: courseID,
 			section: section,
+			term,
+			year,
 		};
 
 		const response = await fetch(`${API_URL}/validate_course_id/`, {

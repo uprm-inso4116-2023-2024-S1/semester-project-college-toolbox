@@ -42,10 +42,10 @@ class TestUtils:
         assert block.section == self.section
 
     def test_validate_course_id_true(self):
-        assert validate_course_id(self.course_id)
+        assert validate_course_id(self.course_id, self.term, self.year)
 
     def test_validate_course_id_false(self):
-        assert not validate_course_id("INVALID")
+        assert not validate_course_id("INVALID", self.term, self.year)
 
 
 # ================================

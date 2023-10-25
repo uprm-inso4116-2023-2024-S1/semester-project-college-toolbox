@@ -277,7 +277,12 @@ def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesRe
 def validate_course_id_endpoint(
     request: ValidateCourseIDRequest,
 ) -> ValidateCourseIDResponse:
-    is_valid = validate_course_id(request.course_id, request.section)
+    is_valid = validate_course_id(
+        course_id=request.course_id,
+        term=request.term,
+        year=request.year,
+        section=request.section,
+    )
     return {"is_valid": is_valid}
 
 
