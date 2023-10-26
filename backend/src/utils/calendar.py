@@ -3,7 +3,7 @@ from icalendar import Calendar, Event, Alarm
 from datetime import datetime, timedelta, timezone
 import os
 import textwrap
-from typing import Optional, Tuple
+from typing import Tuple
 from uuid import uuid4
 from fastapi.responses import FileResponse
 from src.models.tables.user import User
