@@ -254,10 +254,10 @@ def export_calendar(
     request: ExportCalendarRequest, postWork: BackgroundTasks
 ) -> FileResponse:
     # assume the time blocks are non conflicting
-    file_name = f"{request.term}-calendar-{uuid4()}.ics"
-    postWork.add_task(try_delete_file, file_name)
+    file_path = f"{request.term}-calendar-{uuid4()}.ics"
+    postWork.add_task(try_delete_file, file_path)
     semester = get_semester(Term(request.term), request.year)
-    return create_course_calendar(request.schedule.courses, file_name, semester)
+    return create_course_calendar(request.schedule.courses, file_path, semester)
 
 
 # Generate Schedules

@@ -134,7 +134,7 @@ def get_building_location(room: str) -> Tuple[str, str]:
 
 
 def create_course_calendar(
-    courses: list[CourseSectionSchedule], ics_filename: str, semester_info: Semester
+    courses: list[CourseSectionSchedule], ics_file_path: str, semester_info: Semester
 ) -> FileResponse:
     cal = Calendar()
     cal.add("prodid", "-//AlejandroCruzado//Matrical//EN")
@@ -196,10 +196,11 @@ def create_course_calendar(
 
             cal.add_component(event)
 
-    with open(ics_filename, "wb") as f:
+    with open(ics_file_path, "wb") as f:
         f.write(cal.to_ical())
 
     return FileResponse(
-        ics_filename,
-        headers={"Content-Disposition": f"attachment; filename={ics_filename}"},
+        path=ics_file_path,
+        filename=f"{semester_info.title}.ics",
+        content_disposition_type="attachment",
     )

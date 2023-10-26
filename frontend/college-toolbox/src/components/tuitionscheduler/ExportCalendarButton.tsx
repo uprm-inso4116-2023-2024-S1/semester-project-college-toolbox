@@ -32,13 +32,18 @@ const ExportCalendarButton: React.FC<ExportButtonProps> = ({
 				return;
 			}
 
+			const filename =
+				response.headers
+					?.get('content-disposition')
+					?.match(/filename\*?=['"]?([^'"]*)['"]?/)
+					?.at(1) ?? `${term}-${year}-calendar.ics`;
 			// Convert the response to a Blob
 			const blob = await response.blob();
 
 			// Create a download link
 			const downloadLink = document.createElement('a');
 			downloadLink.href = window.URL.createObjectURL(blob);
-			downloadLink.download = 'calendar.ics';
+			downloadLink.download = filename;
 
 			// Trigger the download
 			document.body.appendChild(downloadLink);
