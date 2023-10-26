@@ -29,7 +29,7 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 			<div className="col-span-3">
 				<div className="flex items-center justify-center">
 					<ExportCalendarButton
-						section_ids={[2191, 1378, 1334]}
+						schedule={schedules[currentScheduleIdx]}
 						term={options.term}
 						year={options.year}
 					/>

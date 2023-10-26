@@ -5,7 +5,6 @@ import type {
 	GeneratedSchedule,
 	ScheduleGenerationOptions,
 } from '../../types/entities';
-import { fi } from 'date-fns/locale';
 import { convertCourseInformationToTextFilter } from '../../lib/data';
 
 interface GenerateScheduleButtonProps {
@@ -28,10 +27,9 @@ const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
 			return;
 		}
 		try {
-			// TODO: we need to convert the course filters to a neat query string (to feed directly into Course Query CFG).
 			const coursesWithTextFilters = courses.map((course) => ({
 				code: course.code,
-				filters: convertCourseInformationToTextFilter(course.filters), // TODO: convert CourseFilters to string representation.
+				filters: convertCourseInformationToTextFilter(course.filters),
 			}));
 			const response = await fetch(`${API_URL}/schedules`, {
 				method: 'POST',
@@ -64,8 +62,9 @@ const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
 	return (
 		<button
 			type="button"
-			className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+			className={`text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover-bg-blue-700 dark:focus:ring-blue-800 disabled:bg-gray-400 disabled:dark:bg-gray-500`}
 			onClick={handleGenerationClick}
+			disabled={!courses || courses.length === 0}
 		>
 			Generate
 		</button>
