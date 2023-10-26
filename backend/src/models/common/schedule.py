@@ -37,8 +37,6 @@ class WeekSchedule:
         return f"L: {self.monday}\nM: {self.tuesday}\nW: {self.wednesday}\nJ: {self.thursday}\nV: {self.friday}\n"
 
 
-
-
 class SpaceTimeBlock(BaseModel):
     room: str
     building: str
@@ -46,6 +44,7 @@ class SpaceTimeBlock(BaseModel):
     day: int
     startTime: str
     endTime: str
+
 
 class CourseSectionSchedule(BaseModel):
     courseCode: str
@@ -59,4 +58,3 @@ class CourseSectionSchedule(BaseModel):
 
 class GeneratedSchedule(BaseModel):
     courses: List[CourseSectionSchedule]
-
