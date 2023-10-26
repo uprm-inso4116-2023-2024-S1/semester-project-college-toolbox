@@ -8,7 +8,7 @@ from uuid import uuid4
 from fastapi.responses import FileResponse
 from src.models.tables.user import User
 from src.ssh_scraper.enums import Term
-from src.models.common.scheduler import Semester, TimeBlock
+from src.models.common.schedule import Semester, TimeBlock
 
 
 def get_full_name(user: User) -> str:
