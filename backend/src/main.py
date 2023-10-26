@@ -1,5 +1,4 @@
 # src/main.py
-import atexit
 from uuid import uuid4
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -32,6 +31,7 @@ from fastapi import (
     Depends,
     Cookie,
     UploadFile,
+    BackgroundTasks,
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
@@ -250,13 +250,14 @@ async def get_all_existing_applications(
 
 # Create .ics calendar file
 @app.post("/export_calendar")
-def export_calendar(request: ExportCalendarRequest) -> FileResponse:
-    time_blocks = get_section_time_blocks_by_ids(request.section_ids)
+def export_calendar(
+    request: ExportCalendarRequest, postWork: BackgroundTasks
+) -> FileResponse:
     # assume the time blocks are non conflicting
-    file_name = f"{request.term}-calendar-{uuid4()}.ics"
-    atexit.register(lambda: try_delete_file(file_name))
+    file_path = f"{request.term}-calendar-{uuid4()}.ics"
+    postWork.add_task(try_delete_file, file_path)
     semester = get_semester(Term(request.term), request.year)
-    return create_course_calendar(time_blocks, file_name, semester)
+    return create_course_calendar(request.schedule.courses, file_path, semester)
 
 
 # Generate Schedules

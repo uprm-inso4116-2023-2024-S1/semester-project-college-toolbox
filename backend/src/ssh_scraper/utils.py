@@ -1,8 +1,8 @@
 from collections import defaultdict
 from typing import List
-from src.models.common.scheduler import TimeBlock, WeekSchedule
+from src.models.common.schedule import TimeBlock, WeekSchedule
 from src.models.requests.schedule import FilteredCourse, ScheduleGenerationOptions
-from src.models.responses.schedule import (
+from src.models.common.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
     SpaceTimeBlock,

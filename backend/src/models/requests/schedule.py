@@ -1,10 +1,11 @@
 # src/models/requests/login.py
 from typing import Optional
 from pydantic import BaseModel
+from src.models.common.schedule import GeneratedSchedule
 
 
 class ExportCalendarRequest(BaseModel):
-    section_ids: list[int]
+    schedule: GeneratedSchedule
     term: str
     year: str
 
