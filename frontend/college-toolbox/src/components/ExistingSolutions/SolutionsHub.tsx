@@ -27,8 +27,10 @@ const SolutionsHub: React.FC = () => {
         <div className="solutions-hub-container">
             <SearchBar onSearch={handleSearchResources} />
             <div className="grid grid-cols-5 gap-4 mx-4 mt-4">
-                <div className="col-span-1">
+                <div className="col-span-1 ">
+									<div className="filters-container fixed">
                     <Filters />
+									</div>
                 </div>
                 <div className="col-span-4">
                     <SolutionsView applications={applications} />
