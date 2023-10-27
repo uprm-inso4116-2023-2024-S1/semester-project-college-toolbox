@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import ScholarshipCard from './ScholarshipCard';
 import { format, parse } from 'date-fns';
+import { isSameDay } from 'date-fns';
 
 import './ScholarshipList.css'; // Import your CSS file
 
@@ -69,6 +72,7 @@ const ScholarshipList = () => {
 		).length;
 		return { total, accepted, denied, waiting };
 	};
+	const [selectedDate, setSelectedDate] = useState(new Date());
 
 	const [scholarshipCounters, setScholarshipCounters] = useState(
 		calculateCounters(),
@@ -219,11 +223,53 @@ const ScholarshipList = () => {
 		.filter((scholarship) =>
 			scholarship.name.toLowerCase().includes(searchQuery.toLowerCase()),
 		);
+	// Function to extract unique deadlines from the scholarships
+	const getUniqueDeadlines = (scholarships) => {
+		return scholarships.map((scholarship) => new Date(scholarship.deadline));
+	};
+
+	const uniqueDeadlines = getUniqueDeadlines(allScholarships);
+
+	// Function to check if a date is in the list of scholarship deadlines
+	const isDeadlineDate = (date) => {
+		return uniqueDeadlines.some((deadline) => {
+			return (
+				date.getDate() === deadline.getDate() &&
+				date.getMonth() === deadline.getMonth() &&
+				date.getFullYear() === deadline.getFullYear()
+			);
+		});
+	};
 
 	return (
 		<div>
+			<div className="calendar-section">
+				<Calendar
+					onChange={setSelectedDate}
+					value={selectedDate}
+					tileContent={({ date }) => {
+						if (isDeadlineDate(date)) {
+							return <p style={{ color: 'red' }}>DL</p>;
+						}
+					}}
+					calendarType="US"
+				/>
+				<p>Selected Date: {selectedDate.toDateString()}</p>
+			</div>
+			<p>DL represents Scholarship Deadline in calendar.</p>
+			<div className="search-bar">
+				<input
+					type="text"
+					placeholder="Search Scholarships"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className="input-field"
+				/>
+			</div>
 			<div className="filter-section">
-				<label>Filter by Status:</label>
+				<div className="filter-status">
+					<p>Filtering by Status: {selectedStatusFilter}</p>
+				</div>
 				<div className="filter-buttons">
 					<button
 						className={`filter-button ${
@@ -275,9 +321,7 @@ const ScholarshipList = () => {
 				</select>
 			</div>
 			{/* Move the filtering status outside of the dropdown */}
-			<div className="filter-status">
-				<p>Filtering by Status: {selectedStatusFilter}</p>
-			</div>
+
 			{isAddingScholarship ? (
 				<div className="add-scholarship-section">
 					<div>
