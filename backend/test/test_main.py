@@ -171,3 +171,55 @@ def test_existing_application_get_all_endpoint(test_db):
 
     # Close the database connection
     db.close()
+
+
+# Test the Existing Application test endpoint
+def test_existing_application_get_by_type_endpoint(test_db):
+    expected_responses = [
+        (
+            ExistingApplicationResponse(
+                Name="Test Application",
+                Description="A test application",
+                URL="https://example.com",
+                Icon="https://example.com/image.jpg",
+                Type="Educational",
+                Rating=500,
+                RatingCount=100,
+            )
+        ),
+        (
+            ExistingApplicationResponse(
+                Name="Test Application 2",
+                Description="Another test application",
+                URL="https://example2.com",
+                Icon="https://example2.com/image.jpg",
+                Type="Organizational",
+                Rating=400,
+                RatingCount=200,
+            )
+        ),
+        ExistingApplicationResponse(
+            Name="Test Application 3",
+            Description="Another test application",
+            URL="https://example3.com",
+            Icon="https://example3.com/image.jpg",
+            Type="Educational",
+            Rating=1000,
+            RatingCount=200,
+        ),
+    ]
+    # Write dummy data to the database
+    db = get_test_db_session()
+    db.execute(get_existing_application_insert_query(expected_responses))
+    db.commit()
+
+    # Test the endpoint
+    response = client.get("/ExistingApplication/get/Educational")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert response.json()[0] == expected_responses[0].model_dump()
+    assert response.json()[1] == expected_responses[2].model_dump()
+
+    # Close the database connection
+    db.close()

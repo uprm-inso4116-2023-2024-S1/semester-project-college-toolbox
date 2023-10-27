@@ -248,6 +248,16 @@ async def get_all_existing_applications(
     return [ExistingApplicationResponse(**d.__dict__) for d in data]
 
 
+# Get an Existing Application endpoint by type
+@app.get("/ExistingApplication/get/{type}")
+async def get_existing_application_by_type(
+    type: str, db: Session = Depends(get_db)
+) -> list[ExistingApplicationResponse]:
+    # Should return a list of tables/existing_app.py
+    data = db.query(ExistingApplication).filter(ExistingApplication.Type == type).all()
+    return [ExistingApplicationResponse(**d.__dict__) for d in data]
+
+
 # Create .ics calendar file
 @app.post("/export_calendar")
 def export_calendar(
