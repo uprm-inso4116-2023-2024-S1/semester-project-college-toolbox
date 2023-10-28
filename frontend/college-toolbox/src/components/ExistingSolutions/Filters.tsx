@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
 
 const Filters: React.FC = () => {
+	const [filterList, setCheckedFilters] = useState<string[]>([]);
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (event.target.checked) {
+      // Checkbox was checked, add its value to the array
+      setCheckedFilters((prevChecked) => [...prevChecked, value]);
+    } else {
+      // Checkbox was unchecked, remove its value from the array
+      setCheckedFilters((prevChecked) => prevChecked.filter((item) => item !== value));
+    }
+  };
+	
 		const createFilterToAppMap = async () => {
 			let data = [];
 			try{
@@ -17,10 +30,6 @@ const Filters: React.FC = () => {
 		};
 
 
-
-
-
-
     return (
         <div className="bg-gray-200 rounded-lg p-4">
             <h2 className="text-xl font-semibold mb-2">Filters</h2>
@@ -30,37 +39,37 @@ const Filters: React.FC = () => {
 							{/* sub elements */}
 							<div className="p-4">
 								<label htmlFor="Note-taking" className="flex items-center">
-									<input type="checkbox" id="Note-taking" name="Note-taking" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Note-taking" value="Note-taking" onChange={handleCheckboxChange} checked={filterList.includes('Note-taking')}  className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Note-taking</span>
 								</label>
 
 								<label htmlFor="Organizational" className="flex items-center mt-2">
-									<input type="checkbox" id="Organizational" name="Organizational" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Organizational" value="Organizational" onChange={handleCheckboxChange} checked={filterList.includes('Organizational')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Organizational</span>
 								</label>
 
 								<label htmlFor="Study" className="flex items-center mt-2">
-									<input type="checkbox" id="Study" name="Study" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Study" value="Study" onChange={handleCheckboxChange} checked={filterList.includes('Study')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Study</span>
 								</label>
 
 								<label htmlFor="ChatGPT" className="flex items-center">
-									<input type="checkbox" id="ChatGPT" name="ChatGPT" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="ChatGPT" value="ChatGPT" onChange={handleCheckboxChange} checked={filterList.includes('ChatGPT')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">ChatGPT</span>
 								</label> 	
 
 								<label htmlFor="Proofreading" className="flex items-center mt-2">
-									<input type="checkbox" id="Proofreading" name="Proofreading" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Proofreading" value="Proofreading" onChange={handleCheckboxChange} checked={filterList.includes('Proofreading')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Proofreading</span>
 								</label>
 
 								<label htmlFor="Budgetting" className="flex items-center">
-									<input type="checkbox" id="Budgetting" name="Budgetting" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Budgetting" value="Budgetting" onChange={handleCheckboxChange} checked={filterList.includes('Budgetting')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Budgetting</span>
 								</label> 
 
 								<label htmlFor="Other" className="flex items-center mt-2">
-									<input type="checkbox" id="Other" name="Other" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Other" value="Other" onChange={handleCheckboxChange} checked={filterList.includes('Other')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Other</span>
 								</label>
 								
@@ -74,12 +83,12 @@ const Filters: React.FC = () => {
 							{/* sub elements */}
 							<div className="p-4">
 								<label htmlFor="A-Z" className="flex items-center">
-									<input type="checkbox" id="A-Z" name="A-Z" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="A-Z" value="A-Z" onChange={handleCheckboxChange} checked={filterList.includes('A-Z')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">A-Z<span>&uarr;</span></span>
 								</label> 	
 
 								<label htmlFor="Price" className="flex items-center mt-2">
-									<input type="checkbox" id="Price" name="Price" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Price" value="Price" onChange={handleCheckboxChange} checked={filterList.includes('Price')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Price<span>&darr;</span></span>
 								</label>
 							</div>
@@ -91,17 +100,17 @@ const Filters: React.FC = () => {
 							{/* sub elements */}
 							<div className="p-4">
 								<label htmlFor="Free" className="flex items-center">
-									<input type="checkbox" id="Free" name="Free" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Free" value="Free" onChange={handleCheckboxChange} checked={filterList.includes('Free')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Free</span>
 								</label> 
 
 								<label htmlFor="One-Time Buy" className="flex items-center">
-									<input type="checkbox" id="One-Time Buy" name="One-Time Buy" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="One-Time Buy" value="One-Time Buy" onChange={handleCheckboxChange} checked={filterList.includes('One-Time Buy')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">One-Time Buy</span>
 								</label> 
 
 								<label htmlFor="Subscription" className="flex items-center">
-									<input type="checkbox" id="Subscription" name="Subscription" className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<input type="checkbox" id="Subscription" value="Subscription" onChange={handleCheckboxChange} checked={filterList.includes('Subscription')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
 									<span className="ml-2">Subscription</span>
 								</label> 									
 							</div>
