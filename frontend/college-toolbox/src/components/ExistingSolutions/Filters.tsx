@@ -1,33 +1,44 @@
 import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
 
-const Filters: React.FC = () => {
+const Filters: React.FC<{ applications: any[] }> = ({ applications }) => {
 	const [filterList, setCheckedFilters] = useState<string[]>([]);
 
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    if (event.target.checked) {
-      // Checkbox was checked, add its value to the array
-      setCheckedFilters((prevChecked) => [...prevChecked, value]);
-    } else {
-      // Checkbox was unchecked, remove its value from the array
-      setCheckedFilters((prevChecked) => prevChecked.filter((item) => item !== value));
-    }
-  };
+	const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = event.target.value;
+		if (event.target.checked) {
+			// Checkbox was checked, add its value to the array
+			setCheckedFilters((prevChecked) => [...prevChecked, value]);
+		} else {
+			// Checkbox was unchecked, remove its value from the array
+			setCheckedFilters((prevChecked) => prevChecked.filter((item) => item !== value));
+		}
+	};
 	
-		const createFilterToAppMap = async () => {
-			let data = [];
-			try{
-				const response = await fetch(`${API_URL}/ExistingApplication/get/all`);
-				if (response.ok) {
-					data = await response.json();
-					//how do I want to map our options to the filters
-					data.map
+	const mapFiltersToApps = () => {
+		let filteredApplications = applications.map(app => {
+			for(let filter in filterList){
+				if(app.Type == filter){
+					return app;
 				}
-			}catch (error) {
-				console.error("Error fetching applications:", error);
 			}
-		};
+		});
+		return filteredApplications;
+	};
+
+	const handleSubmitEvent = () => {
+		applications = mapFiltersToApps();
+		//Uncheck the boxes and clear the list
+		for(let filterString in filterList){
+			const checkbox = document.getElementById(filterString) as HTMLInputElement;
+			if(checkbox!==null) {
+				checkbox.checked = false;
+			} else {
+				console.error("Input element with id "+ filterString + " was not found.");
+			}	
+		setCheckedFilters([]);
+		}
+	}
 
 
     return (
@@ -53,9 +64,9 @@ const Filters: React.FC = () => {
 									<span className="ml-2">Study</span>
 								</label>
 
-								<label htmlFor="ChatGPT" className="flex items-center">
-									<input type="checkbox" id="ChatGPT" value="ChatGPT" onChange={handleCheckboxChange} checked={filterList.includes('ChatGPT')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
-									<span className="ml-2">ChatGPT</span>
+								<label htmlFor="Information" className="flex items-center">
+									<input type="checkbox" id="Information" value="Information" onChange={handleCheckboxChange} checked={filterList.includes('Information')} className="form-checkbox text-bg-blue-700 h-5 w-5"/>
+									<span className="ml-2">Information</span>
 								</label> 	
 
 								<label htmlFor="Proofreading" className="flex items-center mt-2">
@@ -116,7 +127,7 @@ const Filters: React.FC = () => {
 							</div>
 						</div>
 
-						<button type="submit" className="text-white mt-auto bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Apply</button>
+						<button type="button" onClick={handleSubmitEvent} className="text-white mt-auto bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Apply</button>
         </div>
     );
 }

@@ -29,7 +29,7 @@ const SolutionsHub: React.FC = () => {
             <div className="grid grid-cols-5 gap-4 mx-4 mt-4">
                 <div className="col-span-1 ">
 									<div className="filters-container fixed">
-                    <Filters />
+                    <Filters applications={applications}/>
 									</div>
                 </div>
                 <div className="col-span-4">
