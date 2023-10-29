@@ -376,14 +376,22 @@ def generate_schedules_with_criteria(
         course_code, _ = (
             course.code.split("-", 1) if "-" in course.code else (course.code, None)
         )
-        section_schedules = get_section_schedules(
+        section_with_schedules = get_section_schedules(
             get_query_from_filters(course), Term(term), year
         )
         course_list.append(course_code)
-        for section, schedules in section_schedules:
-            course_to_sections[course_code].append(section.id)
-            section_map[section.id] = section
-            section_time_map[section.id] = schedules
+        for section, schedules in section_with_schedules:
+            # For now, discard sections without schedules
+            # TODO: replace this with proper logic to incorporate remote courses
+            if not any(
+                map(
+                    lambda s: (not s.start_time or not s.end_time or not s.days),
+                    schedules,
+                )
+            ):
+                course_to_sections[course_code].append(section.id)
+                section_map[section.id] = section
+                section_time_map[section.id] = schedules
     # Try to build the schedules
     generated_schedules: set[frozenset[int]] = set()
     max_schedules = min(25, options.maxSchedules) if options.maxSchedules else 5
@@ -428,9 +436,9 @@ def generate_schedules_with_criteria(
         converted_schedule = GeneratedSchedule(courses=[])
         for section_id in schedule:
             section_data = section_map[section_id]
-            section_schedules = section_time_map[section_id]
+            section_with_schedules = section_time_map[section_id]
             course_section_schedule = create_course_section_schedule(
-                section_data, section_schedules
+                section_data, section_with_schedules
             )
             converted_schedule.courses.append(course_section_schedule)
         converted_schedules.append(converted_schedule)
