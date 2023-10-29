@@ -3,17 +3,17 @@ from icalendar import Calendar, Event, Alarm
 from datetime import datetime, timedelta, timezone
 import os
 import textwrap
-from typing import Optional, Tuple
+from typing import Tuple
 from uuid import uuid4
 from fastapi.responses import FileResponse
 from src.models.tables.user import User
 from src.ssh_scraper.enums import Term
-from src.models.common.scheduler import Semester, TimeBlock
 from src.models.tables.existing_app import ExistingApplication
 from src.models.requests.resources import (
     applyAllFilterRequest,
 )
 
+from src.models.common.schedule import CourseSectionSchedule, Semester
 
 
 def get_full_name(user: User) -> str:
@@ -44,6 +44,11 @@ time_block_day_to_rfc = {
     "V": "FR",
     "S": "SA",
     "D": "SU",
+}
+short_days = ["L", "M", "W", "J", "V", "S", "D"]
+rfc_days = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
+time_block_day_to_rfc = {
+    short_day: rfc_day for short_day, rfc_day in zip(short_days, rfc_days)
 }
 
 weekday_str_to_int = {day_str: day_int for day_int, day_str in enumerate("LMWJVSD")}
@@ -134,7 +139,7 @@ def get_building_location(room: str) -> Tuple[str, str]:
 
 
 def create_course_calendar(
-    time_blocks: list[TimeBlock], ics_filename: str, semester_info: Semester
+    courses: list[CourseSectionSchedule], ics_file_path: str, semester_info: Semester
 ) -> FileResponse:
     cal = Calendar()
     cal.add("prodid", "-//AlejandroCruzado//Matrical//EN")
@@ -142,63 +147,67 @@ def create_course_calendar(
     cal.add("x-wr-calname", f"{semester_info.title}")
     cal.add("x-wr-timezone", "America/Puerto_Rico")
     # TODO: Add notification preferences
-    for time_block in time_blocks:
-        building_name, location = get_building_location(time_block.room)
-        event = Event()
-        event.add("uid", str(uuid4()))
-        event.add(
-            "summary",
-            f"{time_block.course_id}-{time_block.section} @ {time_block.room}",
-        )
-        event.add("location", location)
-        event.add(
-            "description",
-            textwrap.dedent(
-                f"""
-                Room: {time_block.room}
-                Building: {building_name}
-                """
-            ),
-        )
+    for course in courses:
+        for time_block in course.timeBlocks:
+            event = Event()
+            event.add("uid", str(uuid4()))
+            event.add(
+                "summary",
+                f"{course.courseCode}-{course.sectionCode} @ {time_block.room}",
+            )
+            event.add("location", time_block.location)
+            event.add(
+                "description",
+                textwrap.dedent(
+                    f"""
+                    Course Name: {course.courseName}
+                    Room: {time_block.room}
+                    Building: {time_block.building}
+                    Section: {course.sectionCode}
+                    Credits: {course.credits}
+                    """
+                ),
+            )
 
-        first_date = next_weekday_date(
-            semester_info.start, weekday_str_to_int[time_block.day]
-        )
-        event.add(
-            "dtstart",
-            first_date.replace(
-                hour=time_block.start_time.hour, minute=time_block.start_time.minute
-            ),
-        )
-        event.add(
-            "dtend",
-            first_date.replace(
-                hour=time_block.end_time.hour, minute=time_block.end_time.minute
-            ),
-        )
-        event.add(
-            "rrule",
-            {
-                "freq": "weekly",
-                "byday": time_block_day_to_rfc[time_block.day],
-                "until": semester_info.end,
-            },
-        )
-        event.add("dtstamp", datetime.now())
-        # Add an alarm 30 minutes before the event
-        alarm = Alarm()
-        alarm.add("action", "DISPLAY")
-        alarm.add("trigger", timedelta(minutes=-30))
-        event.add_component(alarm)
+            first_date = next_weekday_date(semester_info.start, time_block.day)
+            event.add(
+                "dtstart",
+                first_date.replace(
+                    hour=int(time_block.startTime.split(":")[0]),
+                    minute=int(time_block.startTime.split(":")[1]),
+                ),
+            )
+            event.add(
+                "dtend",
+                first_date.replace(
+                    hour=int(time_block.endTime.split(":")[0]),
+                    minute=int(time_block.endTime.split(":")[1]),
+                ),
+            )
+            event.add(
+                "rrule",
+                {
+                    "freq": "weekly",
+                    "byday": rfc_days[time_block.day],
+                    "until": semester_info.end,
+                },
+            )
+            event.add("dtstamp", datetime.now())
+            # Add an alarm 30 minutes before the event
+            alarm = Alarm()
+            alarm.add("action", "DISPLAY")
+            alarm.add("trigger", timedelta(minutes=-30))
+            event.add_component(alarm)
 
-        cal.add_component(event)
+            cal.add_component(event)
 
-    with open(ics_filename, "wb") as f:
+    with open(ics_file_path, "wb") as f:
         f.write(cal.to_ical())
 
     return FileResponse(
-        ics_filename,
-        headers={"Content-Disposition": f"attachment; filename={ics_filename}"},
+        path=ics_file_path,
+        filename=f"{semester_info.title}.ics",
+        content_disposition_type="attachment",
     )
 
 

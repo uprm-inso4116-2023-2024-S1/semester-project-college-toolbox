@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { url, asset } from '../lib/data';
 import { register } from '../services/authentication';
-
+import ToolboxLogo from './ToolboxLogo';
 const SignUpForm = () => {
 	const [formData, setFormData] = useState({
 		firstName: '',
@@ -47,11 +47,9 @@ const SignUpForm = () => {
 				href="#"
 				className="flex items-center justify-center mb-8 text-2xl font-semibold lg:mb-10 dark:text-white"
 			>
-				<img
-					src={asset('docs/assets/toolboxImg.svg')}
-					alt="toolbox logo"
-					className="mr-4 h-11"
-				/>
+				<div class="mr-4 h-11">
+					<ToolboxLogo />
+				</div>
 				<span>College Toolbox</span>
 			</a>
 			<div className="w-full max-w-xl p-6 space-y-8 sm:p-8 bg-white rounded-lg shadow dark:bg-gray-800">

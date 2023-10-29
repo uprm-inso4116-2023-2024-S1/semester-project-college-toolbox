@@ -1,4 +1,5 @@
 ---
+import ToolboxLogo from '../components/ToolboxLogo.jsx';
 import { asset, url } from '../lib/data.js';
 ---
 
@@ -9,11 +10,9 @@ import { asset, url } from '../lib/data.js';
 		<div class="flex items-center justify-between">
 			<div class="flex items-center justify-start">
 				<a href={url()} class="flex mr-4">
-					<img
-						src={asset("docs/assets/toolboxImg.svg")}
-						class="h-8 mr-3"
-						alt="College Toolbox Logo"
-					/>
+					<div class="h-8 mr-4">
+						<ToolboxLogo />
+					</div>
 					<span
 						class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
 						>College Toolbox</span
@@ -152,3 +151,4 @@ import { asset, url } from '../lib/data.js';
 		</ul>
 	</div>
 </nav>
+../components/ToolboxLogo.tsx

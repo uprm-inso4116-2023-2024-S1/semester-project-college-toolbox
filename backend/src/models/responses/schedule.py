@@ -1,28 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
-
-
-class SpaceTimeBlock(BaseModel):
-    room: str
-    building: str
-    location: str
-    day: int
-    startTime: str
-    endTime: str
-
-
-class CourseSectionSchedule(BaseModel):
-    courseCode: str
-    courseName: str
-    professor: str
-    credits: int
-    sectionCode: str
-    sectionId: int
-    timeBlocks: List[SpaceTimeBlock]
-
-
-class GeneratedSchedule(BaseModel):
-    courses: List[CourseSectionSchedule]
+from src.models.common.schedule import GeneratedSchedule
 
 
 class GenerateSchedulesResponse(BaseModel):
