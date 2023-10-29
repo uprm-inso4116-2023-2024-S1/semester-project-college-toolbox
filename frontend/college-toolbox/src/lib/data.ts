@@ -128,10 +128,10 @@ export function convertCourseInformationToTextFilter(
 		);
 	}
 	if (info.startTime) {
-		filters.push(`start time >= ${info.startTime}`);
+		filters.push(`start time >= ${toMeridianTime(info.startTime)}`);
 	}
 	if (info.endTime) {
-		filters.push(`end time <= ${info.endTime}`);
+		filters.push(`end time <= ${toMeridianTime(info.endTime)}`);
 	}
 	if (info.professor) {
 		filters.push(`professor : ${info.professor}`);
@@ -155,4 +155,16 @@ export function getDefaultOptions(): ScheduleGenerationOptions {
 		return { term: "1erSem", year: `${currentYear}` }
 	}
 
+}
+
+export function toMeridianTime(time: string): string {
+		const time24Hour = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)?$/) || [time];
+		let meridianTime: string[] = [];
+    if (time24Hour.length > 1) { // If time format correct
+      meridianTime = time24Hour.slice(1); // Remove full string match value
+      meridianTime[5] = +meridianTime[0] < 12 ? 'am' : 'pm'; // Set AM/PM
+      meridianTime[0] = +meridianTime[0] % 12 || 12; // Adjust hours
+    }
+    return meridianTime.join(''); // return adjusted time or original string
+	
 }
