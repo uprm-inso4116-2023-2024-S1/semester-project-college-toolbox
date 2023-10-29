@@ -204,7 +204,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 											<li>
 												Building:{' '}
 												<a
-													className="text-blue-700 hover:underline"
+													className="text-blue-700 hover:underline dark:text-blue-300"
 													href={block.location}
 												>
 													{block.building}
