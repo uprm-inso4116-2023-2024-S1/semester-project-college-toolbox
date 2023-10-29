@@ -82,3 +82,14 @@ export interface CourseFilters {
 	days?: string;
 	professor?: string;
 }
+
+export interface ResourcesModel {
+    Name: string;
+    Description: string;
+    URL: string;
+    Icon: string;
+    Type: string;
+    Rating: number;
+    RatingCount: number;
+}
+

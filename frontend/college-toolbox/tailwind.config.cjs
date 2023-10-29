@@ -78,6 +78,12 @@ module.exports = {
 			minWidth: {
 				kanban: '28rem',
 			},
+
+			height: {
+				'132': '33rem',  
+				'144': '36rem', 
+				'160': '40rem',
+			}
 		},
 	},
 

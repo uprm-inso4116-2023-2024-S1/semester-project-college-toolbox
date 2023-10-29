@@ -22,6 +22,8 @@ from src.utils.calendar import (
     get_full_name,
     get_semester,
     try_delete_file,
+    filter_apps_by_prefix,
+    filter_apps_by_criteria,
 )
 from fastapi import (
     FastAPI,
@@ -52,6 +54,10 @@ from src.database import Base, SessionLocal, engine
 
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.requests.resources import (
+    PrefixFilterRequest,
+    applyAllFilterRequest,
+)
 from src.models.responses.existing_app import ExistingApplicationResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
@@ -246,6 +252,22 @@ async def get_all_existing_applications(
     # Should return a list of tables/existing_app.py
     data = db.query(ExistingApplication).all()
     return [ExistingApplicationResponse(**d.__dict__) for d in data]
+
+
+@app.post("/ExistingApplication/filter/prefix")
+async def filter_existing_applications_by_prefix(request_data: PrefixFilterRequest, db: Session = Depends(get_db)) -> list[ExistingApplicationResponse]:
+    """Retrieve all applications that start with a specific prefix."""
+    all_apps = db.query(ExistingApplication).all()
+    filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
+    return [ExistingApplicationResponse(**app.__dict__) for app in filtered_apps]
+
+@app.post("/ExistingApplication/filter/applyAll")
+async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingApplicationResponse]:
+    """Retrieve all applications that fit the given filters."""
+    all_apps = db.query(ExistingApplication).all()
+    filtered_apps = filter_apps_by_criteria(request_data, all_apps)
+    return filtered_apps
+
 
 
 # Create .ics calendar file
