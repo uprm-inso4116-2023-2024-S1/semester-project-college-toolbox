@@ -71,7 +71,6 @@ const SolutionsHub: React.FC = () => {
                 </div>
                 <div className="col-span-4">
                     <SolutionsView applications={applications} />
-                    <p>Submitted search string: {searchValue}</p> {/* Display the submitted search string */}
                 </div>
             </div>
         </div>
