@@ -1,5 +1,4 @@
 import type React from 'react';
-import { API_URL } from '../../app/constants';
 import type { ResourcesModel } from '../../types/entities';
 
 const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applications }) => {
@@ -10,7 +9,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
             <div className="h-144 overflow-y-auto">
                 <div className="grid grid-cols-4 gap-4 p-2">
                     {applications.map((app, index) => (
-                        <button key={index} className="flex items-center justify-between application-block relative bg-gray-300 dark:bg-gray-600 dark:border-gray-800 border-gray-400 border-2 rounded-xl hover:scale-105 dark:hover:border-blue-400 transition-transform">
+                        <button key={index} className="flex items-center justify-between application-block relative bg-gray-300 dark:bg-gray-600 dark:border-gray-800 border-gray-400 border-2 rounded-xl hover:scale-105 dark:hover:border-blue-400 hover:border-blue-400 transition-transform">
                             <div className="grid grid-cols-2 gap-1 items-center ml-2">
                                 <div className="ml-2 mt-2 mb-2 mr-2 rounded-full bg-white col-span-1"> 
                                     <img 
