@@ -498,7 +498,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 							name="professor"
 							value={modalProps.courseFilters?.professor}
 							onChange={handleFiltersChange}
-							className="border border-gray-300 p-2 mb-4 w-full dark:bg-gray-200"
+							className="border border-gray-300 p-2 mb-4 w-full dark:bg-gray-200 dark:text-black"
 						/>
 						<button
 							onClick={saveCourseInfo}
