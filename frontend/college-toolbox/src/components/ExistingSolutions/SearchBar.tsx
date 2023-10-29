@@ -6,12 +6,14 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
     const [isActive, setIsActive] = useState<boolean>(false);
     const [suggestions, setSuggestions] = useState<ResourcesModel[]>([]);
     const searchRef = useRef<HTMLFormElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const [searchValue, setSearchValue] = useState<string>('');
 
     const resetSearchBar = () => {
         setIsActive(false);
         setSearchValue('');
         setSuggestions([]);
+        searchInputRef.current?.blur(); 
     }
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -46,21 +48,19 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
     const handleSuggestionFill = (e: React.MouseEvent<HTMLButtonElement>, suggestionName: string): void => {
         e.preventDefault();
         setSearchValue(suggestionName);
-        generateSuggestions(suggestionName);
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         e.preventDefault();
         setSearchValue(e.target.value)
-        generateSuggestions(e.target.value);
     };
 
     const generateSuggestions = async (search_prefix: string) => {
-        if (search_prefix !== "") {
-            const requestBody = {
-                prefix: search_prefix
-            };
-        
+        const requestBody = {
+            prefix: search_prefix
+        };
+
+        try {
             const response = await fetch(`${API_URL}/ExistingApplication/filter/prefix`, {
                 method: 'POST',
                 headers: {
@@ -68,19 +68,28 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
                 },
                 body: JSON.stringify(requestBody),
             });
-        
+
             if (!response.ok) {
                 throw new Error(`Validation request failed: ${response.statusText}`);
             }
-        
+
             const data = await response.json();
             setSuggestions(data);
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            }
         }
-        else {
+    };
+
+
+    useEffect(() => {
+        if (searchValue !== "") {
+            generateSuggestions(searchValue);
+        } else {
             setSuggestions([]);
         }
-    }
-    
+    }, [searchValue]);
     
 
     return (
@@ -93,6 +102,7 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
                     </svg>
                 </div>
                 <input
+                    ref={searchInputRef}
                     type="search"
                     id="default-search"
                     className="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
