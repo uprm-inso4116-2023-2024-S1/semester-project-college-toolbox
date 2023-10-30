@@ -34,7 +34,7 @@ function stringToColor(str: string): string {
 
         // Map the value to the desired range
         value = MIN_VALUE + (value % (MAX_VALUE - MIN_VALUE));
-        color += ('00' + value.toString(16)).substring(-2);
+        color += ('00' + value.toString(16)).substr(-2);
     }
     return color;
 }
