@@ -18,6 +18,27 @@ interface WeeklyCalendarProps {
 	year: string;
 }
 
+function stringToColor(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    let color = '#';
+
+    // Minimum and maximum color values to avoid extreme dark or bright colors
+    const MIN_VALUE = 100;  // closer to 0 is darker, adjust as needed
+    const MAX_VALUE = 250; // closer to 255 is brighter, adjust as needed
+
+    for (let j = 0; j < 3; j++) {
+        let value = (hash >> (j * 8)) & 0xFF;
+
+        // Map the value to the desired range
+        value = MIN_VALUE + (value % (MAX_VALUE - MIN_VALUE));
+        color += ('00' + value.toString(16)).substring(-2);
+    }
+    return color;
+}
+
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	schedule,
 	term,
@@ -66,14 +87,16 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			);
 			const remainingMinutes: number =
 				subtract24HourTimes(block.startTime, block.endTime) % 30;
+			const courseColor = stringToColor(course.courseCode + "-" + course.sectionCode);
 			if (remainingMinutes == 0) {
 				return (
 					<div
 						key={`block ${idx}`}
-						className="z-10 bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white rounded-b-[5px] hover:cursor-pointer"
+						className="z-10 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white rounded-b-[5px] hover:cursor-pointer"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
+							backgroundColor: courseColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -89,10 +112,11 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			return (
 				<React.Fragment key={`block-fragment ${idx}`}>
 					<div
-						className="bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
+						className="rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
+							backgroundColor: courseColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -104,11 +128,12 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						Room: {block.room}
 					</div>
 					<div
-						className="z-10 bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]"
+						className={`z-10 p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]`}
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow + hoursDuration} / span 1`,
 							height: `${(remainingMinutes / 30) * 100}%`,
+							backgroundColor: courseColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
