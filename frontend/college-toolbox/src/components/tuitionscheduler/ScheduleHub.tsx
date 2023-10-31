@@ -9,7 +9,8 @@ import type {
 	ScheduleGenerationOptions,
 } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
-import { getDefaultOptions } from '../../lib/data';
+import { getDefaultOptions, getCookie } from '../../lib/data';
+import SaveScheduleButton from './SaveScheduleButton';
 
 interface ScheduleHubProps {}
 
@@ -39,6 +40,12 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 						courses={selectedCourses}
 						term={options.term}
 						year={options.year}
+					/>
+					<SaveScheduleButton
+						schedule={schedules[currentScheduleIdx]}
+						term={options.term}
+						year={options.year}
+						getAuthToken={() => getCookie('auth_token')}
 					/>
 				</div>
 				{schedules && schedules.length > 0 && (
