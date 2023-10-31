@@ -9,7 +9,12 @@ from src.models.common.schedule import (
 )
 from src.ssh_scraper.enums import Term
 from src.database import engine
-from src.models.tables.tuition_scheduler_models import CourseSection, RoomSchedule, Schedule, CourseSchedule
+from src.models.tables.tuition_scheduler_models import (
+    CourseSection,
+    RoomSchedule,
+    Schedule,
+    CourseSchedule,
+)
 from src.ssh_scraper.query_parser import parse
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
