@@ -9,3 +9,7 @@ class GenerateSchedulesResponse(BaseModel):
 
 class ValidateCourseIDResponse(BaseModel):
     is_valid: bool
+
+
+class SaveScheduleResponse(BaseModel):
+    schedule_id: int

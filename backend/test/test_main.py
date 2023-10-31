@@ -11,6 +11,7 @@ from .test_utils import get_existing_application_insert_query
 from src.main import app, get_db
 from src.database import Base
 from src.models.responses.existing_app import ExistingApplicationResponse
+from src.models.requests.schedule import SaveScheduleRequest
 
 # Test database configuration
 os.makedirs(os.path.join("database", "test"), exist_ok=True)
@@ -171,3 +172,27 @@ def test_existing_application_get_all_endpoint(test_db):
 
     # Close the database connection
     db.close()
+
+
+def test_save_schedule(test_db):
+    # Register the user first (assuming registration works)
+    response_register = client.post("/register", json=register_data)
+    assert response_register.status_code == 200
+
+    course_section_ids = [1, 2, 3, 4]
+    name = "TestSchedule"
+    term = "1erSem"
+    year = 2023
+    auth_token = response_register.cookies["auth_token"]
+    request = SaveScheduleRequest(
+        course_section_ids=course_section_ids,
+        name=name,
+        term=term,
+        year=year,
+        auth_token=auth_token,
+    ).model_dump()
+
+    # Test the endpoint
+    response = client.post("/save_schedule", json=request)
+    assert response.status_code == 200
+    assert "schedule_id" in response.json()

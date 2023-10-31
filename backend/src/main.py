@@ -6,16 +6,19 @@ from src.models.requests.schedule import (
     ExportCalendarRequest,
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
+    SaveScheduleRequest,
 )
 from src.models.responses.schedule import (
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
+    SaveScheduleResponse,
 )
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import (
     generate_schedules_with_criteria,
     get_section_time_blocks_by_ids,
     validate_course_id,
+    save_schedule,
 )
 from src.utils.calendar import (
     create_course_calendar,
@@ -311,6 +314,21 @@ def validate_course_id_endpoint(
         section=request.section,
     )
     return {"is_valid": is_valid}
+
+
+@app.post("/save_schedule")
+def save_schedule_endpoint(request: SaveScheduleRequest) -> SaveScheduleResponse:
+    if not request.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(request.auth_token)
+    schedule_id = save_schedule(
+        course_section_ids=request.course_section_ids,
+        name=request.name,
+        term=request.term,
+        year=request.year,
+        user_id=user_id,
+    )
+    return {"schedule_id": schedule_id}
 
 
 if __name__ == "__main__":

@@ -496,3 +496,41 @@ def get_query_from_filters(course: FilteredCourse) -> str:
     if course.filters is not None and course.filters != "":
         query += f", {course.filters}"
     return query
+
+
+def get_course_section_from_id(course_section_id: int) -> CourseSection:
+    with Session(engine) as session:
+        return session.get(CourseSection, course_section_id)
+
+
+def save_schedule(
+    course_section_ids: list[int], name: str, term: str, year: int, user_id: int
+) -> int:
+    with Session(engine) as session:
+        schedule = Schedule(user_id=user_id, name=name, term=term, year=year)
+        for course_section_id in course_section_ids:
+            course_schedule = CourseSchedule(course_section_id=course_section_id)
+            course_schedule.schedule = schedule
+            session.add(course_schedule)
+        session.add(schedule)
+        session.commit()
+        return schedule.id
+
+
+def get_section_ids_from_schedule(schedule_id: int):
+    with Session(engine) as session:
+        return [
+            course_schedule.course_section_id
+            for course_schedule in session.query(CourseSchedule).filter(
+                CourseSchedule.schedule_id == schedule_id
+            )
+        ]
+
+
+def delete_schedule(schedule_id: int):
+    with Session(engine) as session:
+        session.query(CourseSchedule).filter(
+            CourseSchedule.schedule_id == schedule_id
+        ).delete()
+        session.query(Schedule).filter(Schedule.id == schedule_id).delete()
+        session.commit()

@@ -168,3 +168,39 @@ class TestGetQueryFromFilters:
             FilteredCourse(code="PSIC3001-116", filters=None)
         )
         assert query == "(course id = PSIC3001, section = 116)"
+
+
+class TestScheduleFunctions:
+    def setup_method(self):
+        self.section_ids = [1, 2, 3, 4]
+        self.name = "Test1"
+        self.term = Term.FIRST_SEMESTER
+        self.year = 2023
+        self.user_id = "1"
+
+    def test_save_schedule(self):
+        schedule_id = save_schedule(
+            self.section_ids, self.name, self.term.value, self.year, self.user_id
+        )
+        with Session(engine) as session:
+            schedule = session.get(Schedule, schedule_id)
+            assert schedule is not None
+            assert schedule.name == self.name
+            assert schedule.term == self.term.value
+            assert schedule.year == self.year
+            assert schedule.user_id == self.user_id
+
+        section_ids = get_section_ids_from_schedule(schedule_id)
+        assert section_ids == self.section_ids
+
+        delete_schedule(schedule_id)
+        with Session(engine) as session:
+            assert session.get(Schedule, schedule_id) is None
+            assert (
+                len(
+                    session.query(CourseSchedule)
+                    .filter(CourseSchedule.schedule_id == schedule_id)
+                    .all()
+                )
+                == 0
+            )
