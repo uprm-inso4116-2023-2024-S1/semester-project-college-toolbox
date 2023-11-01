@@ -35,7 +35,6 @@ def get_db():
     """
     db: Session = SessionLocal()
     try:
-        with db.begin():
-            yield db
+        yield db
     finally:
         db.close()
