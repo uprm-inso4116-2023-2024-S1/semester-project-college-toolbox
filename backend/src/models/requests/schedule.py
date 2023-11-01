@@ -42,3 +42,17 @@ class SaveScheduleRequest(BaseModel):
     term: str
     year: int
     auth_token: Annotated[str | None, Cookie()] = None
+
+
+class CreateCustomFilterRequest(BaseModel):
+    name: str
+    query: str
+    auth_token: Annotated[str | None, Cookie()] = None
+
+
+class GetCustomFiltersRequest(BaseModel):
+    auth_token: Annotated[str | None, Cookie()] = None
+
+
+class DeleteCustomFilterRequest(BaseModel):
+    custom_filter_id: int

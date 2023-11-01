@@ -76,11 +76,23 @@ export interface ScheduleGenerationOptions {
 	maxCredits?: number;
 }
 
-export interface CourseFilters {
+export type CourseFilters = DefaultFilters & CustomFilters;
+
+interface DefaultFilters {
 	startTime?: string;
 	endTime?: string;
 	days?: string;
 	professor?: string;
+}
+
+interface CustomFilters {
+	activated_filters?: [number, string][];
+}
+
+export interface CustomFilter {
+	id: number;
+	name: string;
+	query: string;
 }
 
 export interface ResourcesModel {

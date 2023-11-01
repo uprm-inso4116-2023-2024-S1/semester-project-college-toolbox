@@ -4,9 +4,12 @@ import type {
 	CourseFilters,
 	FilteredCourse,
 	ScheduleGenerationOptions,
+	CustomFilter,
 } from '../../types/entities';
 import { Modal } from 'flowbite-react';
 import ToggleSwitch from '../ToggleSwitch';
+import { isLoggedIn } from '../../lib/profile';
+import { getCookie } from '../../lib/data';
 
 export interface ScheduleOptions {
 	courses: FilteredCourse[];
@@ -27,6 +30,9 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 
 	// State for modal
 	const [openModal, setOpenModal] = useState<string | undefined>();
+	const [openCustomFiltersModal, setOpenCustomFiltersModal] = useState<
+		string | undefined
+	>();
 	const [courseFilters, setCourseFilters] = useState<CourseFilters | undefined>(
 		undefined,
 	);
@@ -34,10 +40,15 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		useState<boolean>(false);
 	const [index, setIndex] = useState<number>(0);
 	const daysOfWeek = ['L', 'M', 'W', 'J', 'V', 'S', 'D'];
+	const [customFilters, setCustomFilters] = useState<CustomFilter[]>([]);
+	const [query, setQuery] = useState<string>('');
+	const [filterName, setFilterName] = useState<string>('');
 
 	const modalProps = {
 		openModal,
 		setOpenModal,
+		openCustomFiltersModal,
+		setOpenCustomFiltersModal,
 		courseFilters,
 		setCourseFilters,
 		index,
@@ -45,6 +56,38 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	};
 
 	const currentYear = new Date().getFullYear();
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const auth_token = getCookie('auth_token');
+
+				const response = await fetch(`${API_URL}/get_custom_filters`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						auth_token,
+					}),
+					credentials: 'include',
+				});
+
+				if (!response.ok) {
+					// Handle error, show a message, or throw an exception
+					console.error('Failed to get custom filters');
+					return;
+				}
+				// update the Custom Filters
+				const customFiltersResponse = await response.json();
+				setCustomFilters(customFiltersResponse.custom_filters);
+			} catch (error) {
+				console.error('An error occurred:', error);
+			} finally {
+			}
+		};
+		if (isLoggedIn.get() === 'true') fetchData();
+	}, []);
 
 	const handleDayClick = (day: string) => {
 		let days = modalProps.courseFilters?.days ?? '';
@@ -212,6 +255,106 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		const sectionRegex = /^(\d{3}[A-Z]?)?$/;
 
 		return sectionRegex.test(section);
+	}
+
+	function handleViewCustomFilters(): void {
+		setOpenCustomFiltersModal('dismissible');
+		setOpenModal(undefined);
+	}
+
+	function handleCloseCustomFilters(): void {
+		setOpenCustomFiltersModal(undefined);
+		setOpenModal('dismissible');
+	}
+
+	async function handleCreateFilter() {
+		try {
+			const auth_token = getCookie('auth_token');
+
+			const response = await fetch(`${API_URL}/create_custom_filter`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					name: filterName,
+					query,
+					auth_token,
+				}),
+				credentials: 'include',
+			});
+
+			if (!response.ok) {
+				// Handle error, show a message, or throw an exception
+				console.error('Failed to create custom filter');
+				return;
+			}
+			// update the Custom Filters
+			const customFilterResponse = await response.json();
+			let customFilter: CustomFilter = {
+				id: customFilterResponse.custom_filter_id,
+				name: filterName,
+				query,
+			};
+			if (customFilters === undefined) setCustomFilters([customFilter]);
+			else setCustomFilters([...customFilters, customFilter]);
+			console.log(`Added filter, filters: ${customFilters}`);
+
+		} catch (error) {
+			console.error('An error occurred:', error);
+		} finally {
+		}
+	}
+
+	async function handleDeleteFilter(index: number) {
+		if (customFilters === undefined) return;
+		const filter = customFilters[index];
+		if (filter === undefined) return;
+
+		const response = await fetch(`${API_URL}/delete_custom_filter`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ custom_filter_id: filter.id }),
+			credentials: 'include',
+		});
+
+		if (!response.ok) {
+			// Handle error, show a message, or throw an exception
+			console.error('Failed to delete custom filter');
+			return;
+		}
+
+		if (getCustomFilterState(index)) {
+			toggleCustomFilterState(index);
+		}
+
+		customFilters.splice(index, 1);
+		setCustomFilters([...customFilters]);
+		console.log(`Deleted filter ${filter.name}`);
+	}
+
+	function getCustomFilterState(index: number): boolean {
+		if (modalProps.courseFilters?.activated_filters === undefined) return false;
+		for (const [id] of modalProps.courseFilters?.activated_filters) {
+			if (customFilters[index]?.id === id) return true;
+		}
+		return false;
+	}
+
+	function toggleCustomFilterState(index: number): void {
+		const filter = customFilters[index];
+		if (filter === undefined) return;
+		let activated_filters = modalProps.courseFilters?.activated_filters ?? [];
+		
+		if (getCustomFilterState(index)) {
+			activated_filters = activated_filters.filter((item) => item[0] != filter.id)
+		}
+		else {
+			activated_filters = [...activated_filters, [filter.id, filter.query]]
+		}
+		setCourseFilters({ ...modalProps.courseFilters, activated_filters });
 	}
 
 	return (
@@ -500,13 +643,81 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 							onChange={handleFiltersChange}
 							className="border border-gray-300 p-2 mb-4 w-full dark:bg-gray-200 dark:text-black"
 						/>
-						<button
-							onClick={saveCourseInfo}
-							className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded "
-						>
-							Save
-						</button>
+						<div className="flex justify-center space-x-4 mb-4">
+							<button
+								onClick={handleViewCustomFilters}
+								disabled={isLoggedIn.get() === 'false'}
+								className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400 disabled:dark:bg-gray-500"
+							>
+								View Custom Filters
+							</button>
+							<button
+								onClick={saveCourseInfo}
+								className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded "
+							>
+								Save
+							</button>
+						</div>
 					</div>
+				</Modal.Body>
+			</Modal>
+			<Modal
+				dismissible
+				show={modalProps.openCustomFiltersModal === 'dismissible'}
+				onClose={handleCloseCustomFilters}
+			>
+				<Modal.Header>
+					Custom Filters: {courses[modalProps.index]?.code}
+				</Modal.Header>
+				<Modal.Body>
+					<div className="max-h-48 overflow-y-auto">
+						<ul className="text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+							{customFilters.map((filter, index) => (
+								<li className="w-full px-4 py-2 border-b border-gray-200 rounded-t-lg dark:border-gray-600">
+									<div className="flex justify-between">
+										<p className="self-center">
+											{filter.name}: {filter.query}
+										</p>
+										<strong
+											className={"text-" + (getCustomFilterState(index) ? "green" : "black") + "-500 align-center cursor-pointer alert-del"}
+											onClick={() => toggleCustomFilterState(index)}
+										>
+											&#10003;
+										</strong>
+										<strong
+											className="text align-center cursor-pointer alert-del"
+											onClick={() => handleDeleteFilter(index)}
+										>
+											&times;
+										</strong>
+									</div>
+								</li>
+							))}
+						</ul>
+					</div>
+					<br />
+					<input
+						type="text"
+						placeholder="Enter filter name"
+						name="filterName"
+						value={filterName}
+						onChange={(e) => setFilterName(e.target.value)}
+						className="border border-gray-300 p-2 mb-4 w-full dark:bg-gray-200 dark:text-black"
+					/>
+					<input
+						type="text"
+						placeholder="Enter CQL query"
+						name="query"
+						value={query}
+						onChange={(e) => setQuery(e.target.value)}
+						className="border border-gray-300 p-2 mb-4 w-full dark:bg-gray-200 dark:text-black"
+					/>
+					<button
+						onClick={handleCreateFilter}
+						className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded "
+					>
+						Add filter
+					</button>
 				</Modal.Body>
 			</Modal>
 		</div>

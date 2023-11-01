@@ -6,6 +6,7 @@ from src.models.common.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
     SpaceTimeBlock,
+    CustomFilter as SerializableCustomFilter,
 )
 from src.ssh_scraper.enums import Term
 from src.database import engine
@@ -14,6 +15,7 @@ from src.models.tables.tuition_scheduler_models import (
     RoomSchedule,
     Schedule,
     CourseSchedule,
+    CustomFilter,
 )
 from src.ssh_scraper.query_parser import parse
 from sqlalchemy.orm import Session
@@ -504,7 +506,7 @@ def get_course_section_from_id(course_section_id: int) -> CourseSection:
 
 
 def save_schedule(
-    course_section_ids: list[int], name: str, term: str, year: int, user_id: int
+    course_section_ids: list[int], name: str, term: str, year: int, user_id: str
 ) -> int:
     with Session(engine) as session:
         schedule = Schedule(user_id=user_id, name=name, term=term, year=year)
@@ -533,4 +535,32 @@ def delete_schedule(schedule_id: int):
             CourseSchedule.schedule_id == schedule_id
         ).delete()
         session.query(Schedule).filter(Schedule.id == schedule_id).delete()
+        session.commit()
+
+
+def create_custom_filter(name: str, query: str, user_id: str) -> int:
+    with Session(engine) as session:
+        custom_filter = CustomFilter(name=name, query=query, user_id=user_id)
+        session.add(custom_filter)
+        session.commit()
+        return custom_filter.id
+
+
+def get_custom_filters(user_id: str) -> list[SerializableCustomFilter]:
+    with Session(engine) as session:
+        filters = (
+            session.query(CustomFilter).filter(CustomFilter.user_id == user_id).all()
+        )
+        return [
+            SerializableCustomFilter(
+                id=filter.id, name=filter.name, query=filter.query
+            )
+            for filter in filters
+        ]
+
+
+def delete_custom_filter(custom_filter_id: int):
+    with Session(engine) as session:
+        filter = session.get(CustomFilter, custom_filter_id)
+        session.delete(filter)
         session.commit()

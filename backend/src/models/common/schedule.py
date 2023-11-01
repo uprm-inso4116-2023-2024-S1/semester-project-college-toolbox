@@ -58,3 +58,9 @@ class CourseSectionSchedule(BaseModel):
 
 class GeneratedSchedule(BaseModel):
     courses: List[CourseSectionSchedule]
+
+
+class CustomFilter(BaseModel):
+    id: int
+    name: str
+    query: str

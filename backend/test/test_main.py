@@ -11,7 +11,7 @@ from .test_utils import get_existing_application_insert_query
 from src.main import app, get_db
 from src.database import Base
 from src.models.responses.existing_app import ExistingApplicationResponse
-from src.models.requests.schedule import SaveScheduleRequest
+from src.models.requests.schedule import SaveScheduleRequest, CreateCustomFilterRequest, GetCustomFiltersRequest
 
 # Test database configuration
 os.makedirs(os.path.join("database", "test"), exist_ok=True)
@@ -196,3 +196,32 @@ def test_save_schedule(test_db):
     response = client.post("/save_schedule", json=request)
     assert response.status_code == 200
     assert "schedule_id" in response.json()
+
+
+def test_create_custom_filter(test_db):
+    # Register the user first (assuming registration works)
+    response_register = client.post("/register", json=register_data)
+    assert response_register.status_code == 200
+
+    name = "TestFilter"
+    query = "QUERY"
+    auth_token = response_register.cookies["auth_token"]
+    request = CreateCustomFilterRequest(name=name, query=query, auth_token=auth_token).model_dump()
+
+    # Test the endpoint
+    response = client.post("/create_custom_filter", json=request)
+    assert response.status_code == 200
+    assert "custom_filter_id" in response.json()
+
+
+def test_get_custom_filters(test_db):
+    # Register the user first (assuming registration works)
+    response_register = client.post("/register", json=register_data)
+    assert response_register.status_code == 200
+
+    auth_token = response_register.cookies["auth_token"]
+    request = GetCustomFiltersRequest(auth_token=auth_token).model_dump()
+    
+    response = client.post("/get_custom_filters", json=request)
+    assert response.status_code == 200
+    assert "custom_filters" in response.json()

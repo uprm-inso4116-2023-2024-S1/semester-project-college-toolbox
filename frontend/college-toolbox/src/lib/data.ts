@@ -136,6 +136,10 @@ export function convertCourseInformationToTextFilter(
 	if (info.professor) {
 		filters.push(`professor : ${info.professor}`);
 	}
+	if (info.activated_filters) {
+		const custom_filters = info.activated_filters.map((item) => item[1]);
+		custom_filters.forEach((item) => filters.push(item));
+	}
 	return filters.join(', ');
 }
 

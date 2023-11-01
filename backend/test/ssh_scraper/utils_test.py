@@ -204,3 +204,34 @@ class TestScheduleFunctions:
                 )
                 == 0
             )
+
+
+class TestCustomFilters:
+    def setup_method(self):
+        self.user_id = "1"
+
+    def test_create_custom_filter(self):
+        name = "Filter1"
+        query = "course id = INSO4116"
+
+        filter_id = create_custom_filter(name=name, query=query, user_id=self.user_id)
+        assert filter_id is not None
+
+        with Session(engine) as session:
+            filter = session.get(CustomFilter, filter_id)
+            assert filter.name == name
+            assert filter.query == query
+            assert filter.user_id == self.user_id
+
+        delete_custom_filter(filter_id)
+
+    def test_get_custom_filters(self):
+        filter_ids = [create_custom_filter(name="Filter1", query="query1", user_id=self.user_id), create_custom_filter(name="Filter2", query="query2", user_id=self.user_id), create_custom_filter(name="Filter3", query="query3", user_id=self.user_id), create_custom_filter(name="Filter4", query="query4", user_id=self.user_id)]
+
+        filters = get_custom_filters(user_id=self.user_id)
+        assert filters is not None
+        assert len(filters) == len(filter_ids)
+        assert all([filter_ids[i] == filters[i].id for i in range(len(filters))])
+
+        for filter_id in filter_ids:
+            delete_custom_filter(filter_id)

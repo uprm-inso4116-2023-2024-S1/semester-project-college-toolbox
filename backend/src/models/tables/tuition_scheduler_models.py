@@ -61,4 +61,16 @@ class CourseSchedule(Base):
     schedule = relationship("Schedule", back_populates="course_schedules")
 
 
+class CustomFilter(Base):
+    __tablename__ = "custom_filters"
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    name = Column(String(50))
+    query = Column(String)
+    user_id = Column(String, ForeignKey("User.UserId"))
+
+    user = relationship("User", back_populates="custom_filters")
+
+
 User.schedules = relationship("Schedule", back_populates="user")
+User.custom_filters = relationship("CustomFilter", back_populates="user")

@@ -7,11 +7,17 @@ from src.models.requests.schedule import (
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
     SaveScheduleRequest,
+    CreateCustomFilterRequest,
+    GetCustomFiltersRequest,
+    DeleteCustomFilterRequest,
 )
 from src.models.responses.schedule import (
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
     SaveScheduleResponse,
+    CreateCustomFilterResponse,
+    GetCustomFiltersResponse,
+    DeleteCustomFilterResponse,
 )
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import (
@@ -19,6 +25,9 @@ from src.ssh_scraper.utils import (
     get_section_time_blocks_by_ids,
     validate_course_id,
     save_schedule,
+    create_custom_filter,
+    get_custom_filters,
+    delete_custom_filter,
 )
 from src.utils.calendar import (
     create_course_calendar,
@@ -329,6 +338,34 @@ def save_schedule_endpoint(request: SaveScheduleRequest) -> SaveScheduleResponse
         user_id=user_id,
     )
     return {"schedule_id": schedule_id}
+
+
+@app.post("/create_custom_filter")
+def create_custom_filter_endpoint(
+    request: CreateCustomFilterRequest,
+) -> CreateCustomFilterResponse:
+    if not request.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(request.auth_token)
+    custom_filter_id = create_custom_filter(
+        name=request.name, query=request.query, user_id=user_id
+    )
+    return {"custom_filter_id": custom_filter_id}
+
+
+@app.post("/get_custom_filters")
+def get_custom_filters_endpoint(request: GetCustomFiltersRequest) -> GetCustomFiltersResponse:
+    if not request.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(request.auth_token)
+    custom_filters = get_custom_filters(user_id=user_id)
+    return {"custom_filters": custom_filters}
+
+
+@app.post("/delete_custom_filter")
+def delete_custom_filter_endpoint(request: DeleteCustomFilterRequest) -> DeleteCustomFilterResponse:
+    delete_custom_filter(request.custom_filter_id)
+    return {"status_code": 200}
 
 
 if __name__ == "__main__":
