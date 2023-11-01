@@ -250,19 +250,23 @@ async def get_all_existing_applications(
 
 
 @app.post("/ExistingApplication/filter/prefix")
-async def filter_existing_applications_by_prefix(request_data: PrefixFilterRequest, db: Session = Depends(get_db)) -> list[ExistingApplicationResponse]:
+async def filter_existing_applications_by_prefix(
+    request_data: PrefixFilterRequest, db: Session = Depends(get_db)
+) -> list[ExistingApplicationResponse]:
     """Retrieve all applications that start with a specific prefix."""
     all_apps = db.query(ExistingApplication).all()
     filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
     return [ExistingApplicationResponse(**app.__dict__) for app in filtered_apps]
 
+
 @app.post("/ExistingApplication/filter/applyAll")
-async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingApplicationResponse]:
+async def filter_existing_applications_by_criteria(
+    request_data: applyAllFilterRequest, db: Session = Depends(get_db)
+) -> list[ExistingApplicationResponse]:
     """Retrieve all applications that fit the given filters."""
     all_apps = db.query(ExistingApplication).all()
     filtered_apps = filter_apps_by_criteria(request_data, all_apps)
     return filtered_apps
-
 
 
 # Create .ics calendar file
