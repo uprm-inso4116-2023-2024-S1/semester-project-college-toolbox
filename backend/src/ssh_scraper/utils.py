@@ -313,6 +313,8 @@ def convert_room_schedule_to_time_block(
 ) -> list[SpaceTimeBlock]:
     blocks = []
     building, location = get_building_location(room_schedule.room)
+    if not room_schedule.days:
+        return []
     for day in room_schedule.days:
         blocks.append(
             SpaceTimeBlock(
@@ -378,6 +380,7 @@ def generate_schedules_with_criteria(
     section_time_map: dict[int, list[RoomSchedule]] = {}
     course_list = []
     course_to_sections = defaultdict(list)
+    asynchronous_sections: list[CourseSection] = []
     for course in courses:
         course_code, _ = (
             course.code.split("-", 1) if "-" in course.code else (course.code, None)
@@ -387,9 +390,13 @@ def generate_schedules_with_criteria(
         )
         course_list.append(course_code)
         for section, schedules in section_schedules:
-            course_to_sections[course_code].append(section.id)
-            section_map[section.id] = section
-            section_time_map[section.id] = schedules
+            if any(map(lambda s: (s.days == "" or s.days is None or s.start_time is None or s.end_time is None) , schedules)):
+                # For now, store the asynchronous sections, we will investigate how to integrate them later.
+                asynchronous_sections.append(section)
+            else:
+                course_to_sections[course_code].append(section.id)
+                section_map[section.id] = section
+                section_time_map[section.id] = schedules
     # Try to build the schedules
     generated_schedules: set[frozenset[int]] = set()
     max_schedules = min(25, options.maxSchedules) if options.maxSchedules else 5
