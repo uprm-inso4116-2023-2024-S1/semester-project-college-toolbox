@@ -20,29 +20,37 @@ interface WeeklyCalendarProps {
 	year: string;
 }
 
+
 function courseCodeToColor(
-	str: string,
-	minColor?: number,
-	maxColor?: number,
+    str: string,
+    minColor: number = 0,
+    maxColor: number = 255
 ): string {
-	let hash = 0;
-	for (let i = 0; i < str.length; i++) {
-		hash = str.charCodeAt(i) + ((hash << 5) - hash);
-	}
-	let color = '#';
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
 
-	// Minimum and maximum color values to avoid extreme dark or bright colors
-	const MIN_VALUE = minColor ?? 0; // closer to 0 is darker
-	const MAX_VALUE = maxColor ?? 255; // closer to 255 is brighter
+    // Seeded pseudo-random number generation based on the hash
+    const m = 0x80000000;
+    let a = 1664525;
+    let c = 1013904223;
+    let seed = hash;
+    seed = (a * seed + c) % m;
+    const randomFactor = seed / m;
 
-	for (let j = 0; j < 3; j++) {
-		let value = (hash >> (j * 8)) & 0xff;
+    hash = hash + Math.floor(randomFactor * 0xFFFFFF);
 
-		// Map the value to the desired range
-		value = MIN_VALUE + (value % (MAX_VALUE - MIN_VALUE));
-		color += ('00' + value.toString(16)).slice(-2);
-	}
-	return color;
+    let color = '#';
+    for (let j = 0; j < 3; j++) {
+        let value = (hash >> (j * 8)) & 0xff;
+
+        // Map the value to the desired range
+        value = minColor + (value % (maxColor - minColor));
+        color += ('00' + value.toString(16)).slice(-2);
+    }
+
+    return color;
 }
 
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
@@ -95,12 +103,12 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			const remainingMinutes: number =
 				subtract24HourTimes(block.startTime, block.endTime) % 30;
 			const lightModeColor = courseCodeToColor(course.courseCode, 120, 255);
-			const darkModeColor = courseCodeToColor(course.courseCode, 5, 200);
+			const darkModeColor = courseCodeToColor(course.courseCode, 40, 200);
 			if (remainingMinutes == 0) {
 				return (
 					<div
 						key={`block ${idx}`}
-						className="z-10 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white rounded-b-[5px] hover:cursor-pointer"
+						className="z-10 rounded-t-[5px] p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white rounded-b-[5px] hover:cursor-pointer"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
@@ -121,7 +129,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			return (
 				<React.Fragment key={`block-fragment ${idx}`}>
 					<div
-						className="rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
+						className="rounded-t-[5px] p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
@@ -138,7 +146,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						Room: {block.room}
 					</div>
 					<div
-						className={`z-10 p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]`}
+						className={`z-10 p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]`}
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow + hoursDuration} / span 1`,
