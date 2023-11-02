@@ -390,7 +390,17 @@ def generate_schedules_with_criteria(
         )
         course_list.append(course_code)
         for section, schedules in section_schedules:
-            if any(map(lambda s: (s.days == "" or s.days is None or s.start_time is None or s.end_time is None) , schedules)):
+            if any(
+                map(
+                    lambda s: (
+                        s.days == ""
+                        or s.days is None
+                        or s.start_time is None
+                        or s.end_time is None
+                    ),
+                    schedules,
+                )
+            ):
                 # For now, store the asynchronous sections, we will investigate how to integrate them later.
                 asynchronous_sections.append(section)
             else:
