@@ -1,4 +1,5 @@
 import { Modal } from 'flowbite-react';
+import { $isDarkMode } from '../../lib/theme.ts';
 import {
 	convertToAmPm,
 	getCurrentTimeInMinutes,
@@ -11,6 +12,7 @@ import type {
 	SpaceTimeBlock,
 } from '../../types/entities';
 import React, { useState } from 'react';
+import { useStore } from '@nanostores/react';
 
 interface WeeklyCalendarProps {
 	schedule: GeneratedSchedule | undefined;
@@ -18,25 +20,29 @@ interface WeeklyCalendarProps {
 	year: string;
 }
 
-function stringToColor(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    let color = '#';
+function courseCodeToColor(
+	str: string,
+	minColor?: number,
+	maxColor?: number,
+): string {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	}
+	let color = '#';
 
-    // Minimum and maximum color values to avoid extreme dark or bright colors
-    const MIN_VALUE = 100;  // closer to 0 is darker, adjust as needed
-    const MAX_VALUE = 250; // closer to 255 is brighter, adjust as needed
+	// Minimum and maximum color values to avoid extreme dark or bright colors
+	const MIN_VALUE = minColor ?? 0; // closer to 0 is darker
+	const MAX_VALUE = maxColor ?? 255; // closer to 255 is brighter
 
-    for (let j = 0; j < 3; j++) {
-        let value = (hash >> (j * 8)) & 0xFF;
+	for (let j = 0; j < 3; j++) {
+		let value = (hash >> (j * 8)) & 0xff;
 
-        // Map the value to the desired range
-        value = MIN_VALUE + (value % (MAX_VALUE - MIN_VALUE));
-        color += ('00' + value.toString(16)).substr(-2);
-    }
-    return color;
+		// Map the value to the desired range
+		value = MIN_VALUE + (value % (MAX_VALUE - MIN_VALUE));
+		color += ('00' + value.toString(16)).slice(-2);
+	}
+	return color;
 }
 
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
@@ -44,6 +50,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	term,
 	year,
 }) => {
+	const isDarkMode = useStore($isDarkMode);
 	const shortDaysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 	const daysOfWeek = [
 		'Monday',
@@ -87,7 +94,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			);
 			const remainingMinutes: number =
 				subtract24HourTimes(block.startTime, block.endTime) % 30;
-			const courseColor = stringToColor(course.courseCode + "-" + course.sectionCode);
+			const lightModeColor = courseCodeToColor(course.courseCode, 120, 255);
+			const darkModeColor = courseCodeToColor(course.courseCode, 5, 200);
 			if (remainingMinutes == 0) {
 				return (
 					<div
@@ -96,7 +104,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
-							backgroundColor: courseColor,
+							backgroundColor:
+								isDarkMode === 'true' ? darkModeColor : lightModeColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -116,7 +125,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
-							backgroundColor: courseColor,
+							backgroundColor:
+								isDarkMode === 'true' ? darkModeColor : lightModeColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -133,7 +143,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							gridColumn: dayColumn,
 							gridRow: `${timeRow + hoursDuration} / span 1`,
 							height: `${(remainingMinutes / 30) * 100}%`,
-							backgroundColor: courseColor,
+							backgroundColor:
+								isDarkMode === 'true' ? darkModeColor : lightModeColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -157,7 +168,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					{shortDaysOfWeek.map((day, index) => (
 						<div
 							key={`day-header ${index}`}
-							className={`border-l border-gray-300 dark:border-gray-400 ${index + 3 === currentDayCol ? ' font-bold' : ''}`}
+							className={`border-l border-gray-300 dark:border-gray-400 ${
+								index + 3 === currentDayCol ? ' font-bold' : ''
+							}`}
 						>
 							{day}
 						</div>
@@ -181,7 +194,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					{Array.from({ length: 7 }, (_, index) => (
 						<div
 							key={`day-col ${index + 1}`}
-							className={`border-r border-gray-200 dark:border-gray-500 col-span-1 row-span-full${index > 4 ? '  bg-gray-100 dark:bg-gray-600' : ''}`}
+							className={`border-r border-gray-200 dark:border-gray-500 col-span-1 row-span-full${
+								index > 4 ? '  bg-gray-100 dark:bg-gray-600' : ''
+							}`}
 							style={{ gridColumn: index + 3 }}
 						></div>
 					))}
