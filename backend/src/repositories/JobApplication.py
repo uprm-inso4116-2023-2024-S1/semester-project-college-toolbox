@@ -5,29 +5,30 @@ from src.security import get_user_id_from_token
 from src.models.tables.JobApplication import JobApplication
 from datetime import datetime
 from src.utils.db import get_db
+from src.repositories.Repository import Repository
 
-
-class JobRepository:
+class JobRepository(Repository):
     def __init__(self, name: str):
-        self.name = name
-        self.db: Session = next(get_db())
-        self.router = APIRouter()
+        
+        super().__init__(name)
+
+    def addRoutes(self) -> None:
 
         # add routes using router object here
         self.router.add_api_route(
-            "/getAllJobApplications", self.getAllApplications, methods=["GET"]
+            "/getAllJobApplications", self.getAll, methods=["GET"]
         )
         self.router.add_api_route(
-            "/updateJobApplication", self.updateApplicationById, methods=["PUT"]
+            "/updateJobApplication", self.update, methods=["PUT"]
         )
         self.router.add_api_route(
-            "/deleteJobApplication", self.deleteApplication, methods=["DELETE"]
+            "/deleteJobApplication", self.delete, methods=["DELETE"]
         )
         self.router.add_api_route(
-            "/createJobApplication", self.createApplication, methods=["POST"]
+            "/createJobApplication", self.create, methods=["POST"]
         )
 
-    async def createApplication(
+    async def create(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
         docId: int = Form(...),
@@ -48,7 +49,7 @@ class JobRepository:
         except Exception as e:
             raise HTTPException(status_code=500, detail="database error" + str(e))
 
-    async def getById(self, jobId):
+    async def getOne(self, jobId):
         """
         get job application by id
 
@@ -74,7 +75,7 @@ class JobRepository:
 
         return job
 
-    async def getAllApplications(
+    async def getAll(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -109,7 +110,7 @@ class JobRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    async def updateApplicationById(
+    async def update(
         self,
         jobId: int,
         auth_token: Annotated[str | None, Cookie()] = None,
@@ -165,8 +166,8 @@ class JobRepository:
                 status_code=500, detail="Error updating job application " + str(e)
             )
 
-    async def deleteApplication(self, applicationId: int = Form(...)):
-        job = self.getById(applicationId)
+    async def delete(self, applicationId: int = Form(...)):
+        job = self.getOne(applicationId)
 
         if job:
             self.db.delete(job)

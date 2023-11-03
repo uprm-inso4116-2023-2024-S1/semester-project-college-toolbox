@@ -5,31 +5,31 @@ from src.security import get_user_id_from_token
 from src.models.tables.ScholarshipApplication import ScholarshipApplication
 from datetime import datetime
 from src.utils.db import get_db
+from src.repositories.Repository import Repository
 
-
-class ScholarshipRepository:
+class ScholarshipRepository(Repository):
     def __init__(self, name: str):
-        self.name = name
-        self.db: Session = next(get_db())
-        self.router = APIRouter()
-
+        
+        super().__init__(name)
+    
+    def addRoutes(self) -> None:
         # add routes using router object here
         self.router.add_api_route(
-            "/getAllScholarshipApplications", self.getAllApplications, methods=["GET"]
+            "/getAllScholarshipApplications", self.getAll, methods=["GET"]
         )
         self.router.add_api_route(
-            "/updateScholarshipApplication", self.updateApplicationById, methods=["PUT"]
+            "/updateScholarshipApplication", self.update, methods=["PUT"]
         )
         self.router.add_api_route(
             "/deleteScholarshipApplication",
-            self.deleteApplication,
+            self.delete,
             methods=["DELETE"],
         )
         self.router.add_api_route(
-            "/createScholarshipApplication", self.createApplication, methods=["POST"]
+            "/createScholarshipApplication", self.create, methods=["POST"]
         )
 
-    async def createApplication(
+    async def create(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
         docId: int = Form(...),
@@ -50,7 +50,7 @@ class ScholarshipRepository:
         except Exception as e:
             raise HTTPException(status_code=500, detail="database error" + str(e))
 
-    async def getById(self, scholarshipId):
+    async def getOne(self, scholarshipId):
         """
         get scholarship application by id
 
@@ -76,7 +76,7 @@ class ScholarshipRepository:
 
         return Scholarship
 
-    async def getAllApplications(
+    async def getAll(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -112,7 +112,7 @@ class ScholarshipRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    async def updateApplicationById(
+    async def update(
         self,
         ScholarshipId: int,
         auth_token: Annotated[str | None, Cookie()] = None,
@@ -170,8 +170,8 @@ class ScholarshipRepository:
                 detail="Error updating Scholarship application " + str(e),
             )
 
-    async def deleteApplication(self, applicationId: int = Form(...)):
-        Scholarship = self.getById(applicationId)
+    async def delete(self, applicationId: int = Form(...)):
+        Scholarship = self.getOne(applicationId)
 
         if Scholarship:
             self.db.delete(Scholarship)
