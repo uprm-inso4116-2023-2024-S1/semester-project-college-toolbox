@@ -1,5 +1,7 @@
 from collections import defaultdict
+import os
 from typing import List
+from src.config import get_db_url
 from src.models.common.schedule import TimeBlock, WeekSchedule
 from src.models.requests.schedule import FilteredCourse, ScheduleGenerationOptions
 from src.models.common.schedule import (
@@ -10,8 +12,8 @@ from src.models.common.schedule import (
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
 from src.ssh_scraper.query_parser import parse
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import and_, create_engine
 import copy
 from dataclasses import dataclass, field
 
@@ -20,8 +22,17 @@ from src.utils.calendar import get_building_location
 day_map = {"L": 0, "M": 1, "W": 2, "J": 3, "V": 4, "S": 5, "D": 6}
 
 
+def get_scraper_db_session():
+    """
+    Get database session instance
+    """
+    environment = os.environ.get("CT_ENV", "DEV")
+    engine = create_engine(get_db_url(environment))
+    return Session(engine)
+
+
 def get_course_sections(course_id: str, term: Term, year: int) -> list[CourseSection]:
-    with Session(engine) as session:
+    with get_scraper_db_session() as session:
         return (
             session.query(CourseSection)
             .filter(
@@ -40,7 +51,7 @@ def get_course_sections(course_id: str, term: Term, year: int) -> list[CourseSec
 def get_course_by_section(
     course_id: str, section: str, term: Term, year: int
 ) -> list[CourseSection]:
-    with Session(engine) as session:
+    with get_scraper_db_session() as session:
         return (
             session.query(CourseSection)
             .filter(
@@ -60,7 +71,7 @@ def get_course_by_section(
 
 
 def get_room_schedules(course_section_id: int) -> list[RoomSchedule]:
-    with Session(engine) as session:
+    with get_scraper_db_session() as session:
         return (
             session.query(RoomSchedule)
             .filter(RoomSchedule.course_section_id == course_section_id)
@@ -73,7 +84,7 @@ def get_course_section_time_blocks(
 ) -> list[TimeBlock]:
     time_blocks = []
 
-    with Session(engine) as session:
+    with get_scraper_db_session() as session:
         section = (
             session.query(CourseSection)
             .filter(
@@ -110,7 +121,7 @@ def get_course_section_time_blocks(
 def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBlock]:
     time_blocks = []
     section_and_schedule: list[tuple[CourseSection, list[RoomSchedule]]] = []
-    with Session(engine) as session:
+    with get_scraper_db_session() as session:
         for sid in course_section_ids:
             section_and_schedule.append(
                 (
@@ -141,7 +152,7 @@ def get_section_time_blocks_by_ids(course_section_ids: list[int]) -> list[TimeBl
 
 
 def validate_course_id(course_id: str, term: str, year: str, section: str = None):
-    with Session(engine) as session:
+    with get_scraper_db_session() as session:
         if section:
             return (
                 session.query(CourseSection)
@@ -384,7 +395,17 @@ def generate_schedules_with_criteria(
         )
         course_list.append(course_code)
         for section, schedules in section_schedules:
-            if any(map(lambda s: (s.days == "" or s.days is None or s.start_time is None or s.end_time is None) , schedules)):
+            if any(
+                map(
+                    lambda s: (
+                        s.days == ""
+                        or s.days is None
+                        or s.start_time is None
+                        or s.end_time is None
+                    ),
+                    schedules,
+                )
+            ):
                 # For now, store the asynchronous sections, we will investigate how to integrate them later.
                 asynchronous_sections.append(section)
             else:
@@ -450,7 +471,7 @@ def get_section_schedules(
 ) -> list[tuple[CourseSection, list[RoomSchedule]]]:
     section_schedules = []
 
-    with Session(engine) as session:
+    with get_scraper_db_session() as session:
         parsed_query = and_(
             parse(query),
             and_(CourseSection.term == term.value, CourseSection.year == year),
