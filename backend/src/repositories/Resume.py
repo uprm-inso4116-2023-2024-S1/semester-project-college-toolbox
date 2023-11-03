@@ -7,21 +7,16 @@ from datetime import datetime
 from src.utils.db import get_db
 from src.repositories.Repository import Repository
 
+
 class ResumeRepository(Repository):
     def __init__(self, name: str):
-        
         super().__init__(name)
-        
+
     def addRoutes(self) -> None:
-        
         # add routes using router object here
         self.router.add_api_route("/getAllResumes", self.getAll, methods=["GET"])
-        self.router.add_api_route(
-            "/updateResume", self.update, methods=["PUT"]
-        )
-        self.router.add_api_route(
-            "/deleteResume", self.delete, methods=["DELETE"]
-        )
+        self.router.add_api_route("/updateResume", self.update, methods=["PUT"])
+        self.router.add_api_route("/deleteResume", self.delete, methods=["DELETE"])
         self.router.add_api_route("/createResume", self.create, methods=["POST"])
 
     async def create(
@@ -144,4 +139,3 @@ class ResumeRepository(Repository):
         if resume:
             self.db.delete(resume)
             self.db.commit()
-

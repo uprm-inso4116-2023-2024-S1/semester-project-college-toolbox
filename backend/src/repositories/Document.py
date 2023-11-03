@@ -7,23 +7,17 @@ from datetime import datetime
 from src.utils.db import get_db
 from src.repositories.Repository import Repository
 
+
 class DocumentRepository(Repository):
     def __init__(self, name: str):
-        
         super().__init__(name)
+
     def addRoutes(self) -> None:
-        
         # add routes using router object here
-        self.router.add_api_route(
-            "/getAllDocuments", self.getAll, methods=["GET"]
-        )
-        self.router.add_api_route(
-            "/updateDocument", self.update, methods=["PUT"]
-        )
+        self.router.add_api_route("/getAllDocuments", self.getAll, methods=["GET"])
+        self.router.add_api_route("/updateDocument", self.update, methods=["PUT"])
         self.router.add_api_route("/deleteDocument", self.delete, methods=["DELETE"])
-        self.router.add_api_route(
-            "/createDocument", self.create, methods=["POST"]
-        )
+        self.router.add_api_route("/createDocument", self.create, methods=["POST"])
 
     async def create(
         self,
