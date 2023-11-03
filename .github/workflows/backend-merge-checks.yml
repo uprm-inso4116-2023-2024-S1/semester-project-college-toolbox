@@ -1,4 +1,6 @@
 name: Backend Pre-Merge Checks
+permissions:
+    contents: write
 
 on:
   pull_request:
