@@ -45,6 +45,7 @@ jobs:
       - name: Run Backend Tests with Pytest
         working-directory: backend/ # Navigate to the backend folder
         run: |
+          chmod 777 ./*.db
           poetry run pytest 
           if [ $? -ne 0 ]; then
               echo "Error: Some tests failed when running Pytest."
