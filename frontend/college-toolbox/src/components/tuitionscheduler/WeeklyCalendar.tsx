@@ -126,7 +126,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 				<div className="bg-[#217346] text-center grid place-content-center text-white dark:text-gray-50 sticky top-0 z-10">
 					{termEnumToString(term)} {year} Semester
 				</div>
-				<div className="bg-gray-100 dark:bg-gray-600 grid place-content-center text-center grid-cols-[4em_10px_repeat(7,1fr)] sticky top-12 z-20 border-b-2 border-gray-200 dark:border-gray-500 text-black dark:text-gray-50">
+				<div className="bg-gray-100 dark:bg-gray-600 grid place-content-center text-center grid-cols-[4em_10px_repeat(7,1fr)] sticky top-12 z-10 border-b-2 border-gray-200 dark:border-gray-500 text-black dark:text-gray-50">
 					<div />
 					<div />
 					{shortDaysOfWeek.map((day, index) => (
@@ -170,7 +170,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					{schedule && schedule.courses.map(convertToCalendarEvents)}
 					<div
 						key={'curr-time'}
-						className="z-10 border-t-2 border-red-500 relative"
+						className="z-30 border-t-2 border-red-500 relative"
 						style={{
 							gridColumn: currentDayCol,
 							gridRow: currentTimeRow,

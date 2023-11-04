@@ -359,7 +359,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 
 	return (
 		<div className="relative">
-			<div className="bg-gray-200 dark:bg-gray-800 rounded-lg col-span-2 p-4">
+			<div className="bg-gray-200 dark:bg-gray-800 rounded-lg p-4 mt-2">
 				<h2 className="text-xl font-extrabold text-gray-900 dark:text-white p-1 mb-1">
 					Course Selection
 				</h2>
@@ -464,8 +464,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 				)}
 			</div>
 
-			<div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-lg col-span-3">
-				<h2 className="text-xl font-extrabold text-gray-900 dark:text-white p-1 mb-5">
+			<div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-lg mt-2">
+				<h2 className="text-xl font-extrabold text-gray-900 dark:text-white p-1 mb-1">
 					Schedule Generation Options
 				</h2>
 				<div className="grid grid-cols-1 gap-1">
