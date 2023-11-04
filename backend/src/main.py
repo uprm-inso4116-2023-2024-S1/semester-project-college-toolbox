@@ -132,7 +132,6 @@ async def register_user(
     """
     existing_user = db.query(User).filter(User.Email == user_request.email).first()
     if existing_user:
-        db.close()
         raise HTTPException(status_code=400, detail="Email already registered.")
 
     user = User(
@@ -151,7 +150,6 @@ async def register_user(
     db.refresh(user)
 
     permanent_token = generate_permanent_token(user.UserId)
-    db.close()
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -170,6 +168,7 @@ async def register_user(
         secure=True,
         path="/",
     )
+
     return response
 
 
@@ -186,14 +185,11 @@ async def login_user(
     """
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
-        db.close()
         raise HTTPException(status_code=404, detail="User not found.")
     if user.EncryptedPassword != hash_password(user_request.password, user.Salt):
-        db.close()
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
     permanent_token = generate_permanent_token(user.UserId)
-    db.close()
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -234,7 +230,6 @@ def fetch_user(
         raise HTTPException(
             status_code=400, detail="User corresponding to this token does not exist."
         )
-    db.close()
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -335,4 +330,4 @@ if __name__ == "__main__":
     import uvicorn
 
     env = prepare_db(environment)
-    uvicorn.run(app, host="localhost", port=5670, reload=env == "PROD")
+    uvicorn.run("main:app", host="localhost", port=5670, reload=env != "PROD")

@@ -20,14 +20,14 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 	const [options, setOptions] = useState<ScheduleGenerationOptions>(
 		getDefaultOptions(),
 	);
-	useEffect(() => {
+useEffect(() => {
 		setCurrentScheduleIdx(0);
 	}, [schedules]);
 
 	return (
-		<section className="grid grid-cols-10 w-full pt-2">
+		<section className="grid grid-cols-10 w-full gap-2 mx-2">
 			<div className="col-span-3">
-				<div className="flex items-center justify-center">
+				<div className="flex items-center justify-center ">
 					<ExportCalendarButton
 						schedule={schedules[currentScheduleIdx]}
 						term={options.term}
