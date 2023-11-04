@@ -8,25 +8,10 @@ from sqlalchemy.orm import sessionmaker
 from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.user import User
 
-from .test_config import TEST_DATABASE_URL
 from .test_utils import get_existing_application_insert_query
 from src.main import app, get_db
 from .test_config import test_db, engine
 from src.models.responses.existing_app import ExistingApplicationResponse
-
-
-# Override database
-def override_get_db():
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-# Override FastAPI app dependency
-app.dependency_overrides[get_db] = override_get_db
 
 # Create a test client
 client = TestClient(app)
@@ -51,18 +36,18 @@ login_data = {
 # Ensure the users table is empty before and after the test
 @pytest.fixture()
 def fresh_users_table():
-    db = next(override_get_db())
+    db = next(get_db())
     try:
         db.query(User).delete()
         db.commit()
-    except:
+    except Exception:
         db.rollback()
     db.close()
 
 
 @pytest.fixture()
 def fresh_solutions_table():
-    db = next(override_get_db())
+    db = next(get_db())
     try:
         db.query(ExistingApplication).delete()
         db.commit()
@@ -159,7 +144,7 @@ def test_existing_application_get_all_endpoint(test_db, fresh_solutions_table):
         ),
     ]
     # Write dummy data to the database
-    db = next(override_get_db())
+    db = next(get_db())
     db.execute(get_existing_application_insert_query(expected_responses))
     db.commit()
 

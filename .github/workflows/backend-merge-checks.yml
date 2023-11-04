@@ -1,6 +1,4 @@
 name: Backend Pre-Merge Checks
-permissions:
-    contents: write
 
 on:
   pull_request:
@@ -14,6 +12,8 @@ on:
 jobs:
   format-and-test:
     runs-on: ubuntu-latest
+    env:
+        CT_ENV: ACTIONS
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -45,7 +45,6 @@ jobs:
       - name: Run Backend Tests with Pytest
         working-directory: backend/ # Navigate to the backend folder
         run: |
-          chmod 777 ./*.db
           poetry run pytest 
           if [ $? -ne 0 ]; then
               echo "Error: Some tests failed when running Pytest."

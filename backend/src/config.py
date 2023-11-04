@@ -14,6 +14,8 @@ def get_db_url(environment: str) -> str:
             return DEV_DB_URL
         case "TEST":
             return TEST_DB_URL
+        case "ACTIONS":
+            return PROD_DB_URL
     return DEV_DB_URL
 
 
