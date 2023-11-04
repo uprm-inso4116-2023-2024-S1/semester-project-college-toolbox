@@ -161,7 +161,7 @@ def test_existing_application_get_all_endpoint(test_db, fresh_solutions_table):
     db.close()
 
 
-def test_save_schedule(test_db):
+def test_save_schedule(test_db, fresh_users_table):
     # Register the user first (assuming registration works)
     response_register = client.post("/register", json=register_data)
     assert response_register.status_code == 200

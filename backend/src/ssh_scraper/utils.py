@@ -526,11 +526,6 @@ def get_query_from_filters(course: FilteredCourse) -> str:
     return query
 
 
-def get_course_section_from_id(course_section_id: int) -> CourseSection:
-    with Session(engine) as session:
-        return session.get(CourseSection, course_section_id)
-
-
 def save_schedule(
     course_section_ids: list[int], name: str, term: str, year: int, user_id: int
 ) -> int:
