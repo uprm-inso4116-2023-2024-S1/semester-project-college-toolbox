@@ -10,7 +10,13 @@ from src.models.common.schedule import (
     SpaceTimeBlock,
 )
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
+from src.database import engine
+from src.models.tables.tuition_scheduler_models import (
+    CourseSection,
+    RoomSchedule,
+    Schedule,
+    CourseSchedule,
+)
 from src.ssh_scraper.query_parser import parse
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import and_, create_engine

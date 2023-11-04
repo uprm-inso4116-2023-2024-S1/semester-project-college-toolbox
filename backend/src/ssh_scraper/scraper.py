@@ -4,7 +4,8 @@ import re
 import sys
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
-from src.ssh_scraper.models import engine, CourseSection, RoomSchedule
+from src.database import engine
+from src.models.tables.tuition_scheduler_models import CourseSection, RoomSchedule
 from datetime import time as Time, datetime
 import asyncio
 import socket
