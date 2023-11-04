@@ -3,19 +3,18 @@ import { API_URL } from '../../app/constants';
 import type { GeneratedSchedule } from '../../types/entities';
 import { isLoggedIn } from '../../lib/profile';
 import { Modal } from 'flowbite-react';
+import { getCookie } from '../../lib/data';
 
 interface SaveScheduleButtonProps {
 	schedule: GeneratedSchedule | undefined;
 	term: string;
 	year: string;
-	getAuthToken: () => string | undefined;
 }
 
 const SaveScheduleButton: React.FC<SaveScheduleButtonProps> = ({
 	schedule,
 	term,
 	year,
-	getAuthToken,
 }) => {
 	const [openModal, setOpenModal] = useState<string | undefined>(undefined);
 	const [name, setName] = useState('');
@@ -36,7 +35,7 @@ const SaveScheduleButton: React.FC<SaveScheduleButtonProps> = ({
 					name,
 					term,
 					year,
-					auth_token: getAuthToken(),
+					auth_token: getCookie('auth_token'),
 				}),
 				credentials: 'include',
 			});
