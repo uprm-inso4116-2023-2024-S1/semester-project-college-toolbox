@@ -1,5 +1,6 @@
 # src/main.py
 from uuid import uuid4
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.models.requests.schedule import (
@@ -12,14 +13,9 @@ from src.models.responses.schedule import (
     ValidateCourseIDResponse,
 )
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import (
-    generate_schedules_with_criteria,
-    get_section_time_blocks_by_ids,
-    validate_course_id,
-)
+from src.ssh_scraper.utils import ScraperUtils
 from src.utils.calendar import (
     create_course_calendar,
-    get_full_name,
     get_semester,
     try_delete_file,
     filter_apps_by_prefix,
@@ -39,19 +35,10 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
-from src.utils.calendar import (
-    create_course_calendar,
-    get_full_name,
-    get_semester,
-    try_delete_file,
-)
-from src.utils.db import get_db, prepare_db
+from src.utils.db import get_db, prepare_db, get_engine
 
 from src.config import environment
-from src.database import Base, SessionLocal, engine
-
+from src.database import Base
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.requests.resources import (
@@ -83,7 +70,6 @@ from src.repositories.Resume import ResumeRepository
 app = FastAPI(
     docs_url="/api/docs",
 )
-
 jobRepo = JobRepository("Job Repository")
 scholarshipRepo = ScholarshipRepository("Scholarship Repository")
 docRepo = DocumentRepository("Document Repository")
@@ -283,8 +269,11 @@ def export_calendar(
 
 # Generate Schedules
 @app.post("/schedules")
-def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
-    schedules = generate_schedules_with_criteria(
+def generate_schedules(
+    request: GenerateSchedulesRequest, engine: Engine = Depends(get_engine)
+) -> GenerateSchedulesResponse:
+    su = ScraperUtils(engine)
+    schedules = su.generate_schedules_with_criteria(
         courses=request.courses,
         term=request.term,
         year=request.year,
@@ -297,9 +286,10 @@ def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesRe
 # Validating courses for schedule generation
 @app.post("/validate_course_id", response_model=ValidateCourseIDResponse)
 def validate_course_id_endpoint(
-    request: ValidateCourseIDRequest,
+    request: ValidateCourseIDRequest, engine: Engine = Depends(get_engine)
 ) -> ValidateCourseIDResponse:
-    is_valid = validate_course_id(
+    su = ScraperUtils(engine)
+    is_valid = su.validate_course_id(
         course_id=request.course_id,
         term=request.term,
         year=request.year,
