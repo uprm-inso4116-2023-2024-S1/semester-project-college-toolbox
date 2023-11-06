@@ -7,12 +7,16 @@ from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.user import User
-
+from sqlalchemy.orm import Session
+import test
 from .test_utils import get_existing_application_insert_query
 from src.main import app, get_db
-from .test_config import test_db, engine
+from .test_config import test_db, get_test_db
 from src.models.responses.existing_app import ExistingApplicationResponse
 
+
+# Override db
+app.dependency_overrides[get_db] = get_test_db
 # Create a test client
 client = TestClient(app)
 
@@ -33,29 +37,6 @@ login_data = {
 }
 
 
-# Ensure the users table is empty before and after the test
-@pytest.fixture()
-def fresh_users_table():
-    db = next(get_db())
-    try:
-        db.query(User).delete()
-        db.commit()
-    except Exception:
-        db.rollback()
-    db.close()
-
-
-@pytest.fixture()
-def fresh_solutions_table():
-    db = next(get_db())
-    try:
-        db.query(ExistingApplication).delete()
-        db.commit()
-    except:
-        db.rollback()
-    db.close()
-
-
 # Test the dummy endpoint
 def test_read_root():
     response = client.get("/")
@@ -64,7 +45,11 @@ def test_read_root():
 
 
 # Test the register endpoint
-def test_register_user(test_db, fresh_users_table):
+def test_register_user(test_db):
+    # Ensure the users table is empty before and after the test
+    with Session(test_db) as session:
+        with session.begin():
+            session.query(User).delete()
     # Test successful registration
     response_register = client.post("/register", json=register_data)
     assert response_register.status_code == 200
@@ -81,7 +66,11 @@ def test_register_user(test_db, fresh_users_table):
 
 
 # Test the login endpoint
-def test_login_user(test_db, fresh_users_table):
+def test_login_user(test_db):
+    # Ensure the users table is empty before and after the test
+    with Session(test_db) as session:
+        with session.begin():
+            session.query(User).delete()
     # Register the user first (assuming registration works)
     response_register = client.post("/register", json=register_data)
     assert response_register.status_code == 200
@@ -118,7 +107,7 @@ def test_login_user(test_db, fresh_users_table):
     assert response_incorrect_password.json() == {"detail": "Incorrect password."}
 
 
-def test_existing_application_get_all_endpoint(test_db, fresh_solutions_table):
+def test_existing_application_get_all_endpoint(test_db):
     expected_responses = [
         (
             ExistingApplicationResponse(
@@ -144,10 +133,10 @@ def test_existing_application_get_all_endpoint(test_db, fresh_solutions_table):
         ),
     ]
     # Write dummy data to the database
-    db = next(get_db())
-    db.execute(get_existing_application_insert_query(expected_responses))
-    db.commit()
-
+    with Session(test_db) as session:
+        with session.begin():
+            session.query(ExistingApplication).delete()
+            session.execute(get_existing_application_insert_query(expected_responses))
     # Test the endpoint
     response = client.get("/ExistingApplication/get/all")
 
@@ -155,6 +144,3 @@ def test_existing_application_get_all_endpoint(test_db, fresh_solutions_table):
     assert len(response.json()) == len(expected_responses)
     for i in range(len(response.json())):
         assert response.json()[i] == expected_responses[i].model_dump()
-
-    # Close the database connection
-    db.close()
