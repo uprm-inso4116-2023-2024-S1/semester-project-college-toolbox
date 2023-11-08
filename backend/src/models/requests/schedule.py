@@ -35,7 +35,7 @@ class ValidateCourseIDRequest(BaseModel):
     year: str
 
 
-class GetCourseQueryRequest(BaseModel):
+class CourseSearchRequest(BaseModel):
     query: str
     term: str
     year: int

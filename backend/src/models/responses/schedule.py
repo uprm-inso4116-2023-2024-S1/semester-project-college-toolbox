@@ -11,5 +11,5 @@ class ValidateCourseIDResponse(BaseModel):
     is_valid: bool
 
 
-class GetCourseQueryResponse(BaseModel):
+class CourseSearchResponse(BaseModel):
     course_section_schedules: list[CourseSectionSchedule]

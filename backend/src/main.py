@@ -7,12 +7,12 @@ from src.models.requests.schedule import (
     ExportCalendarRequest,
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
-    GetCourseQueryRequest,
+    CourseSearchRequest,
 )
 from src.models.responses.schedule import (
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
-    GetCourseQueryResponse,
+    CourseSearchResponse,
 )
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import ScraperUtils
@@ -301,10 +301,10 @@ def validate_course_id_endpoint(
 
 
 # Get section schedules from course query
-@app.post("/get_course_query")
-def get_course_query_endpoint(
-    request: GetCourseQueryRequest, engine: Engine = Depends(get_engine)
-) -> GetCourseQueryResponse:
+@app.post("/course_search")
+def course_search_endpoint(
+    request: CourseSearchRequest, engine: Engine = Depends(get_engine)
+) -> CourseSearchResponse:
     su = ScraperUtils(engine)
     result = su.get_section_schedules(
         query=request.query, term=Term(request.term), year=request.year
