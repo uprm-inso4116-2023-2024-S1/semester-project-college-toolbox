@@ -7,10 +7,12 @@ from src.models.requests.schedule import (
     ExportCalendarRequest,
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
+    GetCourseQueryRequest,
 )
 from src.models.responses.schedule import (
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
+    GetCourseQueryResponse,
 )
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import ScraperUtils
@@ -296,6 +298,22 @@ def validate_course_id_endpoint(
         section=request.section,
     )
     return {"is_valid": is_valid}
+
+
+# Get section schedules from course query
+@app.post("/get_course_query")
+def get_course_query_endpoint(
+    request: GetCourseQueryRequest, engine: Engine = Depends(get_engine)
+) -> GetCourseQueryResponse:
+    su = ScraperUtils(engine)
+    result = su.get_section_schedules(
+        query=request.query, term=Term(request.term), year=request.year
+    )
+    course_section_schedules = [
+        su.create_course_section_schedule(section, schedules)
+        for section, schedules in result
+    ]
+    return {"course_section_schedules": course_section_schedules}
 
 
 if __name__ == "__main__":
