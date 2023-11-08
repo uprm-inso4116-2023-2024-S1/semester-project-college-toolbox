@@ -418,7 +418,7 @@ class ScraperUtils:
         max_schedules = min(25, options.maxSchedules) if options.maxSchedules else 5
 
         def generate_schedules_with_criteria_helper(
-            self, sections_added=[], courses_added=set(), current_credits=0
+            sections_added=[], courses_added=set(), current_credits=0
         ):
             if len(generated_schedules) >= max_schedules:
                 return
