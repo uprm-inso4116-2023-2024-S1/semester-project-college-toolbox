@@ -1,29 +1,28 @@
 import React from 'react';
-import type { CourseSectionSchedule } from '../../types/entities';
+import type { CourseSearchSection } from '../../types/entities';
 import { convertToAmPm } from '../../lib/data';
 
 // Update the props type to include the courses array
 type CourseListProps = {
-  courses: CourseSectionSchedule[];
+  courses: CourseSearchSection[];
 };
 
 // Update the component to accept the courses prop
 const CourseList: React.FC<CourseListProps> = ({ courses }) => {
-	function getDaysString(course: CourseSectionSchedule){
-		const daysOfWeek = ["L","M","W","J","V","S","D"]
-		const days = course.timeBlocks.map(block=>daysOfWeek[block.day])
-		return daysOfWeek.filter(day=>days.includes(day))
+	function getDaysString(course: CourseSearchSection){
+		const days = course.schedules.map(block=>block.days)
+		return days.join("")
 	}
-	function getRooms(course: CourseSectionSchedule){
+	function getRooms(course: CourseSearchSection){
 		const rooms: string[] = []
-		course.timeBlocks.map(block=>block.room).forEach((room)=> {
+		course.schedules.map(block=>block.room).forEach((room)=> {
 			if (!rooms.includes(room)) rooms.push(room)
 		})
 		return rooms
 	}
-	function getTimes(course: CourseSectionSchedule){
+	function getTimes(course: CourseSearchSection){
 		const times: string[] = []
-		course.timeBlocks.map(block=>`${convertToAmPm(block.startTime)}-${convertToAmPm(block.endTime)}`).forEach((time)=> {
+		course.schedules.map(block=>`${convertToAmPm(block.startTime)}-${convertToAmPm(block.endTime)}`).forEach((time)=> {
 			if (!times.includes(time)) times.push(time)
 		})
 		return times
@@ -58,9 +57,9 @@ const CourseList: React.FC<CourseListProps> = ({ courses }) => {
               <td className="px-4 py-4 dark:text-white">{course.sectionCode}</td>
               <td className="px-4 py-4 dark:text-white">{course.professor}</td>
               <td className="px-4 py-4 dark:text-white">{course.credits}</td>
-              <td className="px-4 py-4 dark:text-white">{getRooms(course).join(",")}</td>
+              <td className="px-4 py-4 dark:text-white">{getRooms(course).join(", ")}</td>
               <td className="px-4 py-4 dark:text-white">{getDaysString(course)}</td>
-              <td className="px-4 py-4 dark:text-white">{getTimes(course).join(",")}</td>
+              <td className="px-4 py-4 dark:text-white">{getTimes(course).join(", ")}</td>
               <td className="px-0 py-4 text-right">
                 <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add to Schedule</button>
               </td>

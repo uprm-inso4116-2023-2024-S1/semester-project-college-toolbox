@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SearchBar from '../CourseSearch/SearchBar';
 import CourseList from '../CourseSearch/CourseList';
-import type { CourseSectionSchedule } from '../../types/entities';
+import type { CourseSearchSection } from '../../types/entities';
 import { API_URL } from '../../app/constants';
 
 export interface SearchQuery {
@@ -11,7 +11,7 @@ export interface SearchQuery {
 }
 
 const CourseSearchHome: React.FC = () => {
-	const [courses, setCourses] = useState<CourseSectionSchedule[]>([]);
+	const [courses, setCourses] = useState<CourseSearchSection[]>([]);
 
 	const submitSearchQuery = async (searchQuery: SearchQuery) => {
 		if (!searchQuery.query) {
