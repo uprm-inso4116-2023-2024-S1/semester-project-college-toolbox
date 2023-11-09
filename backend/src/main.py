@@ -310,7 +310,7 @@ def course_search_endpoint(
         query=request.query, term=Term(request.term), year=request.year
     )
     course_section_schedules = [
-        su.create_course_section_schedule(section, schedules)
+        su.create_course_search_section(section, schedules)
         for section, schedules in result
     ]
     return {"course_section_schedules": course_section_schedules}
