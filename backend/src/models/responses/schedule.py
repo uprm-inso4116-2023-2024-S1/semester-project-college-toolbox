@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
-from src.models.common.schedule import GeneratedSchedule, CourseSectionSchedule
+from src.models.common.schedule import GeneratedSchedule, CourseSearchSection
 
 
 class GenerateSchedulesResponse(BaseModel):
@@ -12,4 +12,4 @@ class ValidateCourseIDResponse(BaseModel):
 
 
 class CourseSearchResponse(BaseModel):
-    course_section_schedules: list[CourseSectionSchedule]
+    course_section_schedules: list[CourseSearchSection]
