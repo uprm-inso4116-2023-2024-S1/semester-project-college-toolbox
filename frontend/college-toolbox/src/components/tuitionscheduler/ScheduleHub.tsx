@@ -10,11 +10,11 @@ import type {
 } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
 import { getDefaultOptions } from '../../lib/data';
-
+import { storedCourses } from '../../lib/courses';
 interface ScheduleHubProps {}
 
 const ScheduleHub: React.FC<ScheduleHubProps> = () => {
-	const [selectedCourses, setSelectedCourses] = useState<FilteredCourse[]>([]);
+	const [selectedCourses, setSelectedCourses] = useState<FilteredCourse[]>(storedCourses.get());
 	const [schedules, setSchedules] = useState<GeneratedSchedule[]>([]);
 	const [currentScheduleIdx, setCurrentScheduleIdx] = useState<number>(0);
 	const [options, setOptions] = useState<ScheduleGenerationOptions>(

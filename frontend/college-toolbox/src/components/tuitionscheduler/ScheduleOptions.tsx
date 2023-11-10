@@ -7,6 +7,7 @@ import type {
 } from '../../types/entities';
 import { Modal } from 'flowbite-react';
 import ToggleSwitch from '../ToggleSwitch';
+import { storedCourses } from '../../lib/courses';
 
 export interface ScheduleOptions {
 	courses: FilteredCourse[];
@@ -79,6 +80,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 			[name]: value,
 		}));
 		setCourses([]);
+		storedCourses.set([]);  // Clear stored courses
 	};
 
 	const handleToggle = () => {
@@ -106,6 +108,9 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		// Save days string that was selected in the modal
 		updatedCoursesInfo[modalProps.index]!.filters = modalProps.courseFilters;
 		setCourses(updatedCoursesInfo);
+		// Update stored courses
+		storedCourses.set(updatedCoursesInfo);
+		// Close modal
 		setOpenModal(undefined);
 	};
 
@@ -149,6 +154,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 						newCourses.push({ code: courseString });
 					}
 					setCourses(newCourses);
+					// Save courses to local storage
+					storedCourses.set(newCourses);
 					// Reset input fields
 					setCourseID('');
 					setSection('');
@@ -171,6 +178,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 			(_, index) => index !== indexToDelete,
 		);
 		setCourses(updatedCourses);
+		// Update stored courses in local storage
+		storedCourses.set(updatedCourses);
 	};
 
 	async function validateCourse(
