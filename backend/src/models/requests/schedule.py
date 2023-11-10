@@ -1,7 +1,7 @@
 # src/models/requests/login.py
 from typing import Optional
 from pydantic import BaseModel
-from src.models.common.schedule import GeneratedSchedule
+from src.models.common.schedule import GeneratedSchedule, CourseSectionSchedule
 
 
 class ExportCalendarRequest(BaseModel):
@@ -33,3 +33,9 @@ class ValidateCourseIDRequest(BaseModel):
     section: Optional[str] = None
     term: str
     year: str
+
+
+class CourseSearchRequest(BaseModel):
+    query: str
+    term: str
+    year: int
