@@ -109,6 +109,6 @@ export interface CourseSearchSection {
     credits: number;
     sectionCode: string;
     sectionId: number;
-    schedules: [CourseSearchSchedule];
+    schedules: CourseSearchSchedule[];
 }
 

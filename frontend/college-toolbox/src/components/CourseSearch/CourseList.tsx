@@ -48,8 +48,8 @@ const CourseList: React.FC<CourseListProps> = ({ courses }) => {
           </tr>
         </thead>
         <tbody>
-          {courses.map((course) => (
-            <tr key={course.courseCode} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+          {courses.map((course,index) => (
+            <tr key={`${course.courseCode}-${course.sectionCode}-${index}`} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
               <th scope="row" className="px-4 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                 {course.courseCode}
               </th>

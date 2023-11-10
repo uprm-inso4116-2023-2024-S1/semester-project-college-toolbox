@@ -27,7 +27,6 @@ const CourseSearchHome: React.FC = () => {
 					...searchQuery,
 					year: Number(searchQuery.year),
 				}),
-				credentials: 'include',
 			});
 
 			if (!response.ok) {
