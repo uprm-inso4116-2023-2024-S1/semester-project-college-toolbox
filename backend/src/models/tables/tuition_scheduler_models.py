@@ -42,6 +42,8 @@ class Schedule(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(50))
+    term = Column(String(10))
+    year = Column(Integer)
     user_id = Column(String, ForeignKey("User.UserId"))
 
     course_schedules = relationship("CourseSchedule", back_populates="schedule")

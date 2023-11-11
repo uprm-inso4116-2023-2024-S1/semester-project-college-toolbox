@@ -12,6 +12,8 @@ on:
 jobs:
   format-and-test:
     runs-on: ubuntu-latest
+    env:
+        CT_ENV: ACTIONS
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2

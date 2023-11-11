@@ -1,27 +1,27 @@
 # src/main.py
 from uuid import uuid4
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.models.requests.schedule import (
     ExportCalendarRequest,
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
+    CourseSearchRequest,
 )
 from src.models.responses.schedule import (
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
+    CourseSearchResponse,
 )
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import (
-    generate_schedules_with_criteria,
-    get_section_time_blocks_by_ids,
-    validate_course_id,
-)
+from src.ssh_scraper.utils import ScraperUtils
 from src.utils.calendar import (
     create_course_calendar,
-    get_full_name,
     get_semester,
     try_delete_file,
+    filter_apps_by_prefix,
+    filter_apps_by_criteria,
 )
 from fastapi import (
     FastAPI,
@@ -37,23 +37,18 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
-from src.utils.calendar import (
-    create_course_calendar,
-    get_full_name,
-    get_semester,
-    try_delete_file,
-)
-from src.utils.db import get_db, prepare_db
+from src.utils.db import get_db, prepare_db, get_engine
 
 from src.config import environment
-from src.database import Base, SessionLocal, engine
-
+from src.database import Base
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.business_model import BusinessModelResponse
 from src.models.responses.existing_solution import ExistingSolutionResponse
+from src.models.requests.resources import (
+    PrefixFilterRequest,
+    applyAllFilterRequest,
+)
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 
@@ -79,7 +74,6 @@ from src.repositories.Resume import ResumeRepository
 app = FastAPI(
     docs_url="/api/docs",
 )
-
 jobRepo = JobRepository("Job Repository")
 scholarshipRepo = ScholarshipRepository("Scholarship Repository")
 docRepo = DocumentRepository("Document Repository")
@@ -125,7 +119,6 @@ async def register_user(
     """
     existing_user = db.query(User).filter(User.Email == user_request.email).first()
     if existing_user:
-        db.close()
         raise HTTPException(status_code=400, detail="Email already registered.")
 
     user = User(
@@ -144,7 +137,6 @@ async def register_user(
     db.refresh(user)
 
     permanent_token = generate_permanent_token(user.UserId)
-    db.close()
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -163,6 +155,7 @@ async def register_user(
         secure=True,
         path="/",
     )
+
     return response
 
 
@@ -179,14 +172,11 @@ async def login_user(
     """
     user = db.query(User).filter(User.Email == user_request.email).first()
     if not user:
-        db.close()
         raise HTTPException(status_code=404, detail="User not found.")
     if user.EncryptedPassword != hash_password(user_request.password, user.Salt):
-        db.close()
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
     permanent_token = generate_permanent_token(user.UserId)
-    db.close()
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -227,7 +217,6 @@ def fetch_user(
         raise HTTPException(
             status_code=400, detail="User corresponding to this token does not exist."
         )
-    db.close()
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -245,7 +234,6 @@ def fetch_user(
 async def get_all_existing_solutions(
     db: Session = Depends(get_db),
 ) -> list[ExistingSolutionResponse]:
-    # Use joinedload to eagerly load the related BusinessModels
     data = db.query(ExistingSolution).all()
 
     responses = []
@@ -276,6 +264,26 @@ async def get_all_existing_solutions(
     return responses
 
 
+@app.post("/ExistingApplication/filter/prefix")
+async def filter_existing_applications_by_prefix(
+    request_data: PrefixFilterRequest, db: Session = Depends(get_db)
+) -> list[ExistingSolutionResponse]:
+    """Retrieve all applications that start with a specific prefix."""
+    all_apps = db.query(ExistingSolution).all()
+    filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
+    return [ExistingSolutionResponse(**app.__dict__) for app in filtered_apps]
+
+
+@app.post("/ExistingApplication/filter/applyAll")
+async def filter_existing_applications_by_criteria(
+    request_data: applyAllFilterRequest, db: Session = Depends(get_db)
+) -> list[ExistingSolutionResponse]:
+    """Retrieve all applications that fit the given filters."""
+    all_apps = db.query(ExistingSolution).all()
+    filtered_apps = filter_apps_by_criteria(request_data, all_apps)
+    return filtered_apps
+
+
 # Create .ics calendar file
 @app.post("/export_calendar")
 def export_calendar(
@@ -290,8 +298,11 @@ def export_calendar(
 
 # Generate Schedules
 @app.post("/schedules")
-def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
-    schedules = generate_schedules_with_criteria(
+def generate_schedules(
+    request: GenerateSchedulesRequest, engine: Engine = Depends(get_engine)
+) -> GenerateSchedulesResponse:
+    su = ScraperUtils(engine)
+    schedules = su.generate_schedules_with_criteria(
         courses=request.courses,
         term=request.term,
         year=request.year,
@@ -304,9 +315,10 @@ def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesRe
 # Validating courses for schedule generation
 @app.post("/validate_course_id", response_model=ValidateCourseIDResponse)
 def validate_course_id_endpoint(
-    request: ValidateCourseIDRequest,
+    request: ValidateCourseIDRequest, engine: Engine = Depends(get_engine)
 ) -> ValidateCourseIDResponse:
-    is_valid = validate_course_id(
+    su = ScraperUtils(engine)
+    is_valid = su.validate_course_id(
         course_id=request.course_id,
         term=request.term,
         year=request.year,
@@ -315,8 +327,24 @@ def validate_course_id_endpoint(
     return {"is_valid": is_valid}
 
 
+# Get section schedules from course query
+@app.post("/course_search")
+def course_search_endpoint(
+    request: CourseSearchRequest, engine: Engine = Depends(get_engine)
+) -> CourseSearchResponse:
+    su = ScraperUtils(engine)
+    result = su.get_section_schedules(
+        query=request.query, term=Term(request.term), year=request.year
+    )
+    course_section_schedules = [
+        su.create_course_search_section(section, schedules)
+        for section, schedules in result
+    ]
+    return {"course_section_schedules": course_section_schedules}
+
+
 if __name__ == "__main__":
     import uvicorn
 
     env = prepare_db(environment)
-    uvicorn.run(app, host="localhost", port=5670, reload=env == "PROD")
+    uvicorn.run("main:app", host="localhost", port=5670, reload=env != "PROD")

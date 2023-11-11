@@ -1,4 +1,5 @@
 import { Modal } from 'flowbite-react';
+import { $isDarkMode } from '../../lib/theme.ts';
 import {
 	convertToAmPm,
 	getCurrentTimeInMinutes,
@@ -11,6 +12,7 @@ import type {
 	SpaceTimeBlock,
 } from '../../types/entities';
 import React, { useState } from 'react';
+import { useStore } from '@nanostores/react';
 
 interface WeeklyCalendarProps {
 	schedule: GeneratedSchedule | undefined;
@@ -18,11 +20,45 @@ interface WeeklyCalendarProps {
 	year: string;
 }
 
+
+function courseCodeToColor(
+    str: string,
+    minColor: number = 0,
+    maxColor: number = 255
+): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Seeded pseudo-random number generation based on the hash
+    const m = 0x80000000;
+    let a = 1664525;
+    let c = 1013904223;
+    let seed = hash;
+    seed = (a * seed + c) % m;
+    const randomFactor = seed / m;
+
+    hash = hash + Math.floor(randomFactor * 0xFFFFFF);
+
+    let color = '#';
+    for (let j = 0; j < 3; j++) {
+        let value = (hash >> (j * 8)) & 0xff;
+
+        // Map the value to the desired range
+        value = minColor + (value % (maxColor - minColor));
+        color += ('00' + value.toString(16)).slice(-2);
+    }
+
+    return color;
+}
+
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	schedule,
 	term,
 	year,
 }) => {
+	const isDarkMode = useStore($isDarkMode);
 	const shortDaysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 	const daysOfWeek = [
 		'Monday',
@@ -66,14 +102,18 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			);
 			const remainingMinutes: number =
 				subtract24HourTimes(block.startTime, block.endTime) % 30;
+			const lightModeColor = courseCodeToColor(course.courseCode, 120, 255);
+			const darkModeColor = courseCodeToColor(course.courseCode, 40, 200);
 			if (remainingMinutes == 0) {
 				return (
 					<div
 						key={`block ${idx}`}
-						className="z-10 bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white rounded-b-[5px] hover:cursor-pointer"
+						className="z-10 rounded-t-[5px] p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white rounded-b-[5px] hover:cursor-pointer"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
+							backgroundColor:
+								isDarkMode === 'true' ? darkModeColor : lightModeColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -89,10 +129,12 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 			return (
 				<React.Fragment key={`block-fragment ${idx}`}>
 					<div
-						className="bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 rounded-t-[5px] p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
+						className="rounded-t-[5px] p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
+							backgroundColor:
+								isDarkMode === 'true' ? darkModeColor : lightModeColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -104,11 +146,13 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						Room: {block.room}
 					</div>
 					<div
-						className="z-10 bg-[#9adbf9] border-[#81cdf2]  dark:bg-blue-400 dark:border-blue-500 p-[5px] mr-[5px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]"
+						className={`z-10 p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]`}
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow + hoursDuration} / span 1`,
 							height: `${(remainingMinutes / 30) * 100}%`,
+							backgroundColor:
+								isDarkMode === 'true' ? darkModeColor : lightModeColor,
 						}}
 						onClick={() => {
 							modalProps.setCalEvent(course);
@@ -126,13 +170,15 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 				<div className="bg-[#217346] text-center grid place-content-center text-white dark:text-gray-50 sticky top-0 z-10">
 					{termEnumToString(term)} {year} Semester
 				</div>
-				<div className="bg-gray-100 dark:bg-gray-600 grid place-content-center text-center grid-cols-[4em_10px_repeat(7,1fr)] sticky top-12 z-20 border-b-2 border-gray-200 dark:border-gray-500 text-black dark:text-gray-50">
+				<div className="bg-gray-100 dark:bg-gray-600 grid place-content-center text-center grid-cols-[4em_10px_repeat(7,1fr)] sticky top-12 z-10 border-b-2 border-gray-200 dark:border-gray-500 text-black dark:text-gray-50">
 					<div />
 					<div />
 					{shortDaysOfWeek.map((day, index) => (
 						<div
 							key={`day-header ${index}`}
-							className={`border-l border-gray-300 dark:border-gray-400 ${index + 3 === currentDayCol ? ' font-bold' : ''}`}
+							className={`border-l border-gray-300 dark:border-gray-400 ${
+								index + 3 === currentDayCol ? ' font-bold' : ''
+							}`}
 						>
 							{day}
 						</div>
@@ -156,7 +202,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					{Array.from({ length: 7 }, (_, index) => (
 						<div
 							key={`day-col ${index + 1}`}
-							className={`border-r border-gray-200 dark:border-gray-500 col-span-1 row-span-full${index > 4 ? '  bg-gray-100 dark:bg-gray-600' : ''}`}
+							className={`border-r border-gray-200 dark:border-gray-500 col-span-1 row-span-full${
+								index > 4 ? '  bg-gray-100 dark:bg-gray-600' : ''
+							}`}
 							style={{ gridColumn: index + 3 }}
 						></div>
 					))}
@@ -170,7 +218,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 					{schedule && schedule.courses.map(convertToCalendarEvents)}
 					<div
 						key={'curr-time'}
-						className="z-10 border-t-2 border-red-500 relative"
+						className="z-30 border-t-2 border-red-500 relative"
 						style={{
 							gridColumn: currentDayCol,
 							gridRow: currentTimeRow,

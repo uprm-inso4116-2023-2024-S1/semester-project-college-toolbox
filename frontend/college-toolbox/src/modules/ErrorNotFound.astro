@@ -1,12 +1,13 @@
 ---
-import { url, asset } from '../lib/data.js';
+import ToolboxLogo from '../components/ToolboxLogo';
+import { url } from '../lib/data.js';
 ---
 
 <div
 	class="flex flex-col justify-center items-center px-6 mx-auto h-screen xl:px-0 dark:bg-gray-900"
 >
 	<div class="block md:max-w-lg">
-		<img src={asset("docs/assets/toolboxImg.svg")} />
+		<ToolboxLogo />
 	</div>
 	<div class="text-center xl:max-w-4xl">
 		<h1

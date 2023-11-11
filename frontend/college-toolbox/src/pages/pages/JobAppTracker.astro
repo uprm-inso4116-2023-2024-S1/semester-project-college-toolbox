@@ -23,16 +23,12 @@ import JobApplicationList from '../../components/JobApplicationList.jsx';
     
 </LayoutSidebar>
 
-<script>
-	import { url, asset } from "../../lib/data";
+<script >
+import { url } from "../../lib/data";
+import { isLoggedIn } from '../../lib/profile';
 
-	const cookies = document.cookie;
-	// Check if the "auth_token" cookie is present
-	const authToken = cookies?.split('; ').find(row => row.startsWith('auth_token='));
-    
-	
     // If the "auth_token" cookie is not found, redirect to the sign-in page
-	if (!authToken) {
+	if (isLoggedIn.get() == "false") {
 		window.location.href = url('authentication/sign-in');
 	}
 

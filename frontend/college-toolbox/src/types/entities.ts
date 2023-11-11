@@ -82,3 +82,33 @@ export interface CourseFilters {
 	days?: string;
 	professor?: string;
 }
+
+export interface ResourcesModel {
+    Name: string;
+    Description: string;
+    URL: string;
+    Icon: string;
+    Type: string;
+    Rating: number;
+    RatingCount: number;
+}
+
+
+interface CourseSearchSchedule {
+    room: string;
+    days: string;
+    startTime: string;
+    endTime: string;
+}
+
+
+export interface CourseSearchSection {
+    courseCode: string;
+    courseName: string;
+    professor: string;
+    credits: number;
+    sectionCode: string;
+    sectionId: number;
+    schedules: CourseSearchSchedule[];
+}
+
