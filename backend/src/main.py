@@ -52,10 +52,12 @@ from src.database import Base, SessionLocal, engine
 
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.responses.business_model import BusinessModelResponse
 from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 
+from src.models.tables.BusinessModel import BusinessModel
 from src.models.tables.Document import Document
 from src.models.tables.Resume import Resume
 from src.models.tables.JobApplication import JobApplication
@@ -243,18 +245,35 @@ def fetch_user(
 async def get_all_existing_solutions(
     db: Session = Depends(get_db),
 ) -> list[ExistingSolutionResponse]:
-    # Should return a list of tables/ExistingSolution.py
+    # Use joinedload to eagerly load the related BusinessModels
     data = db.query(ExistingSolution).all()
 
+    responses = []
     for d in data:
-        # The pros and cons are stored as a string in the database, so we need to convert them to a list
+        # The Pros and Cons are stored as a string in the database, so we need to convert them to a list
         d.Pros = d.Pros.split(",")
         d.Cons = d.Cons.split(",")
 
         # The datetime object is not JSON serializable, so we need to convert it to a string
-        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d")
+        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
 
-    return [ExistingSolutionResponse(**d.__dict__) for d in data]
+        business_models = [
+            BusinessModelResponse(
+                ExistingSolutionId=i.ExistingSolutionId,
+                BusinessModelType=i.BusinessModelType,
+                Price=i.Price,
+                Description=i.Description
+            ) for i in d.BusinessModels
+        ]
+
+        response_dict = { **d.__dict__ }       
+        response_dict['BusinessModels'] = business_models
+
+        # Create an ExistingSolutionResponse instance from the dictionary
+        response = ExistingSolutionResponse(**response_dict)
+        responses.append(response)
+
+    return responses
 
 
 # Create .ics calendar file

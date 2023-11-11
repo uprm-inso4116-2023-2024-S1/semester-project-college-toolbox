@@ -3,6 +3,21 @@ from sqlalchemy.sql import text
 def list_to_string(list):
     return ",".join(list)
 
+def get_business_model_insert_query(business_models):
+    query = "INSERT INTO BusinessModel (ExistingSolutionId, BusinessModelType, Price, Description) VALUES "
+    for i, business_model in enumerate(business_models):
+        query += f"({business_model.ExistingSolutionId}, '"
+        query += f"{business_model.BusinessModelType}', "
+        query += f"{business_model.Price}, '"
+        query += f"{business_model.Description}')"
+
+        # Add a comma if the current tuple is not the last tuple
+        if i != len(business_models) - 1:
+            query += ", "
+
+    return text(query)
+
+
 def get_existing_solution_insert_query(expected_responses):
     # Define a text string that represents the SQL query
     query = "INSERT INTO ExistingSolution (Name, Description, URL, Icon, Type, Rating, RatingCount, Pros, Cons, LastUpdated, HasMobile, HasWeb) VALUES "

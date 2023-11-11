@@ -1,6 +1,7 @@
 # src/models/responses/existing_solution.py
 from pydantic import BaseModel
 from typing import List
+from src.models.responses.business_model import BusinessModelResponse
 
 
 class ExistingSolutionResponse(BaseModel):
@@ -16,3 +17,4 @@ class ExistingSolutionResponse(BaseModel):
     LastUpdated: str
     HasMobile: bool
     HasWeb: bool
+    BusinessModels: List[BusinessModelResponse] = []

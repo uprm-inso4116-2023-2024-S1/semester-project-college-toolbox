@@ -1,6 +1,6 @@
 # src/models/ExistingSolution.py
-from sqlalchemy import Column, Integer, Sequence, String, DateTime, Boolean
-
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy.orm import relationship
 from src.database import Base
 
 
@@ -21,6 +21,9 @@ class ExistingSolution(Base):
     LastUpdated = Column(DateTime)
     HasMobile = Column(Boolean)
     HasWeb = Column(Boolean)
+
+    # Populate BusinessModel's ExistingSolution attribute with this object
+    BusinessModels = relationship("BusinessModel", back_populates="existing_solution", cascade="all, delete-orphan", lazy="joined")
 
 
     def __init__(
