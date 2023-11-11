@@ -200,8 +200,7 @@ class ScraperUtils:
     # Valid meaning that there were no conflicts and that all courses were added.
     # If 5 course IDs were passed by parameter, all shceudles must strictly have 5 courses.
     # The function return a list of all possible schedules that were valid.
-    def make_all_schedules_helper(                Term(course_section.term),
-
+    def make_all_schedules_helper(
         self,
         curr_week_schedule: WeekSchedule,
         courses: list[str],
