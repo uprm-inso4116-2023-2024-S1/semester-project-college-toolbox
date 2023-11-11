@@ -93,3 +93,22 @@ export interface ResourcesModel {
     RatingCount: number;
 }
 
+
+interface CourseSearchSchedule {
+    room: string;
+    days: string;
+    startTime: string;
+    endTime: string;
+}
+
+
+export interface CourseSearchSection {
+    courseCode: string;
+    courseName: string;
+    professor: string;
+    credits: number;
+    sectionCode: string;
+    sectionId: number;
+    schedules: CourseSearchSchedule[];
+}
+

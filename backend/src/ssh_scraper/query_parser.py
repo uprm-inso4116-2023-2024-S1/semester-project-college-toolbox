@@ -1,5 +1,5 @@
 from datetime import datetime, time
-from src.ssh_scraper.models import CourseSection, RoomSchedule
+from src.models.tables.tuition_scheduler_models import CourseSection, RoomSchedule
 from ply import lex
 import ply.yacc as yacc
 from sqlalchemy import ColumnExpressionArgument, and_, or_, not_
