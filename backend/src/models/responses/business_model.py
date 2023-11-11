@@ -7,4 +7,3 @@ class BusinessModelResponse(BaseModel):
     BusinessModelType: str
     Price: float
     Description: str
-

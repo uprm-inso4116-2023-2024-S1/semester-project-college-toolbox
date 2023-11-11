@@ -9,12 +9,14 @@ from src.models.tables.ExistingSolution import ExistingSolution
 from src.models.tables.user import User
 from sqlalchemy.orm import Session
 import test
-from .test_utils import get_existing_solution_insert_query, get_business_model_insert_query
+from .test_utils import (
+    get_existing_solution_insert_query,
+    get_business_model_insert_query,
+)
 from .test_config import test_db, get_test_db
 from src.main import app, get_db
 from src.database import Base
 from src.models.responses.existing_solution import ExistingSolutionResponse
-
 
 
 # Override db
@@ -108,6 +110,7 @@ def test_login_user(test_db):
     )  # Expect a 401 Unauthorized status code
     assert response_incorrect_password.json() == {"detail": "Incorrect password."}
 
+
 def test_existing_application_get_all_endpoint_no_business_models(test_db):
     expected_responses = [
         (
@@ -158,6 +161,7 @@ def test_existing_application_get_all_endpoint_no_business_models(test_db):
     assert len(response.json()) == len(expected_responses)
     for i in range(len(response.json())):
         assert response.json()[i] == expected_responses[i].model_dump()
+
 
 def test_existing_application_get_all_endpoint_with_business_models(test_db):
     expected_responses = [
@@ -229,7 +233,9 @@ def test_existing_application_get_all_endpoint_with_business_models(test_db):
             session.query(ExistingSolution).delete()
             session.execute(get_existing_solution_insert_query(expected_responses))
             for response in expected_responses:
-                session.execute(get_business_model_insert_query(response.BusinessModels))
+                session.execute(
+                    get_business_model_insert_query(response.BusinessModels)
+                )
             session.commit()
 
     # Test the endpoint

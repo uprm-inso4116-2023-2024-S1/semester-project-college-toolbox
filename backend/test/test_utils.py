@@ -1,7 +1,9 @@
 from sqlalchemy.sql import text
 
+
 def list_to_string(list):
     return ",".join(list)
+
 
 def get_business_model_insert_query(business_models):
     query = "INSERT INTO BusinessModel (ExistingSolutionId, BusinessModelType, Price, Description) VALUES "

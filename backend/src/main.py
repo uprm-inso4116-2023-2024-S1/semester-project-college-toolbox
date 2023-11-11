@@ -250,12 +250,13 @@ async def get_all_existing_solutions(
                 ExistingSolutionId=i.ExistingSolutionId,
                 BusinessModelType=i.BusinessModelType,
                 Price=i.Price,
-                Description=i.Description
-            ) for i in d.BusinessModels
+                Description=i.Description,
+            )
+            for i in d.BusinessModels
         ]
 
-        response_dict = { **d.__dict__ }       
-        response_dict['BusinessModels'] = business_models
+        response_dict = {**d.__dict__}
+        response_dict["BusinessModels"] = business_models
 
         # Create an ExistingSolutionResponse instance from the dictionary
         response = ExistingSolutionResponse(**response_dict)

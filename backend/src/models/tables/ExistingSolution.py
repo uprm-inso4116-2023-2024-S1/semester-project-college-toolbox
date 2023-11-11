@@ -8,7 +8,9 @@ from src.database import Base
 class ExistingSolution(Base):
     __tablename__ = "ExistingSolution"
 
-    ExistingSolutionId = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    ExistingSolutionId = Column(
+        Integer, primary_key=True, nullable=False, autoincrement=True
+    )
     Name = Column(String, nullable=False)
     Description = Column(String)
     URL = Column(String)
@@ -23,8 +25,12 @@ class ExistingSolution(Base):
     HasWeb = Column(Boolean)
 
     # Populate BusinessModel's ExistingSolution attribute with this object
-    BusinessModels = relationship("BusinessModel", back_populates="existing_solution", cascade="all, delete-orphan", lazy="joined")
-
+    BusinessModels = relationship(
+        "BusinessModel",
+        back_populates="existing_solution",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
 
     def __init__(
         self,
@@ -35,7 +41,7 @@ class ExistingSolution(Base):
         Type,
         Rating,
         RatingCount,
-        Pros, 
+        Pros,
         Cons,
         LastUpdated,
         HasMobile,
