@@ -52,7 +52,7 @@ from src.database import Base, SessionLocal, engine
 
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
-from src.models.responses.existing_app import ExistingApplicationResponse
+from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 
@@ -60,7 +60,7 @@ from src.models.tables.Document import Document
 from src.models.tables.Resume import Resume
 from src.models.tables.JobApplication import JobApplication
 from src.models.tables.ScholarshipApplication import ScholarshipApplication
-from src.models.tables.existing_app import ExistingApplication
+from src.models.tables.ExistingSolution import ExistingSolution
 from src.models.tables.user import User
 from src.security import (
     hash_password,
@@ -238,14 +238,23 @@ def fetch_user(
     return LoginResponse(profile=profile)
 
 
-# Get all Existing Applications endpoint
-@app.get("/ExistingApplication/get/all")
-async def get_all_existing_applications(
+# Get all Existing Solutions endpoint
+@app.get("/ExistingSolution/get/all")
+async def get_all_existing_solutions(
     db: Session = Depends(get_db),
-) -> list[ExistingApplicationResponse]:
-    # Should return a list of tables/existing_app.py
-    data = db.query(ExistingApplication).all()
-    return [ExistingApplicationResponse(**d.__dict__) for d in data]
+) -> list[ExistingSolutionResponse]:
+    # Should return a list of tables/ExistingSolution.py
+    data = db.query(ExistingSolution).all()
+
+    for d in data:
+        # The pros and cons are stored as a string in the database, so we need to convert them to a list
+        d.Pros = d.Pros.split(",")
+        d.Cons = d.Cons.split(",")
+
+        # The datetime object is not JSON serializable, so we need to convert it to a string
+        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d")
+
+    return [ExistingSolutionResponse(**d.__dict__) for d in data]
 
 
 # Create .ics calendar file

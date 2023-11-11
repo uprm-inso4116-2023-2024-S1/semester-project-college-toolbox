@@ -7,10 +7,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from .test_config import TEST_DATABASE_URL
-from .test_utils import get_existing_application_insert_query
+from .test_utils import get_existing_solution_insert_query
 from src.main import app, get_db
 from src.database import Base
-from src.models.responses.existing_app import ExistingApplicationResponse
+from src.models.responses.existing_solution import ExistingSolutionResponse
 
 # Test database configuration
 os.makedirs(os.path.join("database", "test"), exist_ok=True)
@@ -134,7 +134,7 @@ def test_login_user(test_db):
 def test_existing_application_get_all_endpoint(test_db):
     expected_responses = [
         (
-            ExistingApplicationResponse(
+            ExistingSolutionResponse(
                 Name="Test Application",
                 Description="A test application",
                 URL="https://example.com",
@@ -142,10 +142,15 @@ def test_existing_application_get_all_endpoint(test_db):
                 Type="Test",
                 Rating=500,
                 RatingCount=100,
+                Pros=["Pro 1", "Pro 2"],
+                Cons=["Con 1", "Con 2"],
+                LastUpdated="2021-01-01",
+                HasMobile=True,
+                HasWeb=True,
             )
         ),
         (
-            ExistingApplicationResponse(
+            ExistingSolutionResponse(
                 Name="Test Application 2",
                 Description="Another test application",
                 URL="https://example2.com",
@@ -153,16 +158,21 @@ def test_existing_application_get_all_endpoint(test_db):
                 Type="Test",
                 Rating=400,
                 RatingCount=200,
+                Pros=["Pro 3", "Pro 4"],
+                Cons=["Con 3", "Con 4"],
+                LastUpdated="2021-01-02",
+                HasMobile=True,
+                HasWeb=False,
             )
         ),
     ]
     # Write dummy data to the database
     db = get_test_db_session()
-    db.execute(get_existing_application_insert_query(expected_responses))
+    db.execute(get_existing_solution_insert_query(expected_responses))
     db.commit()
 
     # Test the endpoint
-    response = client.get("/ExistingApplication/get/all")
+    response = client.get("/ExistingSolution/get/all")
 
     assert response.status_code == 200
     assert len(response.json()) == len(expected_responses)
