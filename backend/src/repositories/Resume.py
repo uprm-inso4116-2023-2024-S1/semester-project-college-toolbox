@@ -5,24 +5,21 @@ from src.security import get_user_id_from_token
 from src.models.tables.Resume import Resume
 from datetime import datetime
 from src.utils.db import get_db
+from src.repositories.Repository import Repository
 
 
-class ResumeRepository:
+class ResumeRepository(Repository):
     def __init__(self, name: str):
-        self.name = name
-        self.router = APIRouter()
-        self.db = next(get_db())
-        # add routes using router object here
-        self.router.add_api_route("/getAllResumes", self.getAllResumes, methods=["GET"])
-        self.router.add_api_route(
-            "/updateResume", self.updateResumeById, methods=["PUT"]
-        )
-        self.router.add_api_route(
-            "/deleteResume", self.deleteResume, methods=["DELETE"]
-        )
-        self.router.add_api_route("/createResume", self.createResume, methods=["POST"])
+        super().__init__(name)
 
-    async def createResume(
+    def addRoutes(self) -> None:
+        # add routes using router object here
+        self.router.add_api_route("/getAllResumes", self.getAll, methods=["GET"])
+        self.router.add_api_route("/updateResume", self.update, methods=["PUT"])
+        self.router.add_api_route("/deleteResume", self.delete, methods=["DELETE"])
+        self.router.add_api_route("/createResume", self.create, methods=["POST"])
+
+    async def create(
         self,
         filename: str = Form(...),
         data=Form(...),
@@ -45,7 +42,7 @@ class ResumeRepository:
         except Exception as e:
             raise HTTPException(status_code=500)
 
-    async def getById(self, resumeId: int):
+    async def getOne(self, resumeId: int):
         """
         get Resume by id
 
@@ -67,7 +64,7 @@ class ResumeRepository:
 
         return resume
 
-    async def getAllResumes(
+    async def getAll(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -98,7 +95,7 @@ class ResumeRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    async def updateResumeById(
+    async def update(
         self,
         resumeId: int,
         filename: str = Form(...),
@@ -136,8 +133,8 @@ class ResumeRepository:
                 status_code=500, detail="Error updating resume  " + str(e)
             )
 
-    async def deleteResume(self, resumeId: int = Form(...)):
-        resume = self.getById(resumeId)
+    async def delete(self, resumeId: int = Form(...)):
+        resume = self.getOne(resumeId)
 
         if resume:
             self.db.delete(resume)
