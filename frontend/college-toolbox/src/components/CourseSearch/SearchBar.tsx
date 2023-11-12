@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { getDefaultAcademicYearOptions } from '../../lib/data';
 import type { SearchQuery } from './CourseSearchHome';
-import { $selectedTermYear } from '../../lib/courses';
+import { $selectedTermYear, $storedCourses } from '../../lib/courses';
 import { useStore } from '@nanostores/react';
 
 
@@ -16,8 +16,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		if (e.target.name === 'term'){
 			$selectedTermYear.setKey('term',e.target.value)
+			$storedCourses.set([])
 		} else if (e.target.name === 'year'){
 			$selectedTermYear.setKey('year',e.target.value)
+			$storedCourses.set([])
 		}else {
 			setSearchQuery({
 				...searchQuery,

@@ -4,7 +4,6 @@ import ExportCalendarButton from './ExportCalendarButton';
 import ScheduleOptions from './ScheduleOptions';
 import ScheduleNavigator from './ScheduleNavigator';
 import type {
-	FilteredCourse,
 	GeneratedSchedule,
 	ScheduleGenerationOptions,
 } from '../../types/entities';
@@ -18,17 +17,17 @@ interface ScheduleHubProps {}
 const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 	let selectedCourses = useStore($storedCourses);
 	let academicTermYear = useStore($selectedTermYear);
-	const defaultAcademicTermYear = getDefaultAcademicYearOptions()
+	const defaultAcademicTermYear = getDefaultAcademicYearOptions();
 	const [schedules, setSchedules] = useState<GeneratedSchedule[]>([]);
 	const [currentScheduleIdx, setCurrentScheduleIdx] = useState<number>(0);
 	const [options, setOptions] = useState<ScheduleGenerationOptions>(
 		getDefaultScheduleOptions(),
 	);
-	const [isClient, setIsClient] = useState(false)
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-useEffect(() => {
+	const [isClient, setIsClient] = useState(false);
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
+	useEffect(() => {
 		setCurrentScheduleIdx(0);
 	}, [schedules]);
 
@@ -44,7 +43,7 @@ useEffect(() => {
 					<GenerateScheduleButton
 						options={options}
 						setSchedules={setSchedules}
-						courses={selectedCourses}
+						courses={isClient ? selectedCourses : []}
 						term={academicTermYear.term}
 						year={academicTermYear.year}
 					/>
@@ -57,7 +56,7 @@ useEffect(() => {
 					/>
 				)}
 				<ScheduleOptions
-					courses={selectedCourses}
+					courses={isClient ? selectedCourses : []}
 					options={options}
 					setOptions={setOptions}
 				/>
@@ -65,8 +64,8 @@ useEffect(() => {
 			<div className="col-span-7">
 				<WeeklyCalendar
 					schedule={schedules[currentScheduleIdx]}
-					term={isClient ? academicTermYear.term: defaultAcademicTermYear.term}
-					year={isClient ? academicTermYear.year: defaultAcademicTermYear.year}
+					term={isClient ? academicTermYear.term : defaultAcademicTermYear.term}
+					year={isClient ? academicTermYear.year : defaultAcademicTermYear.year}
 				/>
 			</div>
 		</section>
