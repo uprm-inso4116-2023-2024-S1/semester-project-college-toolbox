@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { getDefaultOptions } from '../../lib/data';
+import { getDefaultAcademicYearOptions } from '../../lib/data';
 import type { SearchQuery } from './CourseSearchHome';
+import { $selectedTermYear } from '../../lib/courses';
+import { useStore } from '@nanostores/react';
 
 
 interface SearchBarProps {
@@ -8,13 +10,20 @@ interface SearchBarProps {
 }
 const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 	const currentYear = new Date().getFullYear();
-	const [searchQuery, setSearchQuery] = useState<SearchQuery>({...getDefaultOptions(), query:""});
+	const academicTermYear = useStore($selectedTermYear)
+	const [searchQuery, setSearchQuery] = useState<SearchQuery>({query:""});
 	
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-		setSearchQuery({
-			...searchQuery,
-			[e.target.name]: e.target.value,
-		});
+		if (e.target.name === 'term'){
+			$selectedTermYear.setKey('term',e.target.value)
+		} else if (e.target.name === 'year'){
+			$selectedTermYear.setKey('year',e.target.value)
+		}else {
+			setSearchQuery({
+				...searchQuery,
+				[e.target.name]: e.target.value,
+			});
+		}
 	};
 
 
@@ -31,7 +40,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 						id="term"
 						name="term"
 						className="rounded-l-lg bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-32 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-						value={searchQuery.term}
+						value={academicTermYear.term}
 						onChange={handleInputChange}
 						required
 					>
@@ -46,7 +55,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 						id="year"
 						name="year"
 						className="bg-gray-50 border border-gray-300 text-gray-900 text-sm	 focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-32 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-						value={searchQuery.year}
+						value={academicTermYear.year}
 						onChange={handleInputChange}
 						required
 					>

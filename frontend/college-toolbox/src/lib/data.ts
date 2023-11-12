@@ -3,6 +3,7 @@
 
 import { API_URL, REMOTE_ASSETS_BASE_URL } from '../app/constants.js';
 import type {
+	AcademicYearOptions,
 	CourseFilters,
 	Endpoint,
 	EndpointsToOperations,
@@ -121,10 +122,10 @@ export function convertCourseInformationToTextFilter(
 	if (info.days) {
 		filters.push(
 			'not days : ' +
-			'LMWJVSD'
-				.split('')
-				.filter((d) => !info.days?.includes(d))
-				.join(' | '),
+				'LMWJVSD'
+					.split('')
+					.filter((d) => !info.days?.includes(d))
+					.join(' | '),
 		);
 	}
 	if (info.startTime) {
@@ -139,32 +140,40 @@ export function convertCourseInformationToTextFilter(
 	return filters.join(', ');
 }
 
-export function getDefaultOptions(): ScheduleGenerationOptions {
-	const currentYear = new Date().getFullYear()
-	const currentMonth = new Date().getMonth()
-	if (currentMonth < 6) { // Jan - May (1-5)
-		return { term: "2doSem", year: `${currentYear - 1}` }
+export function getDefaultAcademicYearOptions(): AcademicYearOptions {
+	const currentYear = new Date().getFullYear();
+	const currentMonth = new Date().getMonth();
+	if (currentMonth < 6) {
+		// Jan - May (1-5)
+		return { term: '2doSem', year: `${currentYear - 1}` };
+	} else if (currentMonth == 6) {
+		// June (6)
+		return { term: '1erVer', year: `${currentYear - 1}` };
+	} else if (currentMonth == 7) {
+		// July (7)
+		return { term: '2doVer', year: `${currentYear - 1}` };
+	} else {
+		// August - Dec (8-12)
+		return { term: '1erSem', year: `${currentYear}` };
 	}
-	else if (currentMonth == 6) { // June (6)
-		return { term: "1erVer", year: `${currentYear - 1}` }
-	}
-	else if (currentMonth == 7) { // July (7)
-		return { term: "2doVer", year: `${currentYear - 1}` }
-	}
-	else {// August - Dec (8-12)
-		return { term: "1erSem", year: `${currentYear}` }
-	}
+}
 
+export function getDefaultScheduleOptions(): ScheduleGenerationOptions {
+	return {
+		...getDefaultAcademicYearOptions(),
+	};
 }
 
 export function toMeridianTime(time: string): string {
-		const time24Hour = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)?$/) || [time];
-		let meridianTime: string[] = [];
-    if (time24Hour.length > 1) { // If time format correct
-      meridianTime = time24Hour.slice(1); // Remove full string match value
-      meridianTime[5] = +meridianTime[0] < 12 ? 'am' : 'pm'; // Set AM/PM
-      meridianTime[0] = +meridianTime[0] % 12 || 12; // Adjust hours
-    }
-    return meridianTime.join(''); // return adjusted time or original string
-	
+	const time24Hour = time
+		.toString()
+		.match(/^([01]\d|2[0-3])(:)([0-5]\d)?$/) || [time];
+	let meridianTime: string[] = [];
+	if (time24Hour.length > 1) {
+		// If time format correct
+		meridianTime = time24Hour.slice(1); // Remove full string match value
+		meridianTime[5] = +meridianTime[0] < 12 ? 'am' : 'pm'; // Set AM/PM
+		meridianTime[0] = +meridianTime[0] % 12 || 12; // Adjust hours
+	}
+	return meridianTime.join(''); // return adjusted time or original string
 }

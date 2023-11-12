@@ -20,37 +20,36 @@ interface WeeklyCalendarProps {
 	year: string;
 }
 
-
 function courseCodeToColor(
-    str: string,
-    minColor: number = 0,
-    maxColor: number = 255
+	str: string,
+	minColor: number = 0,
+	maxColor: number = 255,
 ): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	}
 
-    // Seeded pseudo-random number generation based on the hash
-    const m = 0x80000000;
-    let a = 1664525;
-    let c = 1013904223;
-    let seed = hash;
-    seed = (a * seed + c) % m;
-    const randomFactor = seed / m;
+	// Seeded pseudo-random number generation based on the hash
+	const m = 0x80000000;
+	let a = 1664525;
+	let c = 1013904223;
+	let seed = hash;
+	seed = (a * seed + c) % m;
+	const randomFactor = seed / m;
 
-    hash = hash + Math.floor(randomFactor * 0xFFFFFF);
+	hash = hash + Math.floor(randomFactor * 0xffffff);
 
-    let color = '#';
-    for (let j = 0; j < 3; j++) {
-        let value = (hash >> (j * 8)) & 0xff;
+	let color = '#';
+	for (let j = 0; j < 3; j++) {
+		let value = (hash >> (j * 8)) & 0xff;
 
-        // Map the value to the desired range
-        value = minColor + (value % (maxColor - minColor));
-        color += ('00' + value.toString(16)).slice(-2);
-    }
+		// Map the value to the desired range
+		value = minColor + (value % (maxColor - minColor));
+		color += ('00' + value.toString(16)).slice(-2);
+	}
 
-    return color;
+	return color;
 }
 
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({

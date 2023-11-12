@@ -1,27 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
 import type {
+	AcademicYearOptions,
 	CourseFilters,
 	FilteredCourse,
 	ScheduleGenerationOptions,
 } from '../../types/entities';
 import { Modal } from 'flowbite-react';
 import ToggleSwitch from '../ToggleSwitch';
-import { storedCourses } from '../../lib/courses';
+import { $storedCourses, $selectedTermYear } from '../../lib/courses';
+import { useStore } from '@nanostores/react';
 
 export interface ScheduleOptions {
 	courses: FilteredCourse[];
-	setCourses: React.Dispatch<React.SetStateAction<FilteredCourse[]>>;
 	options: ScheduleGenerationOptions;
 	setOptions: React.Dispatch<React.SetStateAction<ScheduleGenerationOptions>>;
 }
 
 const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	courses,
-	setCourses,
 	options,
 	setOptions,
 }) => {
+	let academicTermYear = useStore($selectedTermYear)
 	// State for course list and input values
 	const [courseID, setCourseID] = useState('');
 	const [section, setSection] = useState('');
@@ -65,7 +66,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		}));
 	};
 
-	const handleOptionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleScheduleOptionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 		setOptions((prevState) => ({
 			...prevState,
@@ -73,14 +74,11 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		}));
 	};
 
-	const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleAcademicTermYearSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const { name, value } = e.target;
-		setOptions((prevState) => ({
-			...prevState,
-			[name]: value,
-		}));
-		setCourses([]);
-		storedCourses.set([]);  // Clear stored courses
+	
+		$selectedTermYear.setKey(name as keyof AcademicYearOptions, value)
+		$storedCourses.set([]);  // Clear stored courses
 	};
 
 	const handleToggle = () => {
@@ -107,9 +105,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		if (updatedCoursesInfo[modalProps.index]?.code === undefined) return;
 		// Save days string that was selected in the modal
 		updatedCoursesInfo[modalProps.index]!.filters = modalProps.courseFilters;
-		setCourses(updatedCoursesInfo);
 		// Update stored courses
-		storedCourses.set(updatedCoursesInfo);
+		$storedCourses.set(updatedCoursesInfo);
 		// Close modal
 		setOpenModal(undefined);
 	};
@@ -140,8 +137,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 				const isValid = await validateCourse(
 					courseID,
 					section,
-					options.term,
-					options.year,
+					academicTermYear.term,
+					academicTermYear.year,
 				);
 				if (isValid) {
 					const newCourses = [...courses];
@@ -153,9 +150,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 					} else {
 						newCourses.push({ code: courseString });
 					}
-					setCourses(newCourses);
 					// Save courses to local storage
-					storedCourses.set(newCourses);
+					$storedCourses.set(newCourses);
 					// Reset input fields
 					setCourseID('');
 					setSection('');
@@ -177,9 +173,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		const updatedCourses = courses.filter(
 			(_, index) => index !== indexToDelete,
 		);
-		setCourses(updatedCourses);
 		// Update stored courses in local storage
-		storedCourses.set(updatedCourses);
+		$storedCourses.set(updatedCourses);
 	};
 
 	async function validateCourse(
@@ -346,8 +341,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 							<select
 								id="term"
 								name="term"
-								value={options.term}
-								onChange={handleSelectChange}
+								value={academicTermYear.term}
+								onChange={handleAcademicTermYearSelectChange}
 								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 								required
 							>
@@ -367,8 +362,8 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 							<select
 								id="year"
 								name="year"
-								value={options.year}
-								onChange={handleSelectChange}
+								value={academicTermYear.year}
+								onChange={handleAcademicTermYearSelectChange}
 								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 								required
 							>
@@ -397,7 +392,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 							value={options.maxSchedules ?? 5}
 							step="1"
 							className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-							onChange={handleOptionsChange}
+							onChange={handleScheduleOptionsChange}
 						/>
 					</div>
 					<span className="text-sm font-medium text-gray-900 dark:text-gray-300">
@@ -426,7 +421,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 								value={options.minCredits ?? 12}
 								step="1"
 								className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-								onChange={handleOptionsChange}
+								onChange={handleScheduleOptionsChange}
 							/>
 							<label
 								htmlFor="max-creds-range"
@@ -443,7 +438,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 								value={options.maxCredits ?? 18}
 								step="1"
 								className="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-								onChange={handleOptionsChange}
+								onChange={handleScheduleOptionsChange}
 							/>
 						</div>
 					)}
