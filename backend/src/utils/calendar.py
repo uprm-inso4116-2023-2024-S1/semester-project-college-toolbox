@@ -8,7 +8,7 @@ from uuid import uuid4
 from fastapi.responses import FileResponse
 from src.models.tables.user import User
 from src.ssh_scraper.enums import Term
-from src.models.tables.existing_app import ExistingApplication
+from src.models.tables.ExistingSolution import ExistingSolution
 from src.models.requests.resources import (
     applyAllFilterRequest,
 )
@@ -212,15 +212,15 @@ def create_course_calendar(
 
 
 def filter_apps_by_prefix(
-    search_prefix: str, apps: list[ExistingApplication]
-) -> list[ExistingApplication]:
+    search_prefix: str, apps: list[ExistingSolution]
+) -> list[ExistingSolution]:
     """Filter out applications based on their name prefix."""
     return [app for app in apps if app.Name.lower().startswith(search_prefix.lower())]
 
 
 def filter_apps_by_criteria(
-    filters: applyAllFilterRequest, apps: list[ExistingApplication]
-) -> list[ExistingApplication]:
+    filters: applyAllFilterRequest, apps: list[ExistingSolution]
+) -> list[ExistingSolution]:
     """Filter out applications based on the given filters."""
     type_set = set(filter.lower() for filter in filters.type)
     sort_set = set(filter.lower() for filter in filters.sort)
