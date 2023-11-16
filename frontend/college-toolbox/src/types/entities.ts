@@ -93,3 +93,12 @@ export interface ResourcesModel {
     RatingCount: number;
 }
 
+export interface SavedScheduleModel {
+    user_id: string
+    id: number
+    name: string
+    term: string
+    year: number
+    schedule: GeneratedSchedule
+}
+
