@@ -3,16 +3,16 @@ import SearchBar from '../CourseSearch/SearchBar';
 import CourseList from '../CourseSearch/CourseList';
 import type { CourseSearchSection } from '../../types/entities';
 import { API_URL } from '../../app/constants';
+import { useStore } from '@nanostores/react';
+import { $selectedTermYear } from '../../lib/courses';
 
 export interface SearchQuery {
 	query: string;
-	term: string;
-	year: string;
 }
 
 const CourseSearchHome: React.FC = () => {
 	const [courses, setCourses] = useState<CourseSearchSection[]>([]);
-
+	const academicTermYear = useStore($selectedTermYear)
 	const submitSearchQuery = async (searchQuery: SearchQuery) => {
 		if (!searchQuery.query) {
 			return;
@@ -25,7 +25,8 @@ const CourseSearchHome: React.FC = () => {
 				},
 				body: JSON.stringify({
 					...searchQuery,
-					year: Number(searchQuery.year),
+					term: academicTermYear.term,
+					year: Number(academicTermYear.year),
 				}),
 			});
 

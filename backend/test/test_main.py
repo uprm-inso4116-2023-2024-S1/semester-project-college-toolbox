@@ -5,14 +5,18 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
-from src.models.tables.existing_app import ExistingApplication
+from src.models.tables.ExistingSolution import ExistingSolution
 from src.models.tables.user import User
 from sqlalchemy.orm import Session
 import test
-from .test_utils import get_existing_application_insert_query
-from src.main import app, get_db
+from .test_utils import (
+    get_existing_solution_insert_query,
+    get_business_model_insert_query,
+)
 from .test_config import test_db, get_test_db
-from src.models.responses.existing_app import ExistingApplicationResponse
+from src.main import app, get_db
+from src.database import Base
+from src.models.responses.existing_solution import ExistingSolutionResponse
 
 
 # Override db
@@ -107,10 +111,10 @@ def test_login_user(test_db):
     assert response_incorrect_password.json() == {"detail": "Incorrect password."}
 
 
-def test_existing_application_get_all_endpoint(test_db):
+def test_existing_application_get_all_endpoint_no_business_models(test_db):
     expected_responses = [
         (
-            ExistingApplicationResponse(
+            ExistingSolutionResponse(
                 Name="Test Application",
                 Description="A test application",
                 URL="https://example.com",
@@ -118,10 +122,15 @@ def test_existing_application_get_all_endpoint(test_db):
                 Type="Test",
                 Rating=500,
                 RatingCount=100,
+                Pros=["Pro 1", "Pro 2"],
+                Cons=["Con 1", "Con 2"],
+                LastUpdated="2021-01-01",
+                HasMobile=True,
+                HasWeb=True,
             )
         ),
         (
-            ExistingApplicationResponse(
+            ExistingSolutionResponse(
                 Name="Test Application 2",
                 Description="Another test application",
                 URL="https://example2.com",
@@ -129,16 +138,108 @@ def test_existing_application_get_all_endpoint(test_db):
                 Type="Test",
                 Rating=400,
                 RatingCount=200,
+                Pros=["Pro 3", "Pro 4"],
+                Cons=["Con 3", "Con 4"],
+                LastUpdated="2021-01-02",
+                HasMobile=True,
+                HasWeb=False,
             )
         ),
     ]
     # Write dummy data to the database
     with Session(test_db) as session:
         with session.begin():
-            session.query(ExistingApplication).delete()
-            session.execute(get_existing_application_insert_query(expected_responses))
+            # Ensure that the database is empty before the test
+            session.query(ExistingSolution).delete()
+            session.execute(get_existing_solution_insert_query(expected_responses))
+            session.commit()
+
     # Test the endpoint
-    response = client.get("/ExistingApplication/get/all")
+    response = client.get("/ExistingSolution/get/all")
+
+    assert response.status_code == 200
+    assert len(response.json()) == len(expected_responses)
+    for i in range(len(response.json())):
+        assert response.json()[i] == expected_responses[i].model_dump()
+
+
+def test_existing_application_get_all_endpoint_with_business_models(test_db):
+    expected_responses = [
+        (
+            ExistingSolutionResponse(
+                Name="Test Application",
+                Description="A test application",
+                URL="https://example.com",
+                Icon="https://example.com/image.jpg",
+                Type="Test",
+                Rating=500,
+                RatingCount=100,
+                Pros=["Pro 1", "Pro 2"],
+                Cons=["Con 1", "Con 2"],
+                LastUpdated="2021-01-01",
+                HasMobile=True,
+                HasWeb=True,
+                BusinessModels=[
+                    {
+                        "ExistingSolutionId": 1,
+                        "BusinessModelType": "Free",
+                        "Price": 0.0,
+                        "Description": "A test business model",
+                    },
+                    {
+                        "ExistingSolutionId": 1,
+                        "BusinessModelType": "Paid (Monthly)",
+                        "Price": 200.0,
+                        "Description": "Another test business model",
+                    },
+                ],
+            )
+        ),
+        (
+            ExistingSolutionResponse(
+                Name="Test Application 2",
+                Description="Another test application",
+                URL="https://example2.com",
+                Icon="https://example2.com/image.jpg",
+                Type="Test",
+                Rating=400,
+                RatingCount=200,
+                Pros=["Pro 3", "Pro 4"],
+                Cons=["Con 3", "Con 4"],
+                LastUpdated="2021-01-02",
+                HasMobile=True,
+                HasWeb=False,
+                BusinessModels=[
+                    {
+                        "ExistingSolutionId": 2,
+                        "BusinessModelType": "Paid (One Time)",
+                        "Price": 300.0,
+                        "Description": "Yet another test business model",
+                    },
+                    {
+                        "ExistingSolutionId": 2,
+                        "BusinessModelType": "Paid (Yearly)",
+                        "Price": 400.0,
+                        "Description": "Yet another test business model",
+                    },
+                ],
+            )
+        ),
+    ]
+    # Write dummy data to the database
+    with Session(test_db) as session:
+        with session.begin():
+            # Ensure that the database is empty before the test
+            session.query(ExistingSolution).delete()
+            session.execute(get_existing_solution_insert_query(expected_responses))
+            for response in expected_responses:
+                session.execute(
+                    get_business_model_insert_query(response.BusinessModels)
+                )
+            session.commit()
+
+    # Test the endpoint
+    response = client.get("/ExistingSolution/get/all")
 
     assert response.status_code == 200
     assert len(response.json()) == len(expected_responses)

@@ -43,19 +43,21 @@ from src.config import environment
 from src.database import Base
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.responses.business_model import BusinessModelResponse
+from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.requests.resources import (
     PrefixFilterRequest,
     applyAllFilterRequest,
 )
-from src.models.responses.existing_app import ExistingApplicationResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 
+from src.models.tables.BusinessModel import BusinessModel
 from src.models.tables.Document import Document
 from src.models.tables.Resume import Resume
 from src.models.tables.JobApplication import JobApplication
 from src.models.tables.ScholarshipApplication import ScholarshipApplication
-from src.models.tables.existing_app import ExistingApplication
+from src.models.tables.ExistingSolution import ExistingSolution
 from src.models.tables.user import User
 from src.security import (
     hash_password,
@@ -227,32 +229,58 @@ def fetch_user(
     return LoginResponse(profile=profile)
 
 
-# Get all Existing Applications endpoint
-@app.get("/ExistingApplication/get/all")
-async def get_all_existing_applications(
+# Get all Existing Solutions endpoint
+@app.get("/ExistingSolution/get/all")
+async def get_all_existing_solutions(
     db: Session = Depends(get_db),
-) -> list[ExistingApplicationResponse]:
-    # Should return a list of tables/existing_app.py
-    data = db.query(ExistingApplication).all()
-    return [ExistingApplicationResponse(**d.__dict__) for d in data]
+) -> list[ExistingSolutionResponse]:
+    data = db.query(ExistingSolution).all()
+
+    responses = []
+    for d in data:
+        # The Pros and Cons are stored as a string in the database, so we need to convert them to a list
+        d.Pros = d.Pros.split(",")
+        d.Cons = d.Cons.split(",")
+
+        # The datetime object is not JSON serializable, so we need to convert it to a string
+        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
+
+        business_models = [
+            BusinessModelResponse(
+                ExistingSolutionId=i.ExistingSolutionId,
+                BusinessModelType=i.BusinessModelType,
+                Price=i.Price,
+                Description=i.Description,
+            )
+            for i in d.BusinessModels
+        ]
+
+        response_dict = {**d.__dict__}
+        response_dict["BusinessModels"] = business_models
+
+        # Create an ExistingSolutionResponse instance from the dictionary
+        response = ExistingSolutionResponse(**response_dict)
+        responses.append(response)
+
+    return responses
 
 
 @app.post("/ExistingApplication/filter/prefix")
 async def filter_existing_applications_by_prefix(
     request_data: PrefixFilterRequest, db: Session = Depends(get_db)
-) -> list[ExistingApplicationResponse]:
+) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that start with a specific prefix."""
-    all_apps = db.query(ExistingApplication).all()
+    all_apps = db.query(ExistingSolution).all()
     filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
-    return [ExistingApplicationResponse(**app.__dict__) for app in filtered_apps]
+    return [ExistingSolutionResponse(**app.__dict__) for app in filtered_apps]
 
 
 @app.post("/ExistingApplication/filter/applyAll")
 async def filter_existing_applications_by_criteria(
     request_data: applyAllFilterRequest, db: Session = Depends(get_db)
-) -> list[ExistingApplicationResponse]:
+) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that fit the given filters."""
-    all_apps = db.query(ExistingApplication).all()
+    all_apps = db.query(ExistingSolution).all()
     filtered_apps = filter_apps_by_criteria(request_data, all_apps)
     return filtered_apps
 
