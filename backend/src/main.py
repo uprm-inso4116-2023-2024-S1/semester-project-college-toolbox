@@ -7,11 +7,13 @@ from src.models.requests.schedule import (
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
     SaveScheduleRequest,
+    getSavedSchedulesRequest,
 )
 from src.models.responses.schedule import (
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
     SaveScheduleResponse,
+    getSavedScheduleResponse,
 )
 from src.ssh_scraper.enums import Term
 from src.ssh_scraper.utils import (
@@ -43,7 +45,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import get_section_time_blocks_by_ids
+from src.ssh_scraper.utils import (
+    get_section_time_blocks_by_ids,
+    get_sections_from_schedule,
+    make_generated_schedule,
+)
 from src.utils.calendar import (
     create_course_calendar,
     get_full_name,
@@ -70,6 +76,7 @@ from src.models.tables.Resume import Resume
 from src.models.tables.JobApplication import JobApplication
 from src.models.tables.ScholarshipApplication import ScholarshipApplication
 from src.models.tables.existing_app import ExistingApplication
+from src.models.tables.tuition_scheduler_models import Schedule
 from src.models.tables.user import User
 from src.security import (
     hash_password,
@@ -324,6 +331,34 @@ def save_schedule_endpoint(request: SaveScheduleRequest) -> SaveScheduleResponse
         user_id=user_id,
     )
     return {"schedule_id": schedule_id}
+
+@app.post("/get_all_save_schedules")
+def get_all_saved_schedules(request: getSavedSchedulesRequest, db: Session = Depends(get_db)) -> list[getSavedScheduleResponse]:
+    if not request.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    
+    user_id = get_user_id_from_token(request.auth_token)
+    all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
+
+    full_saved_schedules = []
+
+    for schedule in all_schedules:
+        course_sections_from_sections = get_sections_from_schedule(schedule.id)
+        generated_schedule = make_generated_schedule(course_sections_from_sections)
+
+        templated_schedule = getSavedScheduleResponse(
+            user_id = schedule.user_id,
+            id= schedule.id,
+            name= schedule.name,
+            term= schedule.term,
+            year= schedule.year,
+            schedule= generated_schedule,
+        )
+
+        full_saved_schedules.append(templated_schedule)
+
+
+    return full_saved_schedules
 
 
 if __name__ == "__main__":

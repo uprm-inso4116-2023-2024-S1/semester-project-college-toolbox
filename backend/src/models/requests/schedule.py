@@ -42,3 +42,6 @@ class SaveScheduleRequest(BaseModel):
     term: str
     year: int
     auth_token: Annotated[str | None, Cookie()] = None
+
+class getSavedSchedulesRequest(BaseModel):
+    auth_token: Annotated[str | None, Cookie()] = None

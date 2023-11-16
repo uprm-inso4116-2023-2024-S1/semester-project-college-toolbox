@@ -13,3 +13,11 @@ class ValidateCourseIDResponse(BaseModel):
 
 class SaveScheduleResponse(BaseModel):
     schedule_id: int
+
+class getSavedScheduleResponse(BaseModel):
+    user_id: str
+    id: int
+    name: str
+    term: str
+    year: int
+    schedule: GeneratedSchedule
