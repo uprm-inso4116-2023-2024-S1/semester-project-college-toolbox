@@ -18,10 +18,16 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                         className="object-cover rounded" 
                                     />
                                 </div>
-                                <div className="mr-1 mt-2 bg-gray-500 text-white text-xs py-1 px-2 rounded-md col-span-1 self-start">
-                                    {app.Type}
-                                </div>
-                                
+                                <div className="grid grid-cols-1 col-span-1">
+																	<div className="my-2 col-span-1">Type:</div>
+																	<div>
+																		{app.Type.map((type, index) => (
+																				<div key={index} className="items-center mr-1 mt-2 bg-gray-500 text-white text-xs py-1 px-2 rounded-md col-span-1 self-start">
+																						{type}
+																				</div>
+																		))}
+																	</div>
+																</div>
                                 <span 
                                     className="mb-2 font-bold text-2xl" 
                                     style={{ textShadow: '-5px 4px 4px rgba(0, 0, 0, 0.25)' }}
