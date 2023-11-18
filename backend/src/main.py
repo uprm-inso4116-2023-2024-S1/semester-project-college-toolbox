@@ -20,6 +20,8 @@ from src.utils.calendar import (
     create_course_calendar,
     get_semester,
     try_delete_file,
+)
+from src.utils.ExistingSolution import (
     filter_apps_by_prefix,
     filter_apps_by_criteria,
 )
@@ -234,13 +236,15 @@ def fetch_user(
 async def get_all_existing_solutions(
     db: Session = Depends(get_db),
 ) -> list[ExistingSolutionResponse]:
-    data = db.query(ExistingSolution).all()
+    
+    data : list[ExistingSolution] = db.query(ExistingSolution).all()
 
     responses = []
     for d in data:
-        # The Pros and Cons are stored as a string in the database, so we need to convert them to a list
-        d.Pros = d.Pros.split(",")
-        d.Cons = d.Cons.split(",")
+        # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
+        d.Pros = d.Pros.split(",") if d.Pros else d.Pros
+        d.Cons = d.Cons.split(",") if d.Cons else d.Cons
+        d.Type = d.Type.split(",") if d.Type else d.Type
 
         # The datetime object is not JSON serializable, so we need to convert it to a string
         d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
@@ -266,21 +270,18 @@ async def get_all_existing_solutions(
 
 
 @app.post("/ExistingApplication/filter/prefix")
-async def filter_existing_applications_by_prefix(
-    request_data: PrefixFilterRequest, db: Session = Depends(get_db)
-) -> list[ExistingSolutionResponse]:
+async def filter_existing_applications_by_prefix(request_data: PrefixFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that start with a specific prefix."""
-    all_apps = db.query(ExistingSolution).all()
+    all_apps = await get_all_existing_solutions(db)
     filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
-    return [ExistingSolutionResponse(**app.__dict__) for app in filtered_apps]
+    return filtered_apps
+
 
 
 @app.post("/ExistingApplication/filter/applyAll")
-async def filter_existing_applications_by_criteria(
-    request_data: applyAllFilterRequest, db: Session = Depends(get_db)
-) -> list[ExistingSolutionResponse]:
+async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that fit the given filters."""
-    all_apps = db.query(ExistingSolution).all()
+    all_apps = await get_all_existing_solutions(db)
     filtered_apps = filter_apps_by_criteria(request_data, all_apps)
     return filtered_apps
 
