@@ -2,6 +2,19 @@ import type React from 'react';
 import type { ResourcesModel } from '../../types/entities';
 
 const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applications }) => {
+	if (applications && applications.length===0) {
+		return (
+			<div className="bg-gray-200 rounded-lg p-4 dark:bg-gray-700 dark:text-white">
+				<h2 className="text-2xl font-extrabold mb-2">Resource Hub</h2>
+
+				<div className="h-144 overflow-y-auto grid place-items-center">
+					<h1 className="text-5xl font-extrabold mb-2 text-gray-400">No applications match your specifications</h1>
+				</div>
+			</div>
+
+		);
+	}
+	else{
     return (
         <div className="bg-gray-200 rounded-lg p-4 dark:bg-gray-700 dark:text-white">
             <h2 className="text-2xl font-extrabold mb-2">Resource Hub</h2>
@@ -41,6 +54,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
             </div>
         </div>
     );
+	}
 }
 
 export default SolutionsView;
