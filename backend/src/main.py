@@ -1,6 +1,6 @@
 # src/main.py
 from uuid import uuid4
-from sqlalchemy import Engine
+from sqlalchemy import Engine, asc, or_, desc
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.models.requests.schedule import (
@@ -238,6 +238,7 @@ async def get_all_existing_solutions(
 ) -> list[ExistingSolutionResponse]:
     
     data : list[ExistingSolution] = db.query(ExistingSolution).all()
+    # db.query(ExistingSolution).all()
 
     responses = []
     for d in data:
@@ -276,14 +277,75 @@ async def filter_existing_applications_by_prefix(request_data: PrefixFilterReque
     filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
     return filtered_apps
 
-
-
 @app.post("/ExistingApplication/filter/applyAll")
 async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
-    """Retrieve all applications that fit the given filters."""
-    all_apps = await get_all_existing_solutions(db)
-    filtered_apps = filter_apps_by_criteria(request_data, all_apps)
-    return filtered_apps
+    conditions_list = []
+    if request_data.type:
+        for filter in request_data.type:
+            # Specific scenario since for some reason "note-taking" does not yeild results
+            if filter.startswith("Note"):
+                conditions_list.append(
+                    or_(ExistingSolution.Type.like("%note%"))
+                )
+                continue
+            
+            conditions_list.append(
+                ExistingSolution.Type == filter
+            )
+    if request_data.sort and request_data.sort.__contains__("High to low"):
+        data : list[ExistingSolution] = (
+            db.query(ExistingSolution)
+            .filter(or_(*conditions_list))
+            .order_by(desc(ExistingSolution.Name))
+            .all()
+        )
+    else:
+        data : list[ExistingSolution] = (
+                db.query(ExistingSolution)
+                .filter(or_(*conditions_list))
+                .order_by(asc(ExistingSolution.Name))
+                .all()
+            )
+        
+    responses = []
+    for d in data:
+        # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
+        d.Pros = d.Pros.split(",") if d.Pros else d.Pros
+        d.Cons = d.Cons.split(",") if d.Cons else d.Cons
+        d.Type = d.Type.split(",") if d.Type else d.Type
+        d.Type.append("Using this query")
+        # The datetime object is not JSON serializable, so we need to convert it to a string
+        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
+
+        business_models = [
+            BusinessModelResponse(
+                ExistingSolutionId=i.ExistingSolutionId,
+                BusinessModelType=i.BusinessModelType,
+                Price=i.Price,
+                Description=i.Description,
+            )
+            for i in d.BusinessModels
+        ]
+
+        response_dict = {**d.__dict__}
+        response_dict["BusinessModels"] = business_models
+
+        # Create an ExistingSolutionResponse instance from the dictionary
+        response = ExistingSolutionResponse(**response_dict)
+        responses.append(response)
+
+    return responses
+
+            
+
+
+
+# @app.post("/ExistingApplication/filter/applyAll")
+# async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
+#     """Retrieve all applications that fit the given filters."""
+#     all_apps = await get_all_existing_solutions(db)
+#     filtered_apps = filter_apps_by_criteria(request_data, all_apps)
+#     return filtered_apps
 
 
 # Create .ics calendar file
