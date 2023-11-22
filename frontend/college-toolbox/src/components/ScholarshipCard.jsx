@@ -49,9 +49,10 @@ const ScholarshipCard = ({
 	};
 
 	const uploadResume = (uploadedFile) => {
-		setResumeFileName(uploadedFile.name);
+		const fileName = uploadedFile.name;
+		setResumeFileName(fileName);
 		const formData = new FormData();
-		formData.append('filename', uploadedFile.name);
+		formData.append('filename', fileName);
 		formData.append('data', uploadedFile);
 		formData.append('filetype', 'pdf');
 
@@ -136,13 +137,15 @@ const ScholarshipCard = ({
 									className="fileInfo"
 									onClick={() => {
 										if (resumeFileName) {
-											window.location.href = `/download-resume?resume_filename=${resumeFileName}`;
-											alert('Downloading resume: ' + resumeFileName);
+											window.location.href = `/download-resume?resume_filename=${resumeFileName.name}`;
+											alert('Downloading resume: ' + resumeFileName.name);
 										}
 									}}
 								>
-									Resume: {resumeFileName || 'No file uploaded'}
+									Resume:{' '}
+									{resumeFileName ? resumeFileName.name : 'No file uploaded'}
 								</div>
+
 								{(!resumeFileName || isUploadingResume) && !isEditingStatus && (
 									<div>
 										<input

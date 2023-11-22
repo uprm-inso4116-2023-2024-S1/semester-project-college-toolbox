@@ -1,11 +1,22 @@
+// External Library Imports
 import React, { useState, useEffect, useRef } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import ScholarshipCard from './ScholarshipCard';
 import { format, parse } from 'date-fns';
 import { isSameDay } from 'date-fns';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
-import './ScholarshipList.css'; // Import your CSS file
+// Internal Component Imports
+import FilterButtons from './FilterButtons';
+import ScholarshipCard from './ScholarshipCard';
+import ScholarshipForm from './ScholarshipForm';
+import StatusFilter from './StatusFilter';
+import YearFilter from './YearFilter';
+
+// CSS Import
+import './ScholarshipList.css';
+
+// Constants
+const STATUS_FILTER_OPTIONS = ['All', 'Accepted', 'Denied', 'Waiting'];
 
 const defaultScholarships = [
 	{
@@ -46,6 +57,28 @@ const defaultScholarships = [
 ];
 
 const ScholarshipList = () => {
+	// State for Scholarships
+	const [allScholarships, setAllScholarships] = useState([
+		...defaultScholarships,
+	]);
+
+	// State for Filters
+	const [selectedStatusFilter, setSelectedStatusFilter] = useState('All');
+	const [selectedYearFilter, setSelectedYearFilter] = useState('All');
+	const [isAddingScholarship, setIsAddingScholarship] = useState(false);
+	const [removeConfirmation, setRemoveConfirmation] = useState(null);
+
+	const handleUpdateScholarship = (newScholarship) => {
+		// Update the scholarship state when a new scholarship is added
+		setAllScholarships((prevScholarships) => [
+			...prevScholarships,
+			{
+				...newScholarship,
+				id: prevScholarships.length + 1,
+			},
+		]);
+	};
+
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [newScholarship, setNewScholarship] = useState({
 		name: '',
@@ -54,33 +87,23 @@ const ScholarshipList = () => {
 		deadline: '',
 	});
 
-	// Define the handleInputChange function
-	const handleInputChange = (e) => {
-		const { name, value, type, files } = e.target;
+	// Function to extract unique years from the scholarships
+	const getUniqueYears = (scholarships) => {
+		const years = new Set();
 
-		// For file inputs, handle the file separately
-		if (type === 'file') {
-			const file = files[0];
-			setNewScholarship((prevScholarship) => ({
-				...prevScholarship,
-				[name]: file,
-			}));
-		} else {
-			// For regular inputs, update the state directly
-			setNewScholarship((prevScholarship) => ({
-				...prevScholarship,
-				[name]: value,
-			}));
-		}
+		scholarships.forEach((scholarship) => {
+			const deadlineDate = new Date(scholarship.deadline);
+
+			if (!isNaN(deadlineDate.getTime())) {
+				const year = format(deadlineDate, 'yyyy');
+				years.add(year);
+			}
+		});
+
+		return Array.from(years);
 	};
 
-	const [selectedStatusFilter, setSelectedStatusFilter] = useState('All');
-	const [selectedYearFilter, setSelectedYearFilter] = useState('All');
-
-	const [allScholarships, setAllScholarships] = useState(defaultScholarships);
-	const [isAddingScholarship, setIsAddingScholarship] = useState(false);
-	const [removeConfirmation, setRemoveConfirmation] = useState(null);
-
+	const uniqueYears = getUniqueYears(allScholarships);
 	const [scholarshipCounters, setScholarshipCounters] = useState({
 		total: 0,
 		accepted: 0,
@@ -88,6 +111,34 @@ const ScholarshipList = () => {
 		waiting: 0,
 	});
 
+	//Filters
+	const [statusFilter, setStatusFilter] = useState(
+		new StatusFilter(selectedStatusFilter),
+	);
+	const [yearFilter, setYearFilter] = useState(
+		new YearFilter(selectedYearFilter, uniqueYears),
+	);
+
+	const [searchQuery, setSearchQuery] = useState('');
+
+	const applyFilters = (scholarships) => {
+		return scholarships
+			.filter(statusFilter.applyFilter.bind(statusFilter))
+			.filter(yearFilter.applyFilter.bind(yearFilter))
+			.filter((scholarship) =>
+				scholarship.name.toLowerCase().includes(searchQuery.toLowerCase()),
+			);
+	};
+
+	useEffect(() => {
+		setStatusFilter(new StatusFilter(selectedStatusFilter));
+		setYearFilter(new YearFilter(selectedYearFilter, uniqueYears));
+
+		const updatedFilteredScholarships = applyFilters(allScholarships);
+		setFilteredScholarships(updatedFilteredScholarships);
+	}, [allScholarships, selectedStatusFilter, selectedYearFilter, searchQuery]);
+
+	// Counter Update Logic
 	const calculateCounters = (scholarships) => {
 		const total = scholarships.length;
 		const accepted = scholarships.filter(
@@ -111,6 +162,7 @@ const ScholarshipList = () => {
 		updateCounters(allScholarships);
 	}, [allScholarships]);
 
+	// UI Interaction Functions
 	const showRemoveConfirmation = (id) => {
 		setRemoveConfirmation((prevId) => (prevId === id ? null : id));
 	};
@@ -141,7 +193,20 @@ const ScholarshipList = () => {
 
 		setIsAddingScholarship(false);
 	};
+
 	const handleAddScholarship = () => {
+		// Check if any of the values in newScholarship is empty
+		const hasEmptyValues = Object.values(newScholarship).some(
+			(value) => value === '' || value === null || value === undefined,
+		);
+
+		// If any empty values are found, don't add the scholarship
+		if (hasEmptyValues) {
+			console.log('Some fields are empty. Cannot add scholarship.');
+			return;
+		}
+
+		console.log('Submitting scholarship form:', newScholarship);
 		const updatedScholarships = [
 			...allScholarships,
 			{
@@ -150,26 +215,15 @@ const ScholarshipList = () => {
 			},
 		];
 
+		handleUpdateScholarship(newScholarship);
 		setAllScholarships(updatedScholarships);
-		setIsAddingScholarship(false);
+
 		updateCounters(updatedScholarships);
+
+		// Close the form after a successful addition
+		setIsAddingScholarship(false);
 	};
 
-	const getUniqueYears = (scholarships) => {
-		const years = new Set();
-		scholarships.forEach((scholarship) => {
-			const year = format(
-				parse(scholarship.deadline, 'yyyy-MM-dd', new Date()),
-				'yyyy',
-			);
-			years.add(year);
-		});
-		return Array.from(years);
-	};
-
-	const uniqueYears = getUniqueYears(allScholarships);
-
-	const [searchQuery, setSearchQuery] = useState('');
 	const [filteredScholarships, setFilteredScholarships] = useState([]);
 
 	const handleUpdateStatus = (id, newStatus) => {
@@ -187,23 +241,23 @@ const ScholarshipList = () => {
 
 	// Updated onClick handlers for filter buttons
 	const handleFilterAll = () => {
-		setSelectedStatusFilter('All');
-		handleUpdateScholarshipStatusForFilter('All');
+		setSelectedStatusFilter(STATUS_FILTER_OPTIONS[0]);
+		handleUpdateScholarshipStatusForFilter(STATUS_FILTER_OPTIONS[0]);
 	};
 
 	const handleFilterAccepted = () => {
-		setSelectedStatusFilter('Accepted');
-		handleUpdateScholarshipStatusForFilter('Accepted');
+		setSelectedStatusFilter(STATUS_FILTER_OPTIONS[1]);
+		handleUpdateScholarshipStatusForFilter(STATUS_FILTER_OPTIONS[1]);
 	};
 
 	const handleFilterDenied = () => {
-		setSelectedStatusFilter('Denied');
-		handleUpdateScholarshipStatusForFilter('Denied');
+		setSelectedStatusFilter(STATUS_FILTER_OPTIONS[2]);
+		handleUpdateScholarshipStatusForFilter(STATUS_FILTER_OPTIONS[2]);
 	};
 
 	const handleFilterWaiting = () => {
-		setSelectedStatusFilter('Waiting');
-		handleUpdateScholarshipStatusForFilter('Waiting');
+		setSelectedStatusFilter(STATUS_FILTER_OPTIONS[3]);
+		handleUpdateScholarshipStatusForFilter(STATUS_FILTER_OPTIONS[3]);
 	};
 
 	// ...
@@ -228,9 +282,6 @@ const ScholarshipList = () => {
 
 		setSelectedStatusFilter(newStatus);
 	};
-
-	// ...
-	// ...
 
 	// Function to extract unique deadlines from the scholarships
 	const getUniqueDeadlines = (scholarships) => {
@@ -301,40 +352,13 @@ const ScholarshipList = () => {
 				<div className="filter-status">
 					<p>Filtering by Status: {selectedStatusFilter}</p>
 				</div>
-				<div className="filter-buttons">
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'All' ? 'active' : ''
-						}`}
-						onClick={handleFilterAll}
-					>
-						All
-					</button>
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'Accepted' ? 'active' : ''
-						}`}
-						onClick={handleFilterAccepted}
-					>
-						Accepted
-					</button>
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'Denied' ? 'active' : ''
-						}`}
-						onClick={handleFilterDenied}
-					>
-						Denied
-					</button>
-					<button
-						className={`filter-button ${
-							selectedStatusFilter === 'Waiting' ? 'active' : ''
-						}`}
-						onClick={handleFilterWaiting}
-					>
-						Waiting
-					</button>
-				</div>
+				<FilterButtons
+					handleFilterAll={handleFilterAll}
+					handleFilterAccepted={handleFilterAccepted}
+					handleFilterDenied={handleFilterDenied}
+					handleFilterWaiting={handleFilterWaiting}
+					selectedStatusFilter={selectedStatusFilter}
+				/>
 			</div>
 			<div className="filter-section">
 				<label>Filter by Year:</label>
@@ -357,55 +381,12 @@ const ScholarshipList = () => {
 
 			{isAddingScholarship ? (
 				<div className="add-scholarship-section">
-					<div>
-						<label>Name:</label>
-						<input
-							type="text"
-							name="name"
-							value={newScholarship.name}
-							onChange={handleInputChange}
-							className="input-field"
-						/>
-					</div>
-					<div>
-						<label>Status:</label>
-						<select
-							name="status"
-							value={newScholarship.status}
-							onChange={handleInputChange}
-							className="input-field"
-						>
-							<option value="Accepted">Accepted</option>
-							<option value="Denied">Denied</option>
-							<option value="Waiting">Waiting</option>
-						</select>
-					</div>
-					<div>
-						<label>Resume:</label>
-						<input
-							type="file"
-							accept=".pdf"
-							name="resume"
-							onChange={handleInputChange}
-							className="input-field"
-						/>
-					</div>
-					<div>
-						<label>Deadline:</label>
-						<input
-							type="date"
-							name="deadline"
-							value={newScholarship.deadline}
-							onChange={handleInputChange}
-							className="input-field"
-						/>
-					</div>
-					<button onClick={handleAddScholarship} className="add-button">
-						Submit Scholarship
-					</button>
-					<button onClick={handleCancelAddition} className="cancel-button">
-						Cancel
-					</button>
+					<ScholarshipForm
+						addScholarship={handleAddScholarship}
+						updateScholarshipsState={handleUpdateScholarship}
+						allScholarships={allScholarships}
+						onCancel={handleCancelAddition}
+					/>
 				</div>
 			) : (
 				<button onClick={() => setIsAddingScholarship(true)}>
