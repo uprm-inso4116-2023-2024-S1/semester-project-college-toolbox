@@ -236,8 +236,7 @@ def fetch_user(
 async def get_all_existing_solutions(
     db: Session = Depends(get_db),
 ) -> list[ExistingSolutionResponse]:
-    
-    data : list[ExistingSolution] = db.query(ExistingSolution).all()
+    data: list[ExistingSolution] = db.query(ExistingSolution).all()
 
     responses = []
     for d in data:
@@ -270,16 +269,19 @@ async def get_all_existing_solutions(
 
 
 @app.post("/ExistingApplication/filter/prefix")
-async def filter_existing_applications_by_prefix(request_data: PrefixFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
+async def filter_existing_applications_by_prefix(
+    request_data: PrefixFilterRequest, db: Session = Depends(get_db)
+) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that start with a specific prefix."""
     all_apps = await get_all_existing_solutions(db)
     filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
     return filtered_apps
 
 
-
 @app.post("/ExistingApplication/filter/applyAll")
-async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
+async def filter_existing_applications_by_criteria(
+    request_data: applyAllFilterRequest, db: Session = Depends(get_db)
+) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that fit the given filters."""
     all_apps = await get_all_existing_solutions(db)
     filtered_apps = filter_apps_by_criteria(request_data, all_apps)
