@@ -9,7 +9,7 @@ class ExistingSolutionResponse(BaseModel):
     Description: str
     URL: str
     Icon: str
-    Type: str
+    Type: List[str]
     Rating: int
     RatingCount: int
     Pros: List[str]
