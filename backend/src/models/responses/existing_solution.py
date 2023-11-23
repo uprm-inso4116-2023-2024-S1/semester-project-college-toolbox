@@ -21,6 +21,7 @@ from src.models.responses.business_model import BusinessModelResponse
 #     HasWeb: bool
 #     BusinessModels: List[BusinessModelResponse] = []
 
+
 class ExistingSolutionResponse(BaseModel):
     Name: Optional[str] = None
     Description: Optional[str] = None
@@ -35,5 +36,3 @@ class ExistingSolutionResponse(BaseModel):
     HasMobile: Optional[bool] = None
     HasWeb: Optional[bool] = None
     BusinessModels: Optional[List[BusinessModelResponse]] = []
-
-

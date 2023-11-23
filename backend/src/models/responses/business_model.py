@@ -10,6 +10,7 @@ from typing import Optional
 #     Price: float
 #     Description: str
 
+
 class BusinessModelResponse(BaseModel):
     ExistingSolutionId: Optional[int] = None
     BusinessModelType: Optional[str] = None
