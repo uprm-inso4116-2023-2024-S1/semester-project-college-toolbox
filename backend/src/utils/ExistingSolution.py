@@ -1,4 +1,3 @@
-
 from src.models.requests.resources import (
     applyAllFilterRequest,
 )
@@ -25,7 +24,11 @@ def filter_apps_by_criteria(
     filtered_apps = apps
 
     if type_set:
-        filtered_apps = [app for app in apps if any(app_type.lower() in type_set for app_type in app.Type)]
+        filtered_apps = [
+            app
+            for app in apps
+            if any(app_type.lower() in type_set for app_type in app.Type)
+        ]
 
     filtered_apps.sort(key=lambda app: app.Name, reverse=("high to low" in sort_set))
 
