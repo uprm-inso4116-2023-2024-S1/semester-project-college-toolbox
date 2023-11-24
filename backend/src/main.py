@@ -54,6 +54,7 @@ from src.models.responses.business_model import BusinessModelResponse
 from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.requests.resources import (
     PrefixFilterRequest,
+    SchedulePrefixFilterRequest,
     applyAllFilterRequest,
 )
 from src.models.responses.login import LoginResponse, UserProfile
@@ -357,6 +358,40 @@ def save_schedule_endpoint(
         user_id=user_id,
     )
     return {"schedule_id": schedule_id}
+
+
+@app.post("/schedules/filter/prefix")
+async def filter_existing_applications_by_prefix(
+    request_data: SchedulePrefixFilterRequest,
+    db: Session = Depends(get_db),
+    engine: Engine = Depends(get_engine),
+) -> list[getSavedScheduleResponse]:
+    """Retrieve all schedules that start with a specific prefix."""
+    if not request_data.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(request_data.auth_token)
+    all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
+    full_saved_schedules = []
+    su = ScheduleUtils(engine)
+    for schedule in all_schedules:
+        course_sections_from_sections = su.get_sections_from_schedule(schedule.id)
+        generated_schedule = su.make_generated_schedule(course_sections_from_sections)
+
+        templated_schedule = getSavedScheduleResponse(
+            user_id=schedule.user_id,
+            id=schedule.id,
+            name=schedule.name,
+            term=schedule.term,
+            year=schedule.year,
+            schedule=generated_schedule,
+        )
+
+        full_saved_schedules.append(templated_schedule)
+
+    filtered_schedules = su.filter_schedules_by_prefix(
+        request_data.prefix, full_saved_schedules
+    )
+    return filtered_schedules
 
 
 @app.post("/get_all_save_schedules")
