@@ -177,3 +177,8 @@ export function toMeridianTime(time: string): string {
 	}
 	return meridianTime.join(''); // return adjusted time or original string
 }
+
+export function getCookie(key: string): string | undefined {
+	var b = document.cookie.match('(^|;)\\s*' + key + '\\s*=\\s*([^;]+)');
+	return b ? b.pop() : '';
+}

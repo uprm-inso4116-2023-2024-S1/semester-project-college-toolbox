@@ -1,6 +1,7 @@
 # src/models/requests/login.py
-from typing import Optional
+from typing import Annotated, Optional
 from pydantic import BaseModel
+from fastapi import Cookie
 from src.models.common.schedule import GeneratedSchedule, CourseSectionSchedule
 
 
@@ -33,6 +34,18 @@ class ValidateCourseIDRequest(BaseModel):
     section: Optional[str] = None
     term: str
     year: str
+
+
+class SaveScheduleRequest(BaseModel):
+    course_section_ids: list[int]
+    name: str
+    term: str
+    year: int
+    auth_token: Annotated[str | None, Cookie()] = None
+
+
+class getSavedSchedulesRequest(BaseModel):
+    auth_token: Annotated[str | None, Cookie()] = None
 
 
 class CourseSearchRequest(BaseModel):

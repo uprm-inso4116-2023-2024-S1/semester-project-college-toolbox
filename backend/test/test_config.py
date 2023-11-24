@@ -19,6 +19,9 @@ def test_db():
         os.environ["CT_ENV"], old_value = "TEST", os.environ.get("CT_ENV", "DEV")
         test_engine = create_engine(get_db_url("TEST"))
         prepare_db("TEST")
+        from src.models.tables import Base
+
+        Base.metadata.create_all(test_engine)
         yield test_engine
         os.environ["CT_ENV"] = old_value
     else:  # If we are in GH actions, just use the prod db for tests

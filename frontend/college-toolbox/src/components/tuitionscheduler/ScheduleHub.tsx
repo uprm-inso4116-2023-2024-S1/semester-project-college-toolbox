@@ -8,7 +8,9 @@ import type {
 	ScheduleGenerationOptions,
 } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
-import { getDefaultScheduleOptions } from '../../lib/data';
+import SaveScheduleButton from './SaveScheduleButton';
+
+import { getDefaultScheduleOptions, } from '../../lib/data';
 import { getDefaultAcademicYearOptions } from '../../lib/data';
 import { useStore } from '@nanostores/react';
 import { $selectedTermYear, $storedCourses } from '../../lib/courses';
@@ -46,6 +48,11 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 						courses={isClient ? selectedCourses : []}
 						term={academicTermYear.term}
 						year={academicTermYear.year}
+					/>
+					<SaveScheduleButton
+						schedule={schedules[currentScheduleIdx]}
+						term={options.term}
+						year={options.year}
 					/>
 				</div>
 				{schedules && schedules.length > 0 && (

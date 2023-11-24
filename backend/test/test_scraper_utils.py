@@ -1,15 +1,16 @@
 from datetime import time
-from sqlalchemy import create_engine
-from src.config import get_db_url
+from src.models.tables import CourseSchedule, Schedule
 from src.ssh_scraper.enums import Term
 from src.models.requests.schedule import FilteredCourse
+from src.utils.course import CourseQueryUtils
 from .test_config import get_test_engine, test_db, test_engine
-from src.ssh_scraper.utils import ScraperUtils
+from src.utils.schedule import ScheduleUtils
+from sqlalchemy.orm import Session
 
 
 class TestUtils:
     def setup_method(self, test_db):
-        self.su = ScraperUtils(get_test_engine())
+        self.su = ScheduleUtils(get_test_engine())
         self.course_id = "PSIC3001"
         self.section = "060"
         self.term = Term.FIRST_SEMESTER
@@ -68,7 +69,7 @@ class TestUtils:
 #
 class TestSchedulingFunctions:
     def setup_method(self, test_db):
-        self.su = ScraperUtils(get_test_engine())
+        self.su = ScheduleUtils(get_test_engine())
         self.courses1 = ["INSO4116"]
         self.courses2 = ["INSO4116", "ININ4020"]
         self.courses3 = ["INSO4116", "ININ4020", "MUSI3171"]
@@ -120,7 +121,7 @@ class TestSchedulingFunctions:
 
 class TestGetSectionSechedules:
     def setup_method(self, test_db):
-        self.su = ScraperUtils(get_test_engine())
+        self.su = ScheduleUtils(get_test_engine())
         self.term = Term.FIRST_SEMESTER
         self.year = 2023
 
@@ -161,22 +162,59 @@ class TestGetSectionSechedules:
 
 class TestGetQueryFromFilters:
     def setup_method(self, test_db):
-        self.su = ScraperUtils(get_test_engine())
+        pass
 
     def test_course_code(self, test_db):
-        query = self.su.get_query_from_filters(
+        query = CourseQueryUtils.get_query_from_filters(
             FilteredCourse(code="PSIC3001", filters="professor : Gustavo G. Cortina")
         )
         assert query == "course id = PSIC3001, professor : Gustavo G. Cortina"
 
     def test_no_filters(self, test_db):
-        query = self.su.get_query_from_filters(
+        query = CourseQueryUtils.get_query_from_filters(
             FilteredCourse(code="INSO4116", filters=None)
         )
         assert query == "course id = INSO4116"
 
     def test_with_section(self, test_db):
-        query = self.su.get_query_from_filters(
+        query = CourseQueryUtils.get_query_from_filters(
             FilteredCourse(code="PSIC3001-116", filters=None)
         )
         assert query == "(course id = PSIC3001, section = 116)"
+
+
+class TestScheduleFunctions:
+    def setup_method(self):
+        self.su = ScheduleUtils(get_test_engine())
+        self.section_ids = [1, 2, 3, 4]
+        self.name = "Test1"
+        self.term = Term.FIRST_SEMESTER
+        self.year = 2023
+        self.user_id = "1"
+
+    def test_save_schedule(self):
+        schedule_id = self.su.save_schedule(
+            self.section_ids, self.name, self.term.value, self.year, self.user_id
+        )
+        with Session(get_test_engine()) as session:
+            schedule = session.get(Schedule, schedule_id)
+            assert schedule is not None
+            assert schedule.name == self.name
+            assert schedule.term == self.term.value
+            assert schedule.year == self.year
+            assert schedule.user_id == self.user_id
+
+        section_ids = self.su.get_section_ids_from_schedule(schedule_id)
+        assert section_ids == self.section_ids
+
+        self.su.delete_schedule(schedule_id)
+        with Session(get_test_engine()) as session:
+            assert session.get(Schedule, schedule_id) is None
+            assert (
+                len(
+                    session.query(CourseSchedule)
+                    .filter(CourseSchedule.schedule_id == schedule_id)
+                    .all()
+                )
+                == 0
+            )

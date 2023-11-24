@@ -5,15 +5,13 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
-from src.models.tables.BusinessModel import BusinessModel
-from src.models.tables.ExistingSolution import ExistingSolution
-from src.models.tables.user import User
+from src.models.tables import BusinessModel, ExistingSolution, User
 from sqlalchemy.orm import Session
 import test
 from .test_utils import existing_solution_model_to_existing_solution_response
 from .test_config import test_db, get_test_db
 from src.main import app, get_db
-from src.database import Base
+from src.models.requests.schedule import SaveScheduleRequest
 from src.models.responses.existing_solution import ExistingSolutionResponse
 
 
@@ -161,6 +159,33 @@ def test_existing_application_get_all_endpoint_no_business_models(test_db):
     assert len(response.json()) == len(expected_responses)
     for i in range(len(response.json())):
         assert response.json()[i] == expected_responses[i].model_dump()
+
+
+def test_save_schedule(test_db):
+    with Session(test_db) as session:
+        with session.begin():
+            session.query(User).delete()
+    # Register the user first (assuming registration works)
+    response_register = client.post("/register", json=register_data)
+    assert response_register.status_code == 200
+
+    course_section_ids = [1, 2, 3, 4]
+    name = "TestSchedule"
+    term = "1erSem"
+    year = 2023
+    auth_token = response_register.cookies["auth_token"]
+    request = SaveScheduleRequest(
+        course_section_ids=course_section_ids,
+        name=name,
+        term=term,
+        year=year,
+        auth_token=auth_token,
+    ).model_dump()
+
+    # Test the endpoint
+    response = client.post("/save_schedule", json=request)
+    assert response.status_code == 200
+    assert "schedule_id" in response.json()
 
 
 def test_existing_application_get_all_endpoint_with_business_models(test_db):
