@@ -10,7 +10,7 @@ import type {
 import GenerateScheduleButton from './GenerateScheduleButton';
 import SaveScheduleButton from './SaveScheduleButton';
 
-import { getDefaultScheduleOptions, } from '../../lib/data';
+import { getDefaultScheduleOptions } from '../../lib/data';
 import { getDefaultAcademicYearOptions } from '../../lib/data';
 import { useStore } from '@nanostores/react';
 import { $selectedTermYear, $storedCourses } from '../../lib/courses';
