@@ -159,6 +159,12 @@ class TestGetSectionSechedules:
             or section.course_id == "CIIC4050"
         )
 
+    def test_no_professor(self, test_db):
+        section, _ = self.su.get_section_schedules(
+            "professor = None", self.term, self.year
+        )[0]
+        assert section.professor == ""
+
 
 class TestGetQueryFromFilters:
     def setup_method(self, test_db):

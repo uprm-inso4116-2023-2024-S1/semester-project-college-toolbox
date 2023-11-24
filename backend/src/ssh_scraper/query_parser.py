@@ -124,6 +124,8 @@ def p_condition(p):
         for operand in p[3]:
             if p[1] == "section" and operand.isdecimal():
                 operand = f'"{operand}"'
+            if operand == "None" and table == "CourseSection":
+                operand = "''"
             if p[2] == ":":
                 queries.append(eval(f"{table}.{p[1]}.like('%'+{operand}+'%')"))
             else:
