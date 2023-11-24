@@ -10,33 +10,37 @@ const SavedScheduleHub: React.FC = () => {
     const [savedSchedules, setSavedSchedules] = useState<SavedScheduleModel[]>([]);
 
     const handleSearchSchedules = async (value: string) => {
-        // try {
-        //     if (value !== "") {
-        //         const requestBody = {
-        //             prefix: value
-        //         };
+        try {
+            if (value !== "") {
+                const requestBody = {
+                    prefix: value,
+                    auth_token: getCookie('auth_token')
+                };
             
-        //         const response = await fetch(`${API_URL}/ExistingApplication/filter/prefix`, {
-        //             method: 'POST',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //             },
-        //             body: JSON.stringify(requestBody),
-        //         });
+                const response = await fetch(`${API_URL}/schedules/filter/prefix`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                });
             
-        //         if (!response.ok) {
-        //             throw new Error(`Validation request failed: ${response.statusText}`);
-        //         }
+                if (!response.ok) {
+                    throw new Error(`Validation request failed: ${response.statusText}`);
+                }
             
-        //         const data = await response.json();
-        //         setApplications(data);
-        //     }
-        //     else {
-        //         setApplications([]);
-        //     }
-        // } catch (error) {
-        //     console.error("Error fetching applications:", error);
-        // }
+                const data = await response.json();
+                if (data.length === 0){
+                    showAllSavedSchedules();
+                }
+                setSavedSchedules(data);
+            }
+            else {
+                setSavedSchedules([]);
+            }
+        } catch (error) {
+            console.error("Error fetching applications:", error);
+        }
         console.log(value);
     };
 
@@ -66,9 +70,13 @@ const SavedScheduleHub: React.FC = () => {
         }
     };
 
+
+
     useEffect(() => {
         showAllSavedSchedules();
     }, []);
+
+
 
     return (
         <div className="Saved-Schedule-Hub-container">
