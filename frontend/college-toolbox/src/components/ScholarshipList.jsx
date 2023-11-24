@@ -1,8 +1,8 @@
 // External Library Imports
 import React, { useState, useEffect, useRef } from 'react';
 import { format, parse } from 'date-fns';
-import { isSameDay } from 'date-fns';
-import Calendar from 'react-calendar';
+import CalendarFactory from './CalendarFactory';
+
 import 'react-calendar/dist/Calendar.css';
 
 // Internal Component Imports
@@ -67,6 +67,26 @@ const ScholarshipList = () => {
 	const [selectedYearFilter, setSelectedYearFilter] = useState('All');
 	const [isAddingScholarship, setIsAddingScholarship] = useState(false);
 	const [removeConfirmation, setRemoveConfirmation] = useState(null);
+	const [calendarColor, setCalendarColor] = useState('green');
+	const [customDeadlineOptions, setCustomDeadlineOptions] = useState({
+		color: calendarColor,
+		text: 'YourCustomText',
+	});
+
+	const handleColorChange = (event) => {
+		setCalendarColor(event.target.value);
+		setCustomDeadlineOptions((prevOptions) => ({
+			...prevOptions,
+			color: event.target.value,
+		}));
+	};
+
+	const handleTextChange = (event) => {
+		setCustomDeadlineOptions((prevOptions) => ({
+			...prevOptions,
+			text: event.target.value,
+		}));
+	};
 
 	const handleUpdateScholarship = (newScholarship) => {
 		// Update the scholarship state when a new scholarship is added
@@ -288,16 +308,6 @@ const ScholarshipList = () => {
 		return scholarships.map((scholarship) => new Date(scholarship.deadline));
 	};
 
-	const uniqueDeadlines = getUniqueDeadlines(allScholarships);
-
-	// Function to check if a date is in the list of scholarship deadlines
-	const isDeadlineDate = (date) => {
-		return uniqueDeadlines.some((deadline) => isSameDay(date, deadline));
-	};
-
-	// Move this part inside the component
-	const prevSelectedYearFilter = useRef(selectedYearFilter);
-
 	useEffect(() => {
 		// Step 3: Implement a filtering mechanism based on the search query
 		const updatedFilteredScholarships = allScholarships
@@ -326,15 +336,31 @@ const ScholarshipList = () => {
 	return (
 		<div>
 			<div className="calendar-section">
-				<Calendar
-					onChange={setSelectedDate}
-					value={selectedDate}
-					tileContent={({ date }) => {
-						if (isDeadlineDate(date)) {
-							return <p style={{ color: 'red' }}>DL</p>;
-						}
-					}}
-					calendarType="gregory"
+				<div className="calendar-header">
+					<label htmlFor="customDeadlineText">Custom Deadline Text:</label>
+					<input
+						type="text"
+						id="customDeadlineText"
+						value={customDeadlineOptions.text}
+						onChange={handleTextChange}
+					/>
+				</div>
+				<label htmlFor="calendarColorSelect">Select Deadline Color</label>
+				<select
+					id="calendarColorSelect"
+					value={calendarColor}
+					onChange={handleColorChange}
+				>
+					<option value="green">Green</option>
+					<option value="red">Red</option>
+					<option value="blue">Blue</option>
+					{/* Add more color options as needed */}
+				</select>
+				<CalendarFactory
+					userPreferences={{ calendarType: 'gregory' }} // Customize based on your needs
+					scholarshipDeadlines={getUniqueDeadlines(allScholarships)} // Assuming you have a function to get unique deadlines
+					onDateChange={setSelectedDate}
+					deadlineOptions={customDeadlineOptions} // Pass the deadlineOptions prop
 				/>
 				<p>Selected Date: {selectedDate.toDateString()}</p>
 			</div>
