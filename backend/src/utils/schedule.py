@@ -555,3 +555,52 @@ class ScheduleUtils:
             ).delete()
             session.query(Schedule).filter(Schedule.id == schedule_id).delete()
             session.commit()
+
+    def filter_schedules_by_prefix(
+       self, search_prefix: str, schedules: list[Schedule]
+    ) -> list[Schedule]:
+        """Filter out schedules based on their name prefix."""
+        return [schedule for schedule in schedules if schedule.name.lower().startswith(search_prefix.lower())]
+    
+    def make_generated_schedule(self, course_sections: List[CourseSection]) -> GeneratedSchedule:
+        course_section_schedules = []
+        weekday_str_to_int = {day_str: day_int for day_int, day_str in enumerate("LMWJVSD")}
+
+
+        for course_section in course_sections:
+            # Fetch room schedules (time blocks) for the course section
+            room_schedules = self.get_room_schedules(course_section.id)
+
+            # Convert room schedules to space time blocks
+            time_blocks = []
+            for room_schedule in room_schedules:
+                building, location = get_building_location(room_schedule.room)
+                for day_char in room_schedule.days:
+                    day_int = weekday_str_to_int[day_char]
+                    time_block = SpaceTimeBlock(
+                        room=room_schedule.room,
+                        building=building,
+                        location=location,
+                        day=day_int,
+                        startTime=room_schedule.start_time.strftime('%H:%M'),
+                        endTime=room_schedule.end_time.strftime('%H:%M'),
+                    )
+                    time_blocks.append(time_block)
+
+            # Create a CourseSectionSchedule
+            course_section_schedule = CourseSectionSchedule(
+                courseCode=course_section.course_id,
+                courseName=course_section.course_name,
+                professor=course_section.professor,
+                credits=course_section.credits,
+                sectionCode=course_section.section,
+                sectionId=course_section.id,
+                timeBlocks=time_blocks
+            )
+
+            course_section_schedules.append(course_section_schedule)
+
+        # Create a GeneratedSchedule from the course section schedules
+        generated_schedule = GeneratedSchedule(courses=course_section_schedules)
+
+        return generated_schedule

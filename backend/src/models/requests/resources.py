@@ -11,3 +11,7 @@ class applyAllFilterRequest(BaseModel):
     type: list[str]
     sort: list[str]
     cost: list[str]
+
+class SchedulePrefixFilterRequest(BaseModel):
+    prefix: str
+    auth_token: str

@@ -1,13 +1,19 @@
 import React, { useState, useRef, useEffect} from 'react';
 import { API_URL } from '../../app/constants';
+import type { SavedScheduleModel } from '../../types/entities';
+import { getCookie } from '../../lib/data';
 
 const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }) => {
     const searchRef = useRef<HTMLFormElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [searchValue, setSearchValue] = useState<string>('');
+    const [suggestions, setSuggestions] = useState<SavedScheduleModel[]>([]);
+    const [isActive, setIsActive] = useState<boolean>(false);
 
     const resetSearchBar = () => {
+        setIsActive(false);
         setSearchValue('');
+        setSuggestions([]);
         searchInputRef.current?.blur(); 
     }
 
@@ -17,17 +23,74 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
         onSearch(searchValue);
     };
 
+    const handleSuggestionSearch = (e: React.FormEvent, suggestion_value : string) => {
+        e.preventDefault();
+        resetSearchBar();
+        onSearch(suggestion_value);
+    };
+    
+    // click handler to check if click is outside the search component
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
+        if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+            setIsActive(false);
+        }
+    };
+    
+    useEffect(() => {
+        // add click event listener to document to detect outside clicks
+        document.addEventListener('mousedown', handleClickOutside);
+        
+        return () => {
+            // cleanup: remove event listener when component is unmounted
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
+    const handleSuggestionFill = (e: React.MouseEvent<HTMLButtonElement>, suggestionName: string): void => {
+        e.preventDefault();
+        setSearchValue(suggestionName);
+    };
+    
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         e.preventDefault();
         setSearchValue(e.target.value)
     };
 
+    const generateSuggestions = async (search_prefix: string) => {
+        const requestBody = {
+            prefix: search_prefix,
+            auth_token: getCookie('auth_token')
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/schedules/filter/prefix`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Validation request failed: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            setSuggestions(data);
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            }
+        }
+    };
 
     useEffect(() => {
-      
+        if (searchValue !== "") {
+            generateSuggestions(searchValue);
+        } else {
+            setSuggestions([]);
+        }
     }, [searchValue]);
-    
 
     return (
         <form className='mt-4 mx-4' ref={searchRef} onSubmit={handleSubmit}>
@@ -47,9 +110,33 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
                     value={searchValue}
                     onChange={(e) => handleSearchChange(e)}
                     required
+                    onFocus={() => setIsActive(true)}
                     autoComplete="off"
                 />
                 <button type="submit" className="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
+                {/* Dropdown Suggestions */}
+                {isActive && (
+                    <div className="absolute w-full mt-2 ml-2 mr-2 border border-gray-300 rounded-lg bg-white shadow-lg z-10 bg-opacity-95 dark:bg-gray-800">
+                        {suggestions.map((schedule, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 hover:bg-gray-200 cursor-pointer bg-opacity-80 dark:hover:bg-gray-700 dark:text-white">
+                                <button 
+                                    className="flex-grow flex items-center justify-start focus:outline-none"
+                                    onClick={(e) => handleSuggestionSearch(e, schedule.name)}
+                                >
+                                    <span className="font-bold">{schedule.name}</span>
+                                </button>
+                                
+                                {/* Arrow icon */}
+                                <button 
+                                    className="ml-2 mr-2 p-1 hover:bg-gray-300 dark:hover:bg-gray-900 rounded-lg transition duration-150 ease-in-out"
+                                    onClick={(e) => handleSuggestionFill(e, schedule.name)}
+                                >
+                                    ↖
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </form>
     );
