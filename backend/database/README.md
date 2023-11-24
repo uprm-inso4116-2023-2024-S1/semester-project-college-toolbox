@@ -4,7 +4,7 @@ College Toolbox uses a SQLite database for all its data. Data that should be ava
 
 ## Rebuilding Dev Database
 
-Deleting the dev database (/dev/ct-test.db) and rerunning the backend (from backend/ run `poetry run python src/main.py`) will recreate it.
+Deleting the dev database (/dev/ct-test.db) and rerunning the backend (from backend/ run `poetry run python src/run.py`) will recreate it.
 
 ## Keeping the database updated
 

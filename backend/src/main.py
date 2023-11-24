@@ -45,7 +45,7 @@ from src.utils.calendar import (
     get_semester,
     try_delete_file,
 )
-from src.utils.db import get_db, prepare_db, get_engine
+from src.utils.db import get_db, get_engine
 
 from src.config import environment
 from src.models.requests.login import LoginRequest
@@ -408,7 +408,4 @@ def course_search_endpoint(
 
 
 if __name__ == "__main__":
-    import uvicorn
-
-    env = prepare_db(environment)
-    uvicorn.run("main:app", host="localhost", port=5670, reload=env != "PROD")
+    print("Run the backend with the command: poetry run python src/run.py")

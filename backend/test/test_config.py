@@ -5,7 +5,7 @@ import os
 import pytest
 from sqlalchemy import create_engine, false
 from sqlalchemy.orm import sessionmaker
-from src.utils.db import prepare_db
+from src.run import prepare_db
 from src.config import get_db_url
 
 test_engine = None
@@ -24,6 +24,7 @@ def test_db():
         test_engine = create_engine(get_db_url("TEST"))
         prepare_db("TEST")
         from src.models.tables import Base
+
         Base.metadata.create_all(test_engine)
         yield test_engine
         os.environ["CT_ENV"] = old_value
