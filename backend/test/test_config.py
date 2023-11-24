@@ -5,7 +5,7 @@ import os
 import pytest
 from sqlalchemy import create_engine, false
 from sqlalchemy.orm import sessionmaker
-from src.utils.db import prepare_db
+from src.run import prepare_db
 from src.config import get_db_url
 
 test_engine = None
