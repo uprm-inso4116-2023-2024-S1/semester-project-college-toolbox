@@ -21,6 +21,7 @@ from sqlalchemy import Engine, and_
 import copy
 from src.utils.calendar import get_building_location
 from .course import CourseQueryUtils
+
 day_map = {"L": 0, "M": 1, "W": 2, "J": 3, "V": 4, "S": 5, "D": 6}
 
 

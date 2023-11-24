@@ -69,7 +69,7 @@ from src.models.tables import (
     RoomSchedule,
     CourseSection,
     ExistingSolution,
-    User
+    User,
 )
 from src.security import (
     hash_password,

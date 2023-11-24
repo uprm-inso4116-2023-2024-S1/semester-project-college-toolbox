@@ -20,6 +20,7 @@ def test_db():
         test_engine = create_engine(get_db_url("TEST"))
         prepare_db("TEST")
         from src.models.tables import Base
+
         Base.metadata.create_all(test_engine)
         yield test_engine
         os.environ["CT_ENV"] = old_value
