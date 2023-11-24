@@ -1,33 +1,31 @@
-import React, { useState } from 'react';
-import { getDefaultAcademicYearOptions } from '../../lib/data';
+import React, { useState, useEffect } from 'react';
 import type { SearchQuery } from './CourseSearchHome';
 import { $selectedTermYear, $storedCourses } from '../../lib/courses';
-import { useStore } from '@nanostores/react';
-
+import type { AcademicYearOptions } from '../../types/entities';
 
 interface SearchBarProps {
-  onSubmit: (searchQuery: SearchQuery) => void; // The onSubmit prop function
+	term: string;
+	year: string;
+	onSubmit: (searchQuery: SearchQuery) => void; // The onSubmit prop function
 }
-const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ term, year, onSubmit }) => {
 	const currentYear = new Date().getFullYear();
-	const academicTermYear = useStore($selectedTermYear)
-	const [searchQuery, setSearchQuery] = useState<SearchQuery>({query:""});
-	
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-		if (e.target.name === 'term'){
-			$selectedTermYear.setKey('term',e.target.value)
-			$storedCourses.set([])
-		} else if (e.target.name === 'year'){
-			$selectedTermYear.setKey('year',e.target.value)
-			$storedCourses.set([])
-		}else {
+	const [searchQuery, setSearchQuery] = useState<SearchQuery>({ query: '' });
+
+	const handleInputChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+	) => {
+		const { name, value } = e.target;
+		if (name === 'term' || name === 'year') {
+			$selectedTermYear.setKey(name as keyof AcademicYearOptions, value);
+			$storedCourses.set([]);
+		} else {
 			setSearchQuery({
 				...searchQuery,
-				[e.target.name]: e.target.value,
+				[name]: value,
 			});
 		}
 	};
-
 
 	// The handleSubmit function that calls the passed onSubmit function
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -42,7 +40,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 						id="term"
 						name="term"
 						className="rounded-l-lg bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-32 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-						value={academicTermYear.term}
+						value={term}
 						onChange={handleInputChange}
 						required
 					>
@@ -57,7 +55,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 						id="year"
 						name="year"
 						className="bg-gray-50 border border-gray-300 text-gray-900 text-sm	 focus:ring-blue-500 focus:border-blue-500 block p-2.5 w-32 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-						value={academicTermYear.year}
+						value={year}
 						onChange={handleInputChange}
 						required
 					>
