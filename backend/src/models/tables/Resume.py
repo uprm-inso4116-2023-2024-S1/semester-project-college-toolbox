@@ -7,7 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
 )
-from src.database import Base
+from . import Base
 from datetime import datetime
 
 

@@ -1,5 +1,5 @@
 # Dependency to get the database session
-from src.database import SessionLocal, engine, Base
+from src.models.tables import SessionLocal, engine
 from sqlalchemy.orm import Session
 import os
 import shutil
@@ -7,6 +7,7 @@ import shutil
 
 def prepare_db(environment: str):
     # copy the prod db to the dev db if running locally
+
     if environment == "DEV":
         # Specify the paths to the source (prod) and destination (dev) databases
         dev_database_path = os.path.join("database", "dev", "ct-dev.db")
@@ -27,10 +28,6 @@ def prepare_db(environment: str):
         # Only copy if the developer doesn't already have a local test db
         os.makedirs(os.path.join("database", "test"), exist_ok=True)
         shutil.copy2(prod_database_path, test_database_path)
-
-    # Create database tables
-    Base.metadata.create_all(bind=engine)
-
     return environment
 
 

@@ -7,11 +7,9 @@ from src.models.common.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
     SpaceTimeBlock,
-    CourseSearchSection,
-    CourseSearchSchedule,
 )
 from src.ssh_scraper.enums import Term
-from src.models.tables.tuition_scheduler_models import (
+from src.models.tables import (
     CourseSection,
     RoomSchedule,
     Schedule,
@@ -22,11 +20,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Engine, and_
 import copy
 from src.utils.calendar import get_building_location
-
+from .course import CourseQueryUtils
 day_map = {"L": 0, "M": 1, "W": 2, "J": 3, "V": 4, "S": 5, "D": 6}
 
 
-class ScraperUtils:
+class ScheduleUtils:
     def __init__(self, engine):
         self.engine: Engine = engine
 
@@ -394,7 +392,7 @@ class ScraperUtils:
                 course.code.split("-", 1) if "-" in course.code else (course.code, None)
             )
             section_schedules = self.get_section_schedules(
-                self.get_query_from_filters(course), Term(term), year
+                CourseQueryUtils.get_query_from_filters(course), Term(term), year
             )
             course_list.append(course_code)
             for section, schedules in section_schedules:
@@ -511,145 +509,48 @@ class ScraperUtils:
 
         return section_schedules
 
-    def get_query_from_filters(self, course: FilteredCourse) -> str:
-        query = ""
-        if "-" in course.code:
-            code, section = course.code.split("-", 1)
-            query += f"(course id = {code}, section = {section})"
-        else:
-            query += f"course id = {course.code}"
-        if course.filters is not None and course.filters != "":
-            query += f", {course.filters}"
-        return query
+    def save_schedule(
+        self,
+        course_section_ids: list[int],
+        name: str,
+        term: str,
+        year: int,
+        user_id: int,
+    ) -> int:
+        with Session(self.engine) as session:
+            schedule = Schedule(user_id=user_id, name=name, term=term, year=year)
+            for course_section_id in course_section_ids:
+                course_schedule = CourseSchedule(course_section_id=course_section_id)
+                course_schedule.schedule = schedule
+                session.add(course_schedule)
+            session.add(schedule)
+            session.commit()
+            return schedule.id
 
-    def create_course_search_section(
-        self, section: CourseSection, schedules: list[RoomSchedule]
-    ):
-        def is_empty_schedule(schedule: RoomSchedule):
-            return (
-                schedule.room is None
-                and schedule.days is None
-                and schedule.start_time is None
-                and schedule.end_time is None
-            )
-
-        return CourseSearchSection(
-            courseCode=section.course_id,
-            courseName=section.course_name,
-            professor="" if section.professor is None else section.professor,
-            credits=section.credits,
-            sectionCode=section.section,
-            sectionId=section.id,
-            schedules=[
-                CourseSearchSchedule(
-                    room="" if schedule.room is None else schedule.room,
-                    days="" if schedule.days is None else schedule.days,
-                    startTime=""
-                    if schedule.start_time is None
-                    else str(schedule.start_time),
-                    endTime="" if schedule.end_time is None else str(schedule.end_time),
+    def get_section_ids_from_schedule(self, schedule_id: int):
+        with Session(self.engine) as session:
+            return [
+                course_schedule.course_section_id
+                for course_schedule in session.query(CourseSchedule).filter(
+                    CourseSchedule.schedule_id == schedule_id
                 )
-                for schedule in schedules
-                if not is_empty_schedule(schedule)
-            ],
-        )
+            ]
 
+    def get_sections_from_schedule(self, schedule_id: int):
+        with Session(self.engine) as session:
+            course_section_ids = self.get_section_ids_from_schedule(schedule_id)
 
-def get_query_from_filters(course: FilteredCourse) -> str:
-    query = ""
-    if "-" in course.code:
-        code, section = course.code.split("-", 1)
-        query += f"(course id = {code}, section = {section})"
-    else:
-        query += f"course id = {course.code}"
-    if course.filters is not None and course.filters != "":
-        query += f", {course.filters}"
-    return query
+            course_sections = (
+                session.query(CourseSection)
+                .filter(CourseSection.id.in_(course_section_ids))
+                .all()
+            )
+            return course_sections
 
-
-def save_schedule(
-    course_section_ids: list[int], name: str, term: str, year: int, user_id: int
-) -> int:
-    with Session(engine) as session:
-        schedule = Schedule(user_id=user_id, name=name, term=term, year=year)
-        for course_section_id in course_section_ids:
-            course_schedule = CourseSchedule(course_section_id=course_section_id)
-            course_schedule.schedule = schedule
-            session.add(course_schedule)
-        session.add(schedule)
-        session.commit()
-        return schedule.id
-
-
-def get_section_ids_from_schedule(schedule_id: int):
-    with Session(engine) as session:
-        return [
-            course_schedule.course_section_id
-            for course_schedule in session.query(CourseSchedule).filter(
+    def delete_schedule(self, schedule_id: int):
+        with Session(self.engine) as session:
+            session.query(CourseSchedule).filter(
                 CourseSchedule.schedule_id == schedule_id
-            )
-        ]
-
-
-def get_sections_from_schedule(schedule_id: int):
-    with Session(engine) as session:
-        course_section_ids = get_section_ids_from_schedule(schedule_id)
-
-        course_sections = (
-            session.query(CourseSection)
-            .filter(CourseSection.id.in_(course_section_ids))
-            .all()
-        )
-        return course_sections
-
-
-def delete_schedule(schedule_id: int):
-    with Session(engine) as session:
-        session.query(CourseSchedule).filter(
-            CourseSchedule.schedule_id == schedule_id
-        ).delete()
-        session.query(Schedule).filter(Schedule.id == schedule_id).delete()
-        session.commit()
-
-
-def make_generated_schedule(course_sections: List[CourseSection]) -> GeneratedSchedule:
-    course_section_schedules = []
-    weekday_str_to_int = {day_str: day_int for day_int, day_str in enumerate("LMWJVSD")}
-
-    for course_section in course_sections:
-        # Fetch room schedules (time blocks) for the course section
-        room_schedules = get_room_schedules(course_section.id)
-
-        # Convert room schedules to space time blocks
-        time_blocks = []
-        for room_schedule in room_schedules:
-            building, location = get_building_location(room_schedule.room)
-            for day_char in room_schedule.days:
-                day_int = weekday_str_to_int[day_char]
-                time_block = SpaceTimeBlock(
-                    room=room_schedule.room,
-                    building=building,
-                    location=location,
-                    day=day_int,
-                    startTime=room_schedule.start_time.strftime("%H:%M"),
-                    endTime=room_schedule.end_time.strftime("%H:%M"),
-                )
-                time_blocks.append(time_block)
-
-        # Create a CourseSectionSchedule
-        course_section_schedule = CourseSectionSchedule(
-            courseCode=course_section.course_id,
-            courseName=course_section.course_name,
-            professor=course_section.professor,
-            credits=course_section.credits,
-            sectionCode=course_section.section,
-            sectionId=course_section.id,
-            timeBlocks=time_blocks,
-        )
-
-        course_section_schedules.append(course_section_schedule)
-
-    # Create a GeneratedSchedule from the course section schedules
-    generated_schedule = GeneratedSchedule(courses=course_section_schedules)
-
-    return generated_schedule
+            ).delete()
+            session.query(Schedule).filter(Schedule.id == schedule_id).delete()
+            session.commit()

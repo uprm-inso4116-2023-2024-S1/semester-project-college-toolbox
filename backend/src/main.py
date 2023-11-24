@@ -12,26 +12,15 @@ from src.models.requests.schedule import (
     CourseSearchRequest,
 )
 from src.models.responses.schedule import (
+    CourseSearchResponse,
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
     SaveScheduleResponse,
     getSavedScheduleResponse,
 )
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import (
-    generate_schedules_with_criteria,
-    get_section_time_blocks_by_ids,
-    validate_course_id,
-    save_schedule,
-    CourseSearchResponse,
-)
-from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import ScraperUtils
-from src.utils.calendar import (
-    create_course_calendar,
-    get_semester,
-    try_delete_file,
-)
+from src.utils.schedule import ScheduleUtils
+from src.utils.course import CourseQueryUtils
 from src.utils.ExistingSolution import (
     filter_apps_by_prefix,
     filter_apps_by_criteria,
@@ -50,12 +39,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import (
-    get_section_time_blocks_by_ids,
-    get_sections_from_schedule,
-    make_generated_schedule,
-)
 from src.utils.calendar import (
     create_course_calendar,
     get_full_name,
@@ -65,7 +48,6 @@ from src.utils.calendar import (
 from src.utils.db import get_db, prepare_db, get_engine
 
 from src.config import environment
-from src.database import Base
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.business_model import BusinessModelResponse
@@ -77,14 +59,18 @@ from src.models.requests.resources import (
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 
-from src.models.tables.BusinessModel import BusinessModel
-from src.models.tables.Document import Document
-from src.models.tables.Resume import Resume
-from src.models.tables.JobApplication import JobApplication
-from src.models.tables.ScholarshipApplication import ScholarshipApplication
-from src.models.tables.tuition_scheduler_models import Schedule
-from src.models.tables.ExistingSolution import ExistingSolution
-from src.models.tables.user import User
+from src.models.tables import (
+    BusinessModel,
+    Document,
+    Resume,
+    JobApplication,
+    ScholarshipApplication,
+    Schedule,
+    RoomSchedule,
+    CourseSection,
+    ExistingSolution,
+    User
+)
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -329,7 +315,7 @@ def export_calendar(
 def generate_schedules(
     request: GenerateSchedulesRequest, engine: Engine = Depends(get_engine)
 ) -> GenerateSchedulesResponse:
-    su = ScraperUtils(engine)
+    su = ScheduleUtils(engine)
     schedules = su.generate_schedules_with_criteria(
         courses=request.courses,
         term=request.term,
@@ -345,7 +331,7 @@ def generate_schedules(
 def validate_course_id_endpoint(
     request: ValidateCourseIDRequest, engine: Engine = Depends(get_engine)
 ) -> ValidateCourseIDResponse:
-    su = ScraperUtils(engine)
+    su = ScheduleUtils(engine)
     is_valid = su.validate_course_id(
         course_id=request.course_id,
         term=request.term,
@@ -356,11 +342,14 @@ def validate_course_id_endpoint(
 
 
 @app.post("/save_schedule")
-def save_schedule_endpoint(request: SaveScheduleRequest) -> SaveScheduleResponse:
+def save_schedule_endpoint(
+    request: SaveScheduleRequest, engine: Engine = Depends(get_engine)
+) -> SaveScheduleResponse:
     if not request.auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(request.auth_token)
-    schedule_id = save_schedule(
+    su = ScheduleUtils(engine)
+    schedule_id = su.save_schedule(
         course_section_ids=request.course_section_ids,
         name=request.name,
         term=request.term,
@@ -372,7 +361,9 @@ def save_schedule_endpoint(request: SaveScheduleRequest) -> SaveScheduleResponse
 
 @app.post("/get_all_save_schedules")
 def get_all_saved_schedules(
-    request: getSavedSchedulesRequest, db: Session = Depends(get_db)
+    request: getSavedSchedulesRequest,
+    db: Session = Depends(get_db),
+    engine: Engine = Depends(get_engine),
 ) -> list[getSavedScheduleResponse]:
     if not request.auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
@@ -381,10 +372,10 @@ def get_all_saved_schedules(
     all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
 
     full_saved_schedules = []
-
+    su = ScheduleUtils(engine)
     for schedule in all_schedules:
-        course_sections_from_sections = get_sections_from_schedule(schedule.id)
-        generated_schedule = make_generated_schedule(course_sections_from_sections)
+        course_sections_from_sections = su.get_sections_from_schedule(schedule.id)
+        generated_schedule = su.make_generated_schedule(course_sections_from_sections)
 
         templated_schedule = getSavedScheduleResponse(
             user_id=schedule.user_id,
@@ -405,12 +396,12 @@ def get_all_saved_schedules(
 def course_search_endpoint(
     request: CourseSearchRequest, engine: Engine = Depends(get_engine)
 ) -> CourseSearchResponse:
-    su = ScraperUtils(engine)
+    su = ScheduleUtils(engine)
     result = su.get_section_schedules(
         query=request.query, term=Term(request.term), year=request.year
     )
     course_section_schedules = [
-        su.create_course_search_section(section, schedules)
+        CourseQueryUtils.create_course_search_section(section, schedules)
         for section, schedules in result
     ]
     return {"course_section_schedules": course_section_schedules}

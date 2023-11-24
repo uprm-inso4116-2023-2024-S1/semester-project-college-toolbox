@@ -1,7 +1,7 @@
 # src/models/ExistingSolution.py
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
-from src.database import Base
+from . import Base
 
 
 # Define SQLAlchemy model for ExistingSolution table

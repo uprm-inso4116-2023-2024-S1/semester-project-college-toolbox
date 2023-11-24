@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Cookie, HTTPException, Form
 from typing import Annotated
 from sqlalchemy.orm import Session
 from src.security import get_user_id_from_token
-from src.models.tables.Document import Document
+from src.models.tables import Document
 from datetime import datetime
 from src.utils.db import get_db
 from src.repositories.Repository import Repository

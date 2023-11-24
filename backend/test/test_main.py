@@ -5,17 +5,13 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
-from src.models.tables.BusinessModel import BusinessModel
-from src.models.tables.ExistingSolution import ExistingSolution
-from src.models.tables.user import User
+from src.models.tables import BusinessModel, ExistingSolution, User
 from sqlalchemy.orm import Session
 import test
 from .test_utils import existing_solution_model_to_existing_solution_response
 from .test_config import test_db, get_test_db
 from src.main import app, get_db
-from .test_config import test_db, engine
 from src.models.requests.schedule import SaveScheduleRequest
-from src.database import Base
 from src.models.responses.existing_solution import ExistingSolutionResponse
 
 
@@ -165,7 +161,10 @@ def test_existing_application_get_all_endpoint_no_business_models(test_db):
         assert response.json()[i] == expected_responses[i].model_dump()
 
 
-def test_save_schedule(test_db, fresh_users_table):
+def test_save_schedule(test_db):
+    with Session(test_db) as session:
+        with session.begin():
+            session.query(User).delete()
     # Register the user first (assuming registration works)
     response_register = client.post("/register", json=register_data)
     assert response_register.status_code == 200

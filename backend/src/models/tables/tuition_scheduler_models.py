@@ -2,8 +2,8 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Time, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 
-from src.database import Base
-from src.models.tables.user import User
+from . import Base
+from .user import User
 
 
 class CourseSection(Base):
