@@ -18,5 +18,3 @@ class ExistingSolutionResponse(BaseModel):
     HasMobile: Optional[bool] = None
     HasWeb: Optional[bool] = None
     BusinessModels: Optional[List[BusinessModelResponse]] = []
-
-

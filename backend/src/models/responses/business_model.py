@@ -2,7 +2,6 @@
 from pydantic import BaseModel
 
 
-
 class BusinessModelResponse(BaseModel):
     ExistingSolutionId: int
     BusinessModelType: str
