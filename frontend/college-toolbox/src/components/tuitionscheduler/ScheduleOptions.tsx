@@ -22,7 +22,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 	options,
 	setOptions,
 }) => {
-	let academicTermYear = useStore($selectedTermYear)
+	let academicTermYear = useStore($selectedTermYear);
 	// State for course list and input values
 	const [courseID, setCourseID] = useState('');
 	const [section, setSection] = useState('');
@@ -66,7 +66,9 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		}));
 	};
 
-	const handleScheduleOptionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleScheduleOptionsChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
 		const { name, value } = e.target;
 		setOptions((prevState) => ({
 			...prevState,
@@ -74,11 +76,13 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 		}));
 	};
 
-	const handleAcademicTermYearSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleAcademicTermYearSelectChange = (
+		e: React.ChangeEvent<HTMLSelectElement>,
+	) => {
 		const { name, value } = e.target;
-	
-		$selectedTermYear.setKey(name as keyof AcademicYearOptions, value)
-		$storedCourses.set([]);  // Clear stored courses
+
+		$selectedTermYear.setKey(name as keyof AcademicYearOptions, value);
+		$storedCourses.set([]); // Clear stored courses
 	};
 
 	const handleToggle = () => {
