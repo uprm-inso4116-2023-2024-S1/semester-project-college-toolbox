@@ -106,8 +106,14 @@ def apply_or(conditions):
 def p_condition(p):
     """condition : id_list operator operand_list
     | NOT condition
-    | LPAREN query RPAREN"""
-    if len(p) <= 3:
+    | LPAREN query RPAREN
+    | operand_list"""
+    if len(p) <= 2:
+        queries = []
+        for operand in p[1]:
+            queries.append(eval(f"CourseSection.course_id.like('%'+{operand}+'%')"))
+        p[0] = apply_or(queries)
+    elif len(p) <= 3:
         p[0] = not_(p[2])
     elif p[1] == "(" and p[3] == ")":
         p[0] = p[2]

@@ -68,9 +68,12 @@ export interface FilteredCourse {
 	code: string;
 	filters?: CourseFilters;
 }
-export interface ScheduleGenerationOptions {
+export interface AcademicYearOptions {
 	term: string;
 	year: string;
+}
+
+export interface ScheduleGenerationOptions extends AcademicYearOptions{
 	maxSchedules?: number;
 	minCredits?: number;
 	maxCredits?: number;
@@ -84,13 +87,20 @@ export interface CourseFilters {
 }
 
 export interface ResourcesModel {
-    Name: string;
-    Description: string;
-    URL: string;
-    Icon: string;
-    Type: string;
-    Rating: number;
-    RatingCount: number;
+	Name: string;
+	Description: string;
+	URL: string;
+	Icon: string;
+	Type: string;
+	Rating: number;
+	RatingCount: number;
+}
+
+interface CourseSearchSchedule {
+	room: string;
+	days: string;
+	startTime: string;
+	endTime: string;
 }
 
 export interface SavedScheduleModel {
@@ -102,3 +112,12 @@ export interface SavedScheduleModel {
     schedule: GeneratedSchedule
 }
 
+export interface CourseSearchSection {
+	courseCode: string;
+	courseName: string;
+	professor: string;
+	credits: number;
+	sectionCode: string;
+	sectionId: number;
+	schedules: CourseSearchSchedule[];
+}

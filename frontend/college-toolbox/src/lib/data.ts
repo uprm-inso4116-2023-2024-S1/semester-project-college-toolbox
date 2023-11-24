@@ -3,6 +3,7 @@
 
 import { API_URL, REMOTE_ASSETS_BASE_URL } from '../app/constants.js';
 import type {
+	AcademicYearOptions,
 	CourseFilters,
 	Endpoint,
 	EndpointsToOperations,
@@ -139,7 +140,7 @@ export function convertCourseInformationToTextFilter(
 	return filters.join(', ');
 }
 
-export function getDefaultOptions(): ScheduleGenerationOptions {
+export function getDefaultAcademicYearOptions(): AcademicYearOptions {
 	const currentYear = new Date().getFullYear();
 	const currentMonth = new Date().getMonth();
 	if (currentMonth < 6) {
@@ -155,6 +156,12 @@ export function getDefaultOptions(): ScheduleGenerationOptions {
 		// August - Dec (8-12)
 		return { term: '1erSem', year: `${currentYear}` };
 	}
+}
+
+export function getDefaultScheduleOptions(): ScheduleGenerationOptions {
+	return {
+		...getDefaultAcademicYearOptions(),
+	};
 }
 
 export function toMeridianTime(time: string): string {

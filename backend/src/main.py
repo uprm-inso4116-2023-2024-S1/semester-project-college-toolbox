@@ -1,5 +1,6 @@
 # src/main.py
 from uuid import uuid4
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.models.requests.schedule import (
@@ -8,6 +9,7 @@ from src.models.requests.schedule import (
     ValidateCourseIDRequest,
     SaveScheduleRequest,
     getSavedSchedulesRequest,
+    CourseSearchRequest,
 )
 from src.models.responses.schedule import (
     GenerateSchedulesResponse,
@@ -21,12 +23,16 @@ from src.ssh_scraper.utils import (
     get_section_time_blocks_by_ids,
     validate_course_id,
     save_schedule,
+    CourseSearchResponse,
 )
+from src.ssh_scraper.enums import Term
+from src.ssh_scraper.utils import ScraperUtils
 from src.utils.calendar import (
     create_course_calendar,
-    get_full_name,
     get_semester,
     try_delete_file,
+)
+from src.utils.ExistingSolution import (
     filter_apps_by_prefix,
     filter_apps_by_criteria,
 )
@@ -56,27 +62,28 @@ from src.utils.calendar import (
     get_semester,
     try_delete_file,
 )
-from src.utils.db import get_db, prepare_db
+from src.utils.db import get_db, prepare_db, get_engine
 
 from src.config import environment
-from src.database import Base, SessionLocal, engine
-
+from src.database import Base
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
+from src.models.responses.business_model import BusinessModelResponse
+from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.requests.resources import (
     PrefixFilterRequest,
     applyAllFilterRequest,
 )
-from src.models.responses.existing_app import ExistingApplicationResponse
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 
+from src.models.tables.BusinessModel import BusinessModel
 from src.models.tables.Document import Document
 from src.models.tables.Resume import Resume
 from src.models.tables.JobApplication import JobApplication
 from src.models.tables.ScholarshipApplication import ScholarshipApplication
-from src.models.tables.existing_app import ExistingApplication
 from src.models.tables.tuition_scheduler_models import Schedule
+from src.models.tables.ExistingSolution import ExistingSolution
 from src.models.tables.user import User
 from src.security import (
     hash_password,
@@ -93,7 +100,6 @@ from src.repositories.Resume import ResumeRepository
 app = FastAPI(
     docs_url="/api/docs",
 )
-
 jobRepo = JobRepository("Job Repository")
 scholarshipRepo = ScholarshipRepository("Scholarship Repository")
 docRepo = DocumentRepository("Document Repository")
@@ -249,32 +255,59 @@ def fetch_user(
     return LoginResponse(profile=profile)
 
 
-# Get all Existing Applications endpoint
-@app.get("/ExistingApplication/get/all")
-async def get_all_existing_applications(
+# Get all Existing Solutions endpoint
+@app.get("/ExistingSolution/get/all")
+async def get_all_existing_solutions(
     db: Session = Depends(get_db),
-) -> list[ExistingApplicationResponse]:
-    # Should return a list of tables/existing_app.py
-    data = db.query(ExistingApplication).all()
-    return [ExistingApplicationResponse(**d.__dict__) for d in data]
+) -> list[ExistingSolutionResponse]:
+    data: list[ExistingSolution] = db.query(ExistingSolution).all()
+
+    responses = []
+    for d in data:
+        # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
+        d.Pros = d.Pros.split(",") if d.Pros else d.Pros
+        d.Cons = d.Cons.split(",") if d.Cons else d.Cons
+        d.Type = d.Type.split(",") if d.Type else d.Type
+
+        # The datetime object is not JSON serializable, so we need to convert it to a string
+        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
+
+        business_models = [
+            BusinessModelResponse(
+                ExistingSolutionId=i.ExistingSolutionId,
+                BusinessModelType=i.BusinessModelType,
+                Price=i.Price,
+                Description=i.Description,
+            )
+            for i in d.BusinessModels
+        ]
+
+        response_dict = {**d.__dict__}
+        response_dict["BusinessModels"] = business_models
+
+        # Create an ExistingSolutionResponse instance from the dictionary
+        response = ExistingSolutionResponse(**response_dict)
+        responses.append(response)
+
+    return responses
 
 
 @app.post("/ExistingApplication/filter/prefix")
 async def filter_existing_applications_by_prefix(
     request_data: PrefixFilterRequest, db: Session = Depends(get_db)
-) -> list[ExistingApplicationResponse]:
+) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that start with a specific prefix."""
-    all_apps = db.query(ExistingApplication).all()
+    all_apps = await get_all_existing_solutions(db)
     filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
-    return [ExistingApplicationResponse(**app.__dict__) for app in filtered_apps]
+    return filtered_apps
 
 
 @app.post("/ExistingApplication/filter/applyAll")
 async def filter_existing_applications_by_criteria(
     request_data: applyAllFilterRequest, db: Session = Depends(get_db)
-) -> list[ExistingApplicationResponse]:
+) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that fit the given filters."""
-    all_apps = db.query(ExistingApplication).all()
+    all_apps = await get_all_existing_solutions(db)
     filtered_apps = filter_apps_by_criteria(request_data, all_apps)
     return filtered_apps
 
@@ -293,8 +326,11 @@ def export_calendar(
 
 # Generate Schedules
 @app.post("/schedules")
-def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesResponse:
-    schedules = generate_schedules_with_criteria(
+def generate_schedules(
+    request: GenerateSchedulesRequest, engine: Engine = Depends(get_engine)
+) -> GenerateSchedulesResponse:
+    su = ScraperUtils(engine)
+    schedules = su.generate_schedules_with_criteria(
         courses=request.courses,
         term=request.term,
         year=request.year,
@@ -307,9 +343,10 @@ def generate_schedules(request: GenerateSchedulesRequest) -> GenerateSchedulesRe
 # Validating courses for schedule generation
 @app.post("/validate_course_id", response_model=ValidateCourseIDResponse)
 def validate_course_id_endpoint(
-    request: ValidateCourseIDRequest,
+    request: ValidateCourseIDRequest, engine: Engine = Depends(get_engine)
 ) -> ValidateCourseIDResponse:
-    is_valid = validate_course_id(
+    su = ScraperUtils(engine)
+    is_valid = su.validate_course_id(
         course_id=request.course_id,
         term=request.term,
         year=request.year,
@@ -359,6 +396,20 @@ def get_all_saved_schedules(request: getSavedSchedulesRequest, db: Session = Dep
 
 
     return full_saved_schedules
+# Get section schedules from course query
+@app.post("/course_search")
+def course_search_endpoint(
+    request: CourseSearchRequest, engine: Engine = Depends(get_engine)
+) -> CourseSearchResponse:
+    su = ScraperUtils(engine)
+    result = su.get_section_schedules(
+        query=request.query, term=Term(request.term), year=request.year
+    )
+    course_section_schedules = [
+        su.create_course_search_section(section, schedules)
+        for section, schedules in result
+    ]
+    return {"course_section_schedules": course_section_schedules}
 
 
 if __name__ == "__main__":

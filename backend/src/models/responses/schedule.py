@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
-from src.models.common.schedule import GeneratedSchedule
+from src.models.common.schedule import GeneratedSchedule, CourseSearchSection
 
 
 class GenerateSchedulesResponse(BaseModel):
@@ -21,3 +21,5 @@ class getSavedScheduleResponse(BaseModel):
     term: str
     year: int
     schedule: GeneratedSchedule
+class CourseSearchResponse(BaseModel):
+    course_section_schedules: list[CourseSearchSection]

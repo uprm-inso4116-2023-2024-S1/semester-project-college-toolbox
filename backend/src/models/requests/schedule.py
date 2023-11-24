@@ -1,8 +1,8 @@
 # src/models/requests/login.py
 from typing import Annotated, Optional
 from pydantic import BaseModel
-from src.models.common.schedule import GeneratedSchedule
 from fastapi import Cookie
+from src.models.common.schedule import GeneratedSchedule, CourseSectionSchedule
 
 
 class ExportCalendarRequest(BaseModel):
@@ -45,3 +45,7 @@ class SaveScheduleRequest(BaseModel):
 
 class getSavedSchedulesRequest(BaseModel):
     auth_token: Annotated[str | None, Cookie()] = None
+class CourseSearchRequest(BaseModel):
+    query: str
+    term: str
+    year: int

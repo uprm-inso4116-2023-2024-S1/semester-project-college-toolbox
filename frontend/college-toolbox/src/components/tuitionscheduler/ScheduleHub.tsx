@@ -4,23 +4,31 @@ import ExportCalendarButton from './ExportCalendarButton';
 import ScheduleOptions from './ScheduleOptions';
 import ScheduleNavigator from './ScheduleNavigator';
 import type {
-	FilteredCourse,
 	GeneratedSchedule,
 	ScheduleGenerationOptions,
 } from '../../types/entities';
 import GenerateScheduleButton from './GenerateScheduleButton';
-import { getDefaultOptions } from '../../lib/data';
 import SaveScheduleButton from './SaveScheduleButton';
 
+import { getDefaultScheduleOptions, } from '../../lib/data';
+import { getDefaultAcademicYearOptions } from '../../lib/data';
+import { useStore } from '@nanostores/react';
+import { $selectedTermYear, $storedCourses } from '../../lib/courses';
 interface ScheduleHubProps {}
 
 const ScheduleHub: React.FC<ScheduleHubProps> = () => {
-	const [selectedCourses, setSelectedCourses] = useState<FilteredCourse[]>([]);
+	let selectedCourses = useStore($storedCourses);
+	let academicTermYear = useStore($selectedTermYear);
+	const defaultAcademicTermYear = getDefaultAcademicYearOptions();
 	const [schedules, setSchedules] = useState<GeneratedSchedule[]>([]);
 	const [currentScheduleIdx, setCurrentScheduleIdx] = useState<number>(0);
 	const [options, setOptions] = useState<ScheduleGenerationOptions>(
-		getDefaultOptions(),
+		getDefaultScheduleOptions(),
 	);
+	const [isClient, setIsClient] = useState(false);
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
 	useEffect(() => {
 		setCurrentScheduleIdx(0);
 	}, [schedules]);
@@ -31,15 +39,15 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 				<div className="flex items-center justify-center ">
 					<ExportCalendarButton
 						schedule={schedules[currentScheduleIdx]}
-						term={options.term}
-						year={options.year}
+						term={academicTermYear.term}
+						year={academicTermYear.year}
 					/>
 					<GenerateScheduleButton
 						options={options}
 						setSchedules={setSchedules}
-						courses={selectedCourses}
-						term={options.term}
-						year={options.year}
+						courses={isClient ? selectedCourses : []}
+						term={academicTermYear.term}
+						year={academicTermYear.year}
 					/>
 					<SaveScheduleButton
 						schedule={schedules[currentScheduleIdx]}
@@ -55,8 +63,7 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 					/>
 				)}
 				<ScheduleOptions
-					courses={selectedCourses}
-					setCourses={setSelectedCourses}
+					courses={isClient ? selectedCourses : []}
 					options={options}
 					setOptions={setOptions}
 				/>
@@ -64,8 +71,8 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 			<div className="col-span-7">
 				<WeeklyCalendar
 					schedule={schedules[currentScheduleIdx]}
-					term={options.term}
-					year={options.year}
+					term={isClient ? academicTermYear.term : defaultAcademicTermYear.term}
+					year={isClient ? academicTermYear.year : defaultAcademicTermYear.year}
 				/>
 			</div>
 		</section>

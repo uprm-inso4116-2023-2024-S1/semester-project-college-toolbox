@@ -58,3 +58,20 @@ class CourseSectionSchedule(BaseModel):
 
 class GeneratedSchedule(BaseModel):
     courses: List[CourseSectionSchedule]
+
+
+class CourseSearchSchedule(BaseModel):
+    room: str
+    days: str
+    startTime: str
+    endTime: str
+
+
+class CourseSearchSection(BaseModel):
+    courseCode: str
+    courseName: str
+    professor: str
+    credits: int
+    sectionCode: str
+    sectionId: int
+    schedules: list[CourseSearchSchedule]

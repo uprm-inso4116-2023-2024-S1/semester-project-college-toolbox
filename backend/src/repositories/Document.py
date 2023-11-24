@@ -5,27 +5,21 @@ from src.security import get_user_id_from_token
 from src.models.tables.Document import Document
 from datetime import datetime
 from src.utils.db import get_db
+from src.repositories.Repository import Repository
 
 
-class DocumentRepository:
+class DocumentRepository(Repository):
     def __init__(self, name: str):
-        self.name = name
-        self.db: Session = next(get_db())
-        self.router = APIRouter()
+        super().__init__(name)
 
+    def addRoutes(self) -> None:
         # add routes using router object here
-        self.router.add_api_route(
-            "/getAllDocuments", self.getAllDocuments, methods=["GET"]
-        )
-        self.router.add_api_route(
-            "/updateDocument", self.updateDocById, methods=["PUT"]
-        )
-        self.router.add_api_route("/deleteDocument", self.deleteDoc, methods=["DELETE"])
-        self.router.add_api_route(
-            "/createDocument", self.createDocument, methods=["POST"]
-        )
+        self.router.add_api_route("/getAllDocuments", self.getAll, methods=["GET"])
+        self.router.add_api_route("/updateDocument", self.update, methods=["PUT"])
+        self.router.add_api_route("/deleteDocument", self.delete, methods=["DELETE"])
+        self.router.add_api_route("/createDocument", self.create, methods=["POST"])
 
-    async def createDocument(
+    async def create(
         self,
         filename: str,
         data=Form(...),
@@ -46,7 +40,7 @@ class DocumentRepository:
         except Exception as e:
             raise HTTPException(status_code=500, detail="database error" + str(e))
 
-    async def getById(self, docId: int):
+    async def getOne(self, docId: int):
         """
         get Document by id
 
@@ -68,7 +62,7 @@ class DocumentRepository:
 
         return doc
 
-    async def getAllDocuments(
+    async def getAll(
         self,
         auth_token: Annotated[str | None, Cookie()] = None,
     ):
@@ -99,7 +93,7 @@ class DocumentRepository:
         except HTTPException:
             raise HTTPException(status_code=500, detail="Error accessing database")
 
-    async def updateDocById(
+    async def update(
         self,
         docId: int,
         filename: str = Form(...),
@@ -134,8 +128,8 @@ class DocumentRepository:
                 status_code=500, detail="Error updating Doc application " + str(e)
             )
 
-    async def deleteDoc(self, docId: int = Form(...)):
-        Doc = self.getById(docId)
+    async def delete(self, docId: int = Form(...)):
+        Doc = self.getOne(docId)
 
         if Doc:
             self.db.delete(Doc)
