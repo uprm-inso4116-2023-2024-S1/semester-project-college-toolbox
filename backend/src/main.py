@@ -359,9 +359,12 @@ def save_schedule_endpoint(
     )
     return {"schedule_id": schedule_id}
 
+
 @app.post("/schedules/filter/prefix")
 async def filter_existing_applications_by_prefix(
-    request_data: SchedulePrefixFilterRequest, db: Session = Depends(get_db), engine: Engine = Depends(get_engine)
+    request_data: SchedulePrefixFilterRequest,
+    db: Session = Depends(get_db),
+    engine: Engine = Depends(get_engine),
 ) -> list[getSavedScheduleResponse]:
     """Retrieve all schedules that start with a specific prefix."""
     if not request_data.auth_token:
@@ -375,17 +378,19 @@ async def filter_existing_applications_by_prefix(
         generated_schedule = su.make_generated_schedule(course_sections_from_sections)
 
         templated_schedule = getSavedScheduleResponse(
-            user_id = schedule.user_id,
-            id= schedule.id,
-            name= schedule.name,
-            term= schedule.term,
-            year= schedule.year,
-            schedule= generated_schedule,
+            user_id=schedule.user_id,
+            id=schedule.id,
+            name=schedule.name,
+            term=schedule.term,
+            year=schedule.year,
+            schedule=generated_schedule,
         )
 
         full_saved_schedules.append(templated_schedule)
 
-    filtered_schedules = su.filter_schedules_by_prefix(request_data.prefix, full_saved_schedules)
+    filtered_schedules = su.filter_schedules_by_prefix(
+        request_data.prefix, full_saved_schedules
+    )
     return filtered_schedules
 
 

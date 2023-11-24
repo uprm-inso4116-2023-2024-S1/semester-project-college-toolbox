@@ -557,15 +557,22 @@ class ScheduleUtils:
             session.commit()
 
     def filter_schedules_by_prefix(
-       self, search_prefix: str, schedules: list[Schedule]
+        self, search_prefix: str, schedules: list[Schedule]
     ) -> list[Schedule]:
         """Filter out schedules based on their name prefix."""
-        return [schedule for schedule in schedules if schedule.name.lower().startswith(search_prefix.lower())]
-    
-    def make_generated_schedule(self, course_sections: List[CourseSection]) -> GeneratedSchedule:
-        course_section_schedules = []
-        weekday_str_to_int = {day_str: day_int for day_int, day_str in enumerate("LMWJVSD")}
+        return [
+            schedule
+            for schedule in schedules
+            if schedule.name.lower().startswith(search_prefix.lower())
+        ]
 
+    def make_generated_schedule(
+        self, course_sections: List[CourseSection]
+    ) -> GeneratedSchedule:
+        course_section_schedules = []
+        weekday_str_to_int = {
+            day_str: day_int for day_int, day_str in enumerate("LMWJVSD")
+        }
 
         for course_section in course_sections:
             # Fetch room schedules (time blocks) for the course section
@@ -582,8 +589,8 @@ class ScheduleUtils:
                         building=building,
                         location=location,
                         day=day_int,
-                        startTime=room_schedule.start_time.strftime('%H:%M'),
-                        endTime=room_schedule.end_time.strftime('%H:%M'),
+                        startTime=room_schedule.start_time.strftime("%H:%M"),
+                        endTime=room_schedule.end_time.strftime("%H:%M"),
                     )
                     time_blocks.append(time_block)
 
@@ -595,7 +602,7 @@ class ScheduleUtils:
                 credits=course_section.credits,
                 sectionCode=course_section.section,
                 sectionId=course_section.id,
-                timeBlocks=time_blocks
+                timeBlocks=time_blocks,
             )
 
             course_section_schedules.append(course_section_schedule)
