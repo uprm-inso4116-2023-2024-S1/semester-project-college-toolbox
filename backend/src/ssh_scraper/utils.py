@@ -554,6 +554,7 @@ class ScraperUtils:
             ],
         )
 
+
 def get_query_from_filters(course: FilteredCourse) -> str:
     query = ""
     if "-" in course.code:
@@ -588,14 +589,18 @@ def get_section_ids_from_schedule(schedule_id: int):
                 CourseSchedule.schedule_id == schedule_id
             )
         ]
-    
+
+
 def get_sections_from_schedule(schedule_id: int):
     with Session(engine) as session:
         course_section_ids = get_section_ids_from_schedule(schedule_id)
-        
-        course_sections = session.query(CourseSection).filter(CourseSection.id.in_(course_section_ids)).all()
-        return course_sections
 
+        course_sections = (
+            session.query(CourseSection)
+            .filter(CourseSection.id.in_(course_section_ids))
+            .all()
+        )
+        return course_sections
 
 
 def delete_schedule(schedule_id: int):
@@ -607,11 +612,9 @@ def delete_schedule(schedule_id: int):
         session.commit()
 
 
-
 def make_generated_schedule(course_sections: List[CourseSection]) -> GeneratedSchedule:
     course_section_schedules = []
     weekday_str_to_int = {day_str: day_int for day_int, day_str in enumerate("LMWJVSD")}
-
 
     for course_section in course_sections:
         # Fetch room schedules (time blocks) for the course section
@@ -628,8 +631,8 @@ def make_generated_schedule(course_sections: List[CourseSection]) -> GeneratedSc
                     building=building,
                     location=location,
                     day=day_int,
-                    startTime=room_schedule.start_time.strftime('%H:%M'),
-                    endTime=room_schedule.end_time.strftime('%H:%M'),
+                    startTime=room_schedule.start_time.strftime("%H:%M"),
+                    endTime=room_schedule.end_time.strftime("%H:%M"),
                 )
                 time_blocks.append(time_block)
 
@@ -641,7 +644,7 @@ def make_generated_schedule(course_sections: List[CourseSection]) -> GeneratedSc
             credits=course_section.credits,
             sectionCode=course_section.section,
             sectionId=course_section.id,
-            timeBlocks=time_blocks
+            timeBlocks=time_blocks,
         )
 
         course_section_schedules.append(course_section_schedule)

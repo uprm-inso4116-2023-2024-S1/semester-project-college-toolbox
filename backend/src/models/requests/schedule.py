@@ -43,8 +43,11 @@ class SaveScheduleRequest(BaseModel):
     year: int
     auth_token: Annotated[str | None, Cookie()] = None
 
+
 class getSavedSchedulesRequest(BaseModel):
     auth_token: Annotated[str | None, Cookie()] = None
+
+
 class CourseSearchRequest(BaseModel):
     query: str
     term: str

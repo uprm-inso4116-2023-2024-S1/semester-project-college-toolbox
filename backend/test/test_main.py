@@ -188,6 +188,7 @@ def test_save_schedule(test_db, fresh_users_table):
     assert response.status_code == 200
     assert "schedule_id" in response.json()
 
+
 def test_existing_application_get_all_endpoint_with_business_models(test_db):
     business_models = [
         BusinessModel(

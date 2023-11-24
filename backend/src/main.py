@@ -369,11 +369,14 @@ def save_schedule_endpoint(request: SaveScheduleRequest) -> SaveScheduleResponse
     )
     return {"schedule_id": schedule_id}
 
+
 @app.post("/get_all_save_schedules")
-def get_all_saved_schedules(request: getSavedSchedulesRequest, db: Session = Depends(get_db)) -> list[getSavedScheduleResponse]:
+def get_all_saved_schedules(
+    request: getSavedSchedulesRequest, db: Session = Depends(get_db)
+) -> list[getSavedScheduleResponse]:
     if not request.auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    
+
     user_id = get_user_id_from_token(request.auth_token)
     all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
 
@@ -384,18 +387,19 @@ def get_all_saved_schedules(request: getSavedSchedulesRequest, db: Session = Dep
         generated_schedule = make_generated_schedule(course_sections_from_sections)
 
         templated_schedule = getSavedScheduleResponse(
-            user_id = schedule.user_id,
-            id= schedule.id,
-            name= schedule.name,
-            term= schedule.term,
-            year= schedule.year,
-            schedule= generated_schedule,
+            user_id=schedule.user_id,
+            id=schedule.id,
+            name=schedule.name,
+            term=schedule.term,
+            year=schedule.year,
+            schedule=generated_schedule,
         )
 
         full_saved_schedules.append(templated_schedule)
 
-
     return full_saved_schedules
+
+
 # Get section schedules from course query
 @app.post("/course_search")
 def course_search_endpoint(

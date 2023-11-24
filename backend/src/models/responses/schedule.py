@@ -14,6 +14,7 @@ class ValidateCourseIDResponse(BaseModel):
 class SaveScheduleResponse(BaseModel):
     schedule_id: int
 
+
 class getSavedScheduleResponse(BaseModel):
     user_id: str
     id: int
@@ -21,5 +22,7 @@ class getSavedScheduleResponse(BaseModel):
     term: str
     year: int
     schedule: GeneratedSchedule
+
+
 class CourseSearchResponse(BaseModel):
     course_section_schedules: list[CourseSearchSection]
