@@ -1,6 +1,9 @@
 import type { Profile } from '../types/entities';
 
-export const API_URL = 'http://localhost:5670';
+export const API_URL =
+	typeof process !== 'undefined' && process.env.CI
+		? 'https://semester-project-college-toolbox.kelvingonzalez2.repl.co'
+		: 'http://localhost:5670';
 
 export const REMOTE_ASSETS_BASE_URL = `https://college-toolbox.vercel.app`;
 
