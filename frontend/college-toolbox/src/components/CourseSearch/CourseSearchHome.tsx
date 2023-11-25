@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchBar from '../CourseSearch/SearchBar';
 import CourseList from '../CourseSearch/CourseList';
 import type { CourseSearchSection } from '../../types/entities';
 import { API_URL } from '../../app/constants';
 import { useStore } from '@nanostores/react';
 import { $selectedTermYear } from '../../lib/courses';
+import { getDefaultAcademicYearOptions } from '../../lib/data';
 
 export interface SearchQuery {
 	query: string;
@@ -12,7 +13,8 @@ export interface SearchQuery {
 
 const CourseSearchHome: React.FC = () => {
 	const [courses, setCourses] = useState<CourseSearchSection[]>([]);
-	const academicTermYear = useStore($selectedTermYear)
+	let academicTermYear = useStore($selectedTermYear);
+	const defaultAcademicTermYear = getDefaultAcademicYearOptions();
 	const submitSearchQuery = async (searchQuery: SearchQuery) => {
 		if (!searchQuery.query) {
 			return;
@@ -43,9 +45,17 @@ const CourseSearchHome: React.FC = () => {
 		} finally {
 		}
 	};
+	const [isClient, setIsClient] = useState(false);
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
 	return (
 		<div className="flex flex-col mr-2 ml-2 w-[98%] gap-2">
-			<SearchBar onSubmit={submitSearchQuery} />
+			<SearchBar
+				onSubmit={submitSearchQuery}
+				term={isClient ? academicTermYear.term : defaultAcademicTermYear.term}
+				year={isClient ? academicTermYear.year : defaultAcademicTermYear.year}
+			/>
 			<CourseList courses={courses} />
 		</div>
 	);
