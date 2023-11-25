@@ -173,16 +173,15 @@ def test_save_schedule(test_db):
     name = "TestSchedule"
     term = "1erSem"
     year = 2023
-    auth_token = response_register.cookies["auth_token"]
     request = SaveScheduleRequest(
         course_section_ids=course_section_ids,
         name=name,
         term=term,
-        year=year,
-        auth_token=auth_token,
+        year=year
     ).model_dump()
 
     # Test the endpoint
+    client.cookies.update(response_register.cookies)
     response = client.post("/save_schedule", json=request)
     assert response.status_code == 200
     assert "schedule_id" in response.json()

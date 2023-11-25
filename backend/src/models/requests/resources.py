@@ -15,4 +15,3 @@ class applyAllFilterRequest(BaseModel):
 
 class SchedulePrefixFilterRequest(BaseModel):
     prefix: str
-    auth_token: str

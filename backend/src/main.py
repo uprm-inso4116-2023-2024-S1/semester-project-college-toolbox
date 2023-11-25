@@ -8,7 +8,6 @@ from src.models.requests.schedule import (
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
     SaveScheduleRequest,
-    getSavedSchedulesRequest,
     CourseSearchRequest,
 )
 from src.models.responses.schedule import (
@@ -344,11 +343,11 @@ def validate_course_id_endpoint(
 
 @app.post("/save_schedule")
 def save_schedule_endpoint(
-    request: SaveScheduleRequest, engine: Engine = Depends(get_engine)
+    request: SaveScheduleRequest, engine: Engine = Depends(get_engine), auth_token: Annotated[str | None, Cookie()] = None
 ) -> SaveScheduleResponse:
-    if not request.auth_token:
+    if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(request.auth_token)
+    user_id = get_user_id_from_token(auth_token)
     su = ScheduleUtils(engine)
     schedule_id = su.save_schedule(
         course_section_ids=request.course_section_ids,
@@ -365,11 +364,12 @@ async def filter_existing_applications_by_prefix(
     request_data: SchedulePrefixFilterRequest,
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
+    auth_token: Annotated[str | None, Cookie()] = None
 ) -> list[getSavedScheduleResponse]:
     """Retrieve all schedules that start with a specific prefix."""
-    if not request_data.auth_token:
+    if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(request_data.auth_token)
+    user_id = get_user_id_from_token(auth_token)
     all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
     full_saved_schedules = []
     su = ScheduleUtils(engine)
@@ -394,16 +394,16 @@ async def filter_existing_applications_by_prefix(
     return filtered_schedules
 
 
-@app.post("/get_all_save_schedules")
+@app.get("/get_all_save_schedules")
 def get_all_saved_schedules(
-    request: getSavedSchedulesRequest,
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
+    auth_token: Annotated[str | None, Cookie()] = None
 ) -> list[getSavedScheduleResponse]:
-    if not request.auth_token:
+    if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
 
-    user_id = get_user_id_from_token(request.auth_token)
+    user_id = get_user_id_from_token(auth_token)
     all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
 
     full_saved_schedules = []
