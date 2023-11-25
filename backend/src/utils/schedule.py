@@ -3,6 +3,7 @@ import os
 from typing import List
 from src.models.common.schedule import TimeBlock, WeekSchedule
 from src.models.requests.schedule import FilteredCourse, ScheduleGenerationOptions
+from src.models.responses.schedule import getSavedScheduleResponse
 from src.models.common.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
@@ -603,14 +604,27 @@ class ScheduleUtils:
             session.commit()
 
     def filter_schedules_by_prefix(
-        self, search_prefix: str, schedules: list[Schedule]
-    ) -> list[Schedule]:
+        self, search_prefix: str, schedules: list[getSavedScheduleResponse]
+    ) -> list[getSavedScheduleResponse]:
         """Filter out schedules based on their name prefix."""
-        return [
-            schedule
-            for schedule in schedules
-            if schedule.name.lower().startswith(search_prefix.lower())
-        ]
+        filtered_schedules = []
+        for schedule in schedules:
+            if schedule.name.lower() == search_prefix.lower():
+                return [schedule]
+            if schedule.name.lower().startswith(search_prefix.lower()):
+                filtered_schedules.append(schedule)
+        return filtered_schedules
+
+    def filter_schedules_by_course_code(
+        self, course_code: str, schedules: list[getSavedScheduleResponse]
+    ) -> list[getSavedScheduleResponse]:
+        filtered_schedules = []
+        course_code = course_code.upper()
+        for schedule in schedules:
+            for section in schedule.schedule.courses:
+                if section.courseCode.upper() == course_code:
+                    filtered_schedules.append(schedule)
+        return filtered_schedules
 
     def make_generated_schedule(
         self, course_sections: List[CourseSection]

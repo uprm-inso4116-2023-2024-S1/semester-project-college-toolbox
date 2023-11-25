@@ -391,6 +391,10 @@ async def filter_existing_applications_by_prefix(
     filtered_schedules = su.filter_schedules_by_prefix(
         request_data.prefix, full_saved_schedules
     )
+    if len(filtered_schedules) == 0:
+        return su.filter_schedules_by_course_code(
+            request_data.prefix, full_saved_schedules
+        )
     return filtered_schedules
 
 
