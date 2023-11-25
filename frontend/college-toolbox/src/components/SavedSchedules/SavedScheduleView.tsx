@@ -1,7 +1,12 @@
-import type React from 'react';
+import React, {useState} from 'react';
 import type { SavedScheduleModel } from '../../types/entities';
+import { Modal } from 'flowbite-react';
+import WeeklyCalendar from '../tuitionscheduler/WeeklyCalendar';
 
 const SavedScheduleView: React.FC<{ applications: SavedScheduleModel[] }> = ({ applications }) => {
+    const [openModal, setOpenModal] = useState<string | undefined>();
+    const [schedule, setSchedule] = useState<SavedScheduleModel | undefined>();
+    const modalProps = { openModal, setOpenModal, schedule, setSchedule };
     return (
         <div className="bg-gray-200 rounded-lg p-4 dark:bg-gray-700 dark:text-white">
             <h2 className="text-2xl font-extrabold mb-2">Saved Schedules</h2>
@@ -12,6 +17,10 @@ const SavedScheduleView: React.FC<{ applications: SavedScheduleModel[] }> = ({ a
                         <button 
                             key={index} 
                             className="application-block relative bg-gray-300 dark:bg-gray-600 dark:border-gray-800 border-gray-400 border-2 rounded-xl hover:scale-105 dark:hover:border-blue-400 hover:border-blue-400 transition-transform flex flex-col items-center p-4"
+                            onClick={() => {
+                                setOpenModal('dismissible');
+                                setSchedule(saved_schedule); // Set the schedule here
+                            }}
                         >
                             <div className="w-full bg-gray-400 dark:bg-gray-700 text-center py-2 rounded-t-xl font-bold text-lg">
                                 {saved_schedule.name}
@@ -33,6 +42,23 @@ const SavedScheduleView: React.FC<{ applications: SavedScheduleModel[] }> = ({ a
                         </button>
                     ))}
                 </div>
+                <Modal
+				dismissible
+				show={modalProps.openModal === 'dismissible'}
+				onClose={() => setOpenModal(undefined)}
+			>
+				<Modal.Header>{modalProps.schedule?.name}</Modal.Header>
+				<Modal.Body>
+                <div className="space-y-6 dark:text-white">
+                    <div>
+                        <WeeklyCalendar schedule={modalProps.schedule?.schedule} 
+                        term={modalProps.schedule?.term  || 'No Term'} 
+                        year={modalProps.schedule?.year.toString()  || 'No Year'}
+                        isInModal={true}/>
+                    </div>
+					</div>
+				</Modal.Body>
+			</Modal>
             </div>
         </div>
     );
