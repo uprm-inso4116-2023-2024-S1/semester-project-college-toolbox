@@ -6,10 +6,8 @@ import textwrap
 from typing import Tuple
 from uuid import uuid4
 from fastapi.responses import FileResponse
-from src.models.tables.user import User
+from src.models.tables import User
 from src.ssh_scraper.enums import Term
-
-
 from src.models.common.schedule import CourseSectionSchedule, Semester
 
 

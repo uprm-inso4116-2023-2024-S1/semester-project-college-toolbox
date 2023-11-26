@@ -4,25 +4,27 @@ import LayoutSidebar from '../../app/LayoutSidebar.astro';
 import ScholarshipList from '../../components/ScholarshipList.jsx';
 
 ---
-
 <LayoutSidebar>
-    <div class="format dark:format-invert lg:format-lg mt-8"> 
-        <p
-            class="text-4xl lg:text-8xl dark:text-slate-200 text-slate-600 leading-tight flex flex-col items-center"
-        >
-           <br>
-            <a
-                rel="noopener nofollow"
-                href="https://github.com/uprm-inso4116-2023-2024-S1/semester-project-college-toolbox"
-                class="font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-violet-800 dark:from-pink-300 dark:to-violet-700 no-underline"
-                >Scholarship Tracker</a
-            >
-            
-        </p>
-         
-        <div class="mb-8"> <!-- This div pushes the ScholarshipList to the bottom -->
-            <ScholarshipList client:load/>
-        </div>
+  <div class="format dark:format-invert lg:format-lg mt-8 pl-4">
+    <h1 class="text-4xl lg:text-6xl dark:text-slate-200 text-slate-600 leading-tight mb-4">
+      Welcome to <span class="font-bold text-pink-600">Scholarship Tracker</span>
+    </h1>
+
+    <p class="text-lg dark:text-slate-200 text-slate-600 mb-6">
+      Track and manage your scholarships with ease. Stay organized and never miss a deadline.
+    </p>
+
+    <div class="mb-4 pl-4">
+      <p class="text-sm dark:text-slate-200 text-slate-600 mb-2">
+        Below, you will find your current scholarships that you have set to be tracked.
+        Remember to update your scholarships regularly for accurate data.
+      </p>
+    </div>
+
+    <div class="mb-8 pl-4">
+      <ScholarshipList client:load />
+    </div>
+  </div>
 </LayoutSidebar>
 
 <script >
@@ -35,4 +37,3 @@ import ScholarshipList from '../../components/ScholarshipList.jsx';
 		}
 	
 	</script>
-

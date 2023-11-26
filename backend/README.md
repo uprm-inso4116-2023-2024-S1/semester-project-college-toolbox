@@ -8,7 +8,7 @@
  `%APPDATA%\pypoetry\venv\Scripts`
 3. cd into `backend/`
 4. Run `poetry install`
-5. Run `poetry run python src/main.py`
+5. Run `poetry run python src/run.py`
 6. Make desired changes and visit `localhost:5670`
 
 ## Option B: Docker

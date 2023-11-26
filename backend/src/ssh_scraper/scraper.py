@@ -4,8 +4,7 @@ import re
 import sys
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
-from src.database import engine
-from src.models.tables.tuition_scheduler_models import CourseSection, RoomSchedule
+from src.models.tables import CourseSection, RoomSchedule, engine
 from datetime import time as Time, datetime
 import asyncio
 import socket
@@ -97,7 +96,7 @@ def parse_lines(lines: str, term: str) -> dict:
     split_lines = lines.split("\n")
 
     course_id = split_lines[0].replace(" ", "")
-    course_name = null_if_empty(split_lines[1].replace("---> ", "").strip())
+    course_name = split_lines[1].replace("---> ", "").strip()
     section = split_lines[2].strip()
 
     i = 3
@@ -134,8 +133,8 @@ def parse_lines(lines: str, term: str) -> dict:
 
     credits = int(split_lines[i])
 
-    professor = null_if_empty(split_lines[i + 1].strip())
-    while professor is not None and "  " in professor:
+    professor = split_lines[i + 1].strip()
+    while "  " in professor:
         professor = professor.replace("  ", " ")
 
     capacity = int(split_lines[i + 2])

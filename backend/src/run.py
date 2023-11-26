@@ -1,5 +1,7 @@
 import os
 import shutil
+import uvicorn
+from src.config import environment
 
 
 def prepare_db(environment: str):
@@ -28,26 +30,9 @@ def prepare_db(environment: str):
     return environment
 
 
-from src.models.tables import SessionLocal, engine
-from sqlalchemy.orm import Session
-
-
-# Dependency to get the database session
-def get_db():
-    """
-    Get database session instance
-
-    Yields:
-        db: generator object;
-        To use in context of FASTAPI use Depends(get_db)
-        If using it in other scopes use next(get_db)
-    """
-    db: Session = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-def get_engine():
-    yield engine
+if __name__ == "__main__":
+    env = prepare_db(environment)
+    host = "localhost"
+    port = 5670
+    reload = env != "PROD"
+    uvicorn.run("src.main:app", host=host, port=port, reload=reload)

@@ -7,20 +7,20 @@ from src.models.requests.schedule import (
     ExportCalendarRequest,
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
+    SaveScheduleRequest,
+    getSavedSchedulesRequest,
     CourseSearchRequest,
 )
 from src.models.responses.schedule import (
+    CourseSearchResponse,
     GenerateSchedulesResponse,
     ValidateCourseIDResponse,
-    CourseSearchResponse,
+    SaveScheduleResponse,
+    getSavedScheduleResponse,
 )
 from src.ssh_scraper.enums import Term
-from src.ssh_scraper.utils import ScraperUtils
-from src.utils.calendar import (
-    create_course_calendar,
-    get_semester,
-    try_delete_file,
-)
+from src.utils.schedule import ScheduleUtils
+from src.utils.course import CourseQueryUtils
 from src.utils.ExistingSolution import (
     filter_apps_by_prefix,
     filter_apps_by_criteria,
@@ -39,28 +39,39 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from src.utils.db import get_db, prepare_db, get_engine
+from src.utils.calendar import (
+    create_course_calendar,
+    get_full_name,
+    get_semester,
+    try_delete_file,
+)
+from src.utils.db import get_db, get_engine
 
 from src.config import environment
-from src.database import Base
 from src.models.requests.login import LoginRequest
 from src.models.requests.register import RegisterRequest
 from src.models.responses.business_model import BusinessModelResponse
 from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.requests.resources import (
     PrefixFilterRequest,
+    SchedulePrefixFilterRequest,
     applyAllFilterRequest,
 )
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
 
-from src.models.tables.BusinessModel import BusinessModel
-from src.models.tables.Document import Document
-from src.models.tables.Resume import Resume
-from src.models.tables.JobApplication import JobApplication
-from src.models.tables.ScholarshipApplication import ScholarshipApplication
-from src.models.tables.ExistingSolution import ExistingSolution
-from src.models.tables.user import User
+from src.models.tables import (
+    BusinessModel,
+    Document,
+    Resume,
+    JobApplication,
+    ScholarshipApplication,
+    Schedule,
+    RoomSchedule,
+    CourseSection,
+    ExistingSolution,
+    User,
+)
 from src.security import (
     hash_password,
     generate_permanent_token,
@@ -236,9 +247,7 @@ def fetch_user(
 async def get_all_existing_solutions(
     db: Session = Depends(get_db),
 ) -> list[ExistingSolutionResponse]:
-    
-    data : list[ExistingSolution] = db.query(ExistingSolution).all()
-    # db.query(ExistingSolution).all()
+    data: list[ExistingSolution] = db.query(ExistingSolution).all()
 
     responses = []
     for d in data:
@@ -271,7 +280,9 @@ async def get_all_existing_solutions(
 
 
 @app.post("/ExistingApplication/filter/prefix")
-async def filter_existing_applications_by_prefix(request_data: PrefixFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
+async def filter_existing_applications_by_prefix(
+    request_data: PrefixFilterRequest, db: Session = Depends(get_db)
+) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that start with a specific prefix."""
     all_apps = await get_all_existing_solutions(db)
     filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
@@ -444,7 +455,7 @@ def export_calendar(
 def generate_schedules(
     request: GenerateSchedulesRequest, engine: Engine = Depends(get_engine)
 ) -> GenerateSchedulesResponse:
-    su = ScraperUtils(engine)
+    su = ScheduleUtils(engine)
     schedules = su.generate_schedules_with_criteria(
         courses=request.courses,
         term=request.term,
@@ -460,7 +471,7 @@ def generate_schedules(
 def validate_course_id_endpoint(
     request: ValidateCourseIDRequest, engine: Engine = Depends(get_engine)
 ) -> ValidateCourseIDResponse:
-    su = ScraperUtils(engine)
+    su = ScheduleUtils(engine)
     is_valid = su.validate_course_id(
         course_id=request.course_id,
         term=request.term,
@@ -470,24 +481,105 @@ def validate_course_id_endpoint(
     return {"is_valid": is_valid}
 
 
+@app.post("/save_schedule")
+def save_schedule_endpoint(
+    request: SaveScheduleRequest, engine: Engine = Depends(get_engine)
+) -> SaveScheduleResponse:
+    if not request.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(request.auth_token)
+    su = ScheduleUtils(engine)
+    schedule_id = su.save_schedule(
+        course_section_ids=request.course_section_ids,
+        name=request.name,
+        term=request.term,
+        year=request.year,
+        user_id=user_id,
+    )
+    return {"schedule_id": schedule_id}
+
+
+@app.post("/schedules/filter/prefix")
+async def filter_existing_applications_by_prefix(
+    request_data: SchedulePrefixFilterRequest,
+    db: Session = Depends(get_db),
+    engine: Engine = Depends(get_engine),
+) -> list[getSavedScheduleResponse]:
+    """Retrieve all schedules that start with a specific prefix."""
+    if not request_data.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    user_id = get_user_id_from_token(request_data.auth_token)
+    all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
+    full_saved_schedules = []
+    su = ScheduleUtils(engine)
+    for schedule in all_schedules:
+        course_sections_from_sections = su.get_sections_from_schedule(schedule.id)
+        generated_schedule = su.make_generated_schedule(course_sections_from_sections)
+
+        templated_schedule = getSavedScheduleResponse(
+            user_id=schedule.user_id,
+            id=schedule.id,
+            name=schedule.name,
+            term=schedule.term,
+            year=schedule.year,
+            schedule=generated_schedule,
+        )
+
+        full_saved_schedules.append(templated_schedule)
+
+    filtered_schedules = su.filter_schedules_by_prefix(
+        request_data.prefix, full_saved_schedules
+    )
+    return filtered_schedules
+
+
+@app.post("/get_all_save_schedules")
+def get_all_saved_schedules(
+    request: getSavedSchedulesRequest,
+    db: Session = Depends(get_db),
+    engine: Engine = Depends(get_engine),
+) -> list[getSavedScheduleResponse]:
+    if not request.auth_token:
+        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+
+    user_id = get_user_id_from_token(request.auth_token)
+    all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
+
+    full_saved_schedules = []
+    su = ScheduleUtils(engine)
+    for schedule in all_schedules:
+        course_sections_from_sections = su.get_sections_from_schedule(schedule.id)
+        generated_schedule = su.make_generated_schedule(course_sections_from_sections)
+
+        templated_schedule = getSavedScheduleResponse(
+            user_id=schedule.user_id,
+            id=schedule.id,
+            name=schedule.name,
+            term=schedule.term,
+            year=schedule.year,
+            schedule=generated_schedule,
+        )
+
+        full_saved_schedules.append(templated_schedule)
+
+    return full_saved_schedules
+
+
 # Get section schedules from course query
 @app.post("/course_search")
 def course_search_endpoint(
     request: CourseSearchRequest, engine: Engine = Depends(get_engine)
 ) -> CourseSearchResponse:
-    su = ScraperUtils(engine)
+    su = ScheduleUtils(engine)
     result = su.get_section_schedules(
         query=request.query, term=Term(request.term), year=request.year
     )
     course_section_schedules = [
-        su.create_course_search_section(section, schedules)
+        CourseQueryUtils.create_course_search_section(section, schedules)
         for section, schedules in result
     ]
     return {"course_section_schedules": course_section_schedules}
 
 
 if __name__ == "__main__":
-    import uvicorn
-
-    env = prepare_db(environment)
-    uvicorn.run("main:app", host="localhost", port=5670, reload=env != "PROD")
+    print("Run the backend with the command: poetry run python src/run.py")

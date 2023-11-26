@@ -1,5 +1,5 @@
 from datetime import datetime, time
-from src.models.tables.tuition_scheduler_models import CourseSection, RoomSchedule
+from src.models.tables import CourseSection, RoomSchedule
 from ply import lex
 import ply.yacc as yacc
 from sqlalchemy import ColumnExpressionArgument, and_, or_, not_
@@ -106,8 +106,14 @@ def apply_or(conditions):
 def p_condition(p):
     """condition : id_list operator operand_list
     | NOT condition
-    | LPAREN query RPAREN"""
-    if len(p) <= 3:
+    | LPAREN query RPAREN
+    | operand_list"""
+    if len(p) <= 2:
+        queries = []
+        for operand in p[1]:
+            queries.append(eval(f"CourseSection.course_id.like('%'+{operand}+'%')"))
+        p[0] = apply_or(queries)
+    elif len(p) <= 3:
         p[0] = not_(p[2])
     elif p[1] == "(" and p[3] == ")":
         p[0] = p[2]
@@ -118,6 +124,8 @@ def p_condition(p):
         for operand in p[3]:
             if p[1] == "section" and operand.isdecimal():
                 operand = f'"{operand}"'
+            if operand == "None" and table == "CourseSection":
+                operand = "''"
             if p[2] == ":":
                 queries.append(eval(f"{table}.{p[1]}.like('%'+{operand}+'%')"))
             else:

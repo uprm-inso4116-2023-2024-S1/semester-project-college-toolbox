@@ -116,6 +116,15 @@ interface CourseSearchSchedule {
 	endTime: string;
 }
 
+export interface SavedScheduleModel {
+    user_id: string
+    id: number
+    name: string
+    term: string
+    year: number
+    schedule: GeneratedSchedule
+}
+
 export interface CourseSearchSection {
 	courseCode: string;
 	courseName: string;

@@ -26,7 +26,7 @@ The two commonly hardest steps are:
 
 1. Run `cd backend`
 2. Run `poetry install`
-3. Run `poetry run python src/main.py`
+3. Run `poetry run python src/run.py`
 4. Access http://localhost:5670/api/docs on your browser
 
 ##### 📜Scripts
@@ -41,7 +41,7 @@ The two commonly hardest steps are:
 
 1. Run `cd backend`
 2. Run `poetry install`
-3. Run `poetry run python src/main.py`
+3. Run `poetry run python src/run.py`
 
 ##### Testing
 1. Run `cd backend`

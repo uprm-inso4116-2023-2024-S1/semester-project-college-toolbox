@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 
 import uuid
 
-from src.database import Base
+from . import Base
 from src.security import generate_salt, hash_password
 
 
