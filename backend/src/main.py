@@ -10,6 +10,7 @@ from src.models.requests.schedule import (
     SaveScheduleRequest,
     getSavedSchedulesRequest,
     CourseSearchRequest,
+    DeleteScheduleRequest,
 )
 from src.models.responses.schedule import (
     CourseSearchResponse,
@@ -358,6 +359,15 @@ def save_schedule_endpoint(
         user_id=user_id,
     )
     return {"schedule_id": schedule_id}
+
+@app.delete("/save_schedule/delete")
+def delete_saved_schedule(
+    request: DeleteScheduleRequest, engine: Engine = Depends(get_engine)
+):
+   su = ScheduleUtils(engine)
+   su.delete_schedule(request.schedule_id)
+
+   return {"message" : "Schedule deleted successfully."}
 
 
 @app.post("/schedules/filter/prefix")
