@@ -9,6 +9,12 @@ import Filters from './Filters';
 const SavedScheduleHub: React.FC = () => {
     const [savedSchedules, setSavedSchedules] = useState<SavedScheduleModel[]>([]);
 
+    const handleDeleteSchedule = (deletedScheduleId: number) => {
+        setSavedSchedules(currentApplications =>
+          currentApplications.filter(schedule => schedule.id !== deletedScheduleId)
+        );
+      };
+
     const handleSearchSchedules = async (value: string) => {
         try {
             if (value !== "") {
@@ -83,7 +89,7 @@ const SavedScheduleHub: React.FC = () => {
             <SearchBar onSearch={handleSearchSchedules} />
             <div className="gap-4 mx-4 mt-4">
                 <div>
-                    <SavedScheduleView applications={savedSchedules}/>
+                    <SavedScheduleView applications={savedSchedules} onDeleteSchedule={handleDeleteSchedule}/>
                 </div>
             </div>
         </div>

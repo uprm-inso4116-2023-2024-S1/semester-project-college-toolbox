@@ -2,12 +2,44 @@ import React, {useState} from 'react';
 import type { SavedScheduleModel } from '../../types/entities';
 import { Modal } from 'flowbite-react';
 import WeeklyCalendar from '../tuitionscheduler/WeeklyCalendar';
+import { API_URL } from '../../app/constants';
 
-const SavedScheduleView: React.FC<{ applications: SavedScheduleModel[] }> = ({ applications }) => {
+
+const SavedScheduleView: React.FC<{applications: SavedScheduleModel[]; onDeleteSchedule: (deletedScheduleId: number) => void;}> = ({ applications, onDeleteSchedule }) => {
     const [openModal, setOpenModal] = useState<string | undefined>();
     const [schedule, setSchedule] = useState<SavedScheduleModel | undefined>();
     const modalProps = { openModal, setOpenModal, schedule, setSchedule };
 
+    const deleteSchedule = async (schedule_id: number | undefined) => {
+        if (!schedule_id) {
+          console.error('Schedule ID is undefined.');
+          return;
+        }
+      
+        try {
+            const response = await fetch(`${API_URL}/save_schedule/delete`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ schedule_id }),
+          });
+      
+          const data = await response.json();
+      
+          if (response.ok) {
+            console.log('Schedule deleted successfully:', data);
+            onDeleteSchedule(schedule_id); 
+            setOpenModal(undefined);
+          } else {
+            console.error('Failed to delete the schedule:', data);
+          }
+        } catch (error) {
+          console.error('An error occurred while deleting the schedule:', error);
+        }
+      };
+      
+      
 
     function termEnumToString(term: string): string {
         const conversions = {
@@ -117,7 +149,13 @@ const SavedScheduleView: React.FC<{ applications: SavedScheduleModel[] }> = ({ a
                             </div>
                             <button
                                 className='bg-red-700 border-2 border-red-700 rounded-lg py-1 px-2 text-white hover:bg-red-800'
+                                onClick={() => {
+                                    if (modalProps.schedule) {
+                                        deleteSchedule(modalProps.schedule.id);
+                                    }
+                                }}
                                 >
+
                                 Delete
                             </button>
                         </div>
