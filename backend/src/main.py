@@ -252,9 +252,9 @@ async def get_all_existing_solutions(
     responses = []
     for d in data:
         # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
-        d.Pros = d.Pros.split(",") if d.Pros else d.Pros
-        d.Cons = d.Cons.split(",") if d.Cons else d.Cons
-        d.Type = d.Type.split(",") if d.Type else d.Type
+        d.Pros = d.Pros.split(",") if d.Pros else []
+        d.Cons = d.Cons.split(",") if d.Cons else []
+        d.Type = d.Type.split(",") if d.Type else []
 
         # The datetime object is not JSON serializable, so we need to convert it to a string
         d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
@@ -269,11 +269,24 @@ async def get_all_existing_solutions(
             for i in d.BusinessModels
         ]
 
-        response_dict = {**d.__dict__}
-        response_dict["BusinessModels"] = business_models
+        
+        d.BusinessModels = business_models
 
         # Create an ExistingSolutionResponse instance from the dictionary
-        response = ExistingSolutionResponse(**response_dict)
+        response = ExistingSolutionResponse(
+            Name = d.Name if d.Name else "",
+            Description = d.Description if d.Description else "",
+            URL = d.URL if d.URL else "",
+            Icon = d.Icon if d.Icon else "",
+            Type = d.Type,
+            Rating = d.Rating if d.Rating else 0,
+            RatingCount = d.RatingCount if d.RatingCount else 0,
+            Pros = d.Pros,
+            Cons = d.Cons,
+            LastUpdated = d.LastUpdated if d.LastUpdated else "",
+            HasMobile = d.HasMobile if d.HasMobile else False,
+            HasWeb = d.HasWeb if d.HasWeb else False,
+        )
         responses.append(response)
 
     return responses
@@ -290,6 +303,7 @@ async def filter_existing_applications_by_prefix(
 
 @app.post("/ExistingApplication/filter/applyAll")
 async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
+    data : list[ExistingSolution] = []
     conditions_list = []
     if request_data.type:
         for filter in request_data.type:
@@ -400,10 +414,10 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
     
     for d in data:
         # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
-        d.Pros = d.Pros.split(",") if d.Pros else d.Pros
-        d.Cons = d.Cons.split(",") if d.Cons else d.Cons
-        d.Type = d.Type.split(",") if d.Type else d.Type
-        d.Type.append("Using this query")
+        d.Pros = d.Pros.split(",") if d.Pros else []
+        d.Cons = d.Cons.split(",") if d.Cons else []
+        d.Type = d.Type.split(",") if d.Type else []
+
         # The datetime object is not JSON serializable, so we need to convert it to a string
         d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
 
@@ -417,11 +431,24 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
             for i in d.BusinessModels
         ]
 
-        response_dict = {**d.__dict__}
-        response_dict["BusinessModels"] = business_models
+        
+        d.BusinessModels = business_models
 
         # Create an ExistingSolutionResponse instance from the dictionary
-        response = ExistingSolutionResponse(**response_dict)
+        response = ExistingSolutionResponse(
+            Name = d.Name if d.Name else "",
+            Description = d.Description if d.Description else "",
+            URL = d.URL if d.URL else "",
+            Icon = d.Icon if d.Icon else "",
+            Type = d.Type,
+            Rating = d.Rating if d.Rating else 0,
+            RatingCount = d.RatingCount if d.RatingCount else 0,
+            Pros = d.Pros,
+            Cons = d.Cons,
+            LastUpdated = d.LastUpdated if d.LastUpdated else "",
+            HasMobile = d.HasMobile if d.HasMobile else False,
+            HasWeb = d.HasWeb if d.HasWeb else False,
+        )
         responses.append(response)
 
     return responses
