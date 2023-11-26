@@ -53,5 +53,6 @@ class CourseSearchRequest(BaseModel):
     term: str
     year: int
 
+
 class DeleteScheduleRequest(BaseModel):
     schedule_id: int

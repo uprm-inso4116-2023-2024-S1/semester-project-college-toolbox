@@ -609,7 +609,7 @@ class ScheduleUtils:
         """Filter out schedules based on their name prefix."""
         if search_prefix == "":
             return schedules
-        
+
         filtered_schedules = []
         for schedule in schedules:
             if schedule.name.lower() == search_prefix.lower():
@@ -623,7 +623,7 @@ class ScheduleUtils:
     ) -> list[getSavedScheduleResponse]:
         if course_code == "":
             return schedules
-        
+
         filtered_schedules = []
         course_code = course_code.upper()
         for schedule in schedules:
