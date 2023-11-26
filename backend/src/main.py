@@ -1,6 +1,6 @@
 # src/main.py
 from uuid import uuid4
-from sqlalchemy import Engine
+from sqlalchemy import Engine, and_
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.models.requests.schedule import (
@@ -9,6 +9,7 @@ from src.models.requests.schedule import (
     ValidateCourseIDRequest,
     SaveScheduleRequest,
     CourseSearchRequest,
+    DeleteScheduleRequest,
 )
 from src.models.responses.schedule import (
     CourseSearchResponse,
@@ -359,6 +360,16 @@ def save_schedule_endpoint(
     return {"schedule_id": schedule_id}
 
 
+@app.delete("/save_schedule/delete")
+def delete_saved_schedule(
+    request: DeleteScheduleRequest, engine: Engine = Depends(get_engine)
+):
+    su = ScheduleUtils(engine)
+    su.delete_schedule(request.schedule_id)
+
+    return {"message": "Schedule deleted successfully."}
+
+
 @app.post("/schedules/filter/prefix")
 async def filter_existing_applications_by_prefix(
     request_data: SchedulePrefixFilterRequest,
@@ -370,7 +381,19 @@ async def filter_existing_applications_by_prefix(
     if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(auth_token)
-    all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
+    all_schedules = (
+        db.query(Schedule)
+        .filter(
+            and_(
+                Schedule.user_id == user_id,
+                and_(
+                    Schedule.term == request_data.term,
+                    Schedule.year == request_data.year,
+                ),
+            )
+        )
+        .all()
+    )
     full_saved_schedules = []
     su = ScheduleUtils(engine)
     for schedule in all_schedules:
@@ -391,6 +414,10 @@ async def filter_existing_applications_by_prefix(
     filtered_schedules = su.filter_schedules_by_prefix(
         request_data.prefix, full_saved_schedules
     )
+    if len(filtered_schedules) == 0:
+        return su.filter_schedules_by_course_code(
+            request_data.prefix, full_saved_schedules
+        )
     return filtered_schedules
 
 

@@ -5,51 +5,42 @@ import type { SavedScheduleModel } from '../../types/entities';
 import { getCookie } from '../../lib/data';
 import SavedScheduleView from './SavedScheduleView';
 import Filters from './Filters';
+import { $selectedTermYear } from '../../lib/courses';
+import { useStore } from '@nanostores/react';
 
 const SavedScheduleHub: React.FC = () => {
 	const [savedSchedules, setSavedSchedules] = useState<SavedScheduleModel[]>(
 		[],
 	);
+	const academicTermYear = useStore($selectedTermYear);
 
-	const handleSearchSchedules = async (value: string) => {
-		// try {
-		//     if (value !== "") {
-		//         const requestBody = {
-		//             prefix: value
-		//         };
-
-		//         const response = await fetch(`${API_URL}/ExistingApplication/filter/prefix`, {
-		//             method: 'POST',
-		//             headers: {
-		//                 'Content-Type': 'application/json',
-		//             },
-		//             body: JSON.stringify(requestBody),
-		//         });
-
-		//         if (!response.ok) {
-		//             throw new Error(`Validation request failed: ${response.statusText}`);
-		//         }
-
-		//         const data = await response.json();
-		//         setApplications(data);
-		//     }
-		//     else {
-		//         setApplications([]);
-		//     }
-		// } catch (error) {
-		//     console.error("Error fetching applications:", error);
-		// }
-		console.log(value);
+	const handleSuggestionsUpdate = (suggestions: SavedScheduleModel[]) => {
+		setSavedSchedules(suggestions);
 	};
 
-	const showAllSavedSchedules = async () => {
+	const handleDeleteSchedule = (deletedScheduleId: number) => {
+		setSavedSchedules((currentApplications) =>
+			currentApplications.filter(
+				(schedule) => schedule.id !== deletedScheduleId,
+			),
+		);
+	};
+
+	const handleSearchSchedules = async (value: string) => {
 		try {
-			const response = await fetch(`${API_URL}/get_all_save_schedules`, {
-				method: 'GET',
+			const requestBody = {
+				prefix: value,
+				auth_token: getCookie('auth_token'),
+				term: academicTermYear.term,
+				year: +academicTermYear.year,
+			};
+
+			const response = await fetch(`${API_URL}/schedules/filter/prefix`, {
+				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				credentials: 'include',
+				body: JSON.stringify(requestBody),
 			});
 
 			if (!response.ok) {
@@ -59,25 +50,27 @@ const SavedScheduleHub: React.FC = () => {
 			const data = await response.json();
 			setSavedSchedules(data);
 		} catch (error) {
-			console.error('Error fetching saved schedules:', error);
+			console.error('Error fetching applications:', error);
 		}
+		console.log(value);
 	};
 
 	useEffect(() => {
-		showAllSavedSchedules();
+		handleSearchSchedules('');
 	}, []);
 
 	return (
 		<div className="Saved-Schedule-Hub-container">
-			<SearchBar onSearch={handleSearchSchedules} />
-			<div className="grid grid-cols-5 gap-4 mx-4 mt-4">
-				<div className="col-span-1 ">
-					<div className="filters-container">
-						<Filters />
-					</div>
-				</div>
-				<div className="col-span-4">
-					<SavedScheduleView applications={savedSchedules} />
+			<SearchBar
+				onSearch={handleSearchSchedules}
+				onSuggestionsUpdate={handleSuggestionsUpdate}
+			/>
+			<div className="gap-4 mx-4 mt-4">
+				<div>
+					<SavedScheduleView
+						applications={savedSchedules}
+						onDeleteSchedule={handleDeleteSchedule}
+					/>
 				</div>
 			</div>
 		</div>

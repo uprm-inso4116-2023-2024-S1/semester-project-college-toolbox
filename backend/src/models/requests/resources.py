@@ -15,3 +15,5 @@ class applyAllFilterRequest(BaseModel):
 
 class SchedulePrefixFilterRequest(BaseModel):
     prefix: str
+    term: str
+    year: int
