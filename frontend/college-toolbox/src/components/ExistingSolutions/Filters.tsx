@@ -67,7 +67,7 @@ const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
     return (
         <div className="bg-gray-200 rounded-lg p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <h2 className="text-2xl font-extrabold mb-2">Filters</h2>
-            <div className="h-132 overflow-y-auto">
+            <div className="overflow-y-auto">
 
                 {/* Filter type */}
                 <div id="type" className="border-gray-300 border-2 p-2 dark:border-gray-600">
