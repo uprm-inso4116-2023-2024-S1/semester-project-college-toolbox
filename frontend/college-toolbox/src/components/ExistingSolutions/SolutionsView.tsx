@@ -144,7 +144,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                             <div className='flex items-center text-lg'>
                                 <div className="text-left font-bold">Available on:</div>
                                 {getDeviceAvailabity("Mobile", selectedApp.HasMobile)} 
-                                {getDeviceAvailabity("Desktop", true)}
+                                {getDeviceAvailabity("Desktop", selectedApp.HasWeb)}
                             </div>
 
                             <div className='flex items-center'>
