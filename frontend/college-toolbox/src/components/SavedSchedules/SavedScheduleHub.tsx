@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { API_URL } from '../../app/constants';
 import SearchBar from '../../components/SavedSchedules/SearchBar';
 import type { SavedScheduleModel } from '../../types/entities';
-import { getCookie } from '../../lib/data';
 import SavedScheduleView from './SavedScheduleView';
-import Filters from './Filters';
 import { $selectedTermYear } from '../../lib/courses';
 import { useStore } from '@nanostores/react';
 
@@ -30,7 +28,6 @@ const SavedScheduleHub: React.FC = () => {
 		try {
 			const requestBody = {
 				prefix: value,
-				auth_token: getCookie('auth_token'),
 				term: academicTermYear.term,
 				year: +academicTermYear.year,
 			};
@@ -41,6 +38,7 @@ const SavedScheduleHub: React.FC = () => {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify(requestBody),
+                credentials: 'include',
 			});
 
 			if (!response.ok) {

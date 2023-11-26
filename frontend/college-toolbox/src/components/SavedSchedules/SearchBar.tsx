@@ -4,7 +4,6 @@ import type {
 	AcademicYearOptions,
 	SavedScheduleModel,
 } from '../../types/entities';
-import { getCookie } from '../../lib/data';
 import { $selectedTermYear, $storedCourses } from '../../lib/courses';
 import { useStore } from '@nanostores/react';
 
@@ -90,7 +89,6 @@ const SearchBar: React.FC<{
 	const generateSuggestions = async (search_prefix: string) => {
 		const requestBody = {
 			prefix: search_prefix,
-			auth_token: getCookie('auth_token'),
 			term: academicTermYear.term,
 			year: +academicTermYear.year,
 		};
@@ -102,6 +100,7 @@ const SearchBar: React.FC<{
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify(requestBody),
+                credentials: 'include',
 			});
 
 			if (!response.ok) {
