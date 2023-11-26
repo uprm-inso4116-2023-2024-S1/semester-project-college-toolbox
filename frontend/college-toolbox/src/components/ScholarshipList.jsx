@@ -343,6 +343,7 @@ const ScholarshipList = () => {
 						id="customDeadlineText"
 						value={customDeadlineOptions.text}
 						onChange={handleTextChange}
+						style={{ background: 'transparent', border: 'transparent', borderBottom: '1px solid #ccc', margin: '5px 0' }}
 					/>
 				</div>
 				<label htmlFor="calendarColorSelect">Select Deadline Color</label>
@@ -350,18 +351,29 @@ const ScholarshipList = () => {
 					id="calendarColorSelect"
 					value={calendarColor}
 					onChange={handleColorChange}
-				>
+					style={{
+						padding: '8px',        // Add padding for better appearance
+						borderRadius: '5px',    // Add rounded corners
+						border: '1px solid #ccc', // Add a border
+						background: '#0C2831',     // Set background color
+						color: '#fff',          // Set text color
+					}}
+				>	
 					<option value="green">Green</option>
 					<option value="red">Red</option>
 					<option value="blue">Blue</option>
+					
 					{/* Add more color options as needed */}
 				</select>
+				<div id="calendarFactoryContainer">
 				<CalendarFactory
 					userPreferences={{ calendarType: 'gregory' }} // Customize based on your needs
 					scholarshipDeadlines={getUniqueDeadlines(allScholarships)} // Assuming you have a function to get unique deadlines
 					onDateChange={setSelectedDate}
 					deadlineOptions={customDeadlineOptions} // Pass the deadlineOptions prop
+					
 				/>
+				</div>
 				<p>Selected Date: {selectedDate.toDateString()}</p>
 			</div>
 			<p>DL represents Scholarship Deadline in calendar.</p>

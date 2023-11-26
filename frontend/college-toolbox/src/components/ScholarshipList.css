@@ -131,3 +131,48 @@
 	gap: 10px; /* Adjust the gap between scholarship cards as needed */
 	width: 300%; /* Adjust the width as needed */
 }
+
+#calendarFactoryContainer {
+    border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+}
+
+#calendarFactoryContainer .day {
+    border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+}
+
+#calendarFactoryContainer .month {
+    border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+}
+
+/* .react-calendar {
+	border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+	background: #0C2831;
+}
+
+.react-calendar__tile {
+	max-width: 100%;
+	text-align: center;
+	padding: 0.75em 0.5em;
+	background: none;
+	background-color: #0C2831;
+  } */
+
+  .react-calendar__viewContainer {
+	background: transparent !important;
+  }
