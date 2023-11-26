@@ -194,7 +194,7 @@ const ScheduleOptions: React.FC<ScheduleOptions> = ({
 			year,
 		};
 
-		const response = await fetch(`${API_URL}/validate_course_id/`, {
+		const response = await fetch(`${API_URL}/validate_course_id`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
