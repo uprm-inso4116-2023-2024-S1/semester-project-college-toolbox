@@ -81,13 +81,8 @@ const SavedScheduleHub: React.FC = () => {
     return (
         <div className="Saved-Schedule-Hub-container">
             <SearchBar onSearch={handleSearchSchedules} />
-            <div className="grid grid-cols-5 gap-4 mx-4 mt-4">
-                <div className="col-span-1 ">
-                    <div className="filters-container">
-                        <Filters />
-                    </div>
-                </div>
-                <div className="col-span-4">
+            <div className="gap-4 mx-4 mt-4">
+                <div>
                     <SavedScheduleView applications={savedSchedules}/>
                 </div>
             </div>
