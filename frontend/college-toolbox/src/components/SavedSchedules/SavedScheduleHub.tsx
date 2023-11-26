@@ -13,6 +13,12 @@ const SavedScheduleHub: React.FC = () => {
         setSavedSchedules(suggestions);
     };
     
+    const handleDeleteSchedule = (deletedScheduleId: number) => {
+        setSavedSchedules(currentApplications =>
+          currentApplications.filter(schedule => schedule.id !== deletedScheduleId)
+        );
+      };
+
     const handleSearchSchedules = async (value: string) => {
         try {
             if (value !== "") {
@@ -80,19 +86,12 @@ const SavedScheduleHub: React.FC = () => {
         showAllSavedSchedules();
     }, []);
 
-
-
     return (
         <div className="Saved-Schedule-Hub-container">
             <SearchBar onSearch={handleSearchSchedules} onSuggestionsUpdate={handleSuggestionsUpdate}/>
-            <div className="grid grid-cols-5 gap-4 mx-4 mt-4">
-                <div className="col-span-1 ">
-                    <div className="filters-container">
-                        <Filters />
-                    </div>
-                </div>
-                <div className="col-span-4">
-                    <SavedScheduleView applications={savedSchedules}/>
+            <div className="gap-4 mx-4 mt-4">
+                <div>
+                    <SavedScheduleView applications={savedSchedules} onDeleteSchedule={handleDeleteSchedule}/>
                 </div>
             </div>
         </div>
