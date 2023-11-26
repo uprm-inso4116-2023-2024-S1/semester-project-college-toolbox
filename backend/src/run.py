@@ -18,9 +18,9 @@ def prepare_db(environment: str, refresh: bool):
             # Check if the destination file exists and delete it if it does
             if os.path.exists(dev_database_path):
                 os.remove(dev_database_path)
-            # Copy the contents of the prod database to the dev database
-            # Only copy if the developer doesn't already have a local dev db
-            shutil.copy2(prod_database_path, dev_database_path)
+        # Copy the contents of the prod database to the dev database
+        # Only copy if the developer doesn't already have a local dev db
+        shutil.copy2(prod_database_path, dev_database_path)
 
     elif environment == "TEST":
         # Specify the paths to the source (prod) and destination (test) databases
