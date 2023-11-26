@@ -1,6 +1,6 @@
 # src/main.py
 from uuid import uuid4
-from sqlalchemy import Engine
+from sqlalchemy import Engine, and_
 from sqlalchemy.orm import Session
 from typing import Annotated
 from src.models.requests.schedule import (
@@ -380,7 +380,19 @@ async def filter_existing_applications_by_prefix(
     if not request_data.auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(request_data.auth_token)
-    all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
+    all_schedules = (
+        db.query(Schedule)
+        .filter(
+            and_(
+                Schedule.user_id == user_id,
+                and_(
+                    Schedule.term == request_data.term,
+                    Schedule.year == request_data.year,
+                ),
+            )
+        )
+        .all()
+    )
     full_saved_schedules = []
     su = ScheduleUtils(engine)
     for schedule in all_schedules:

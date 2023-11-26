@@ -16,3 +16,5 @@ class applyAllFilterRequest(BaseModel):
 class SchedulePrefixFilterRequest(BaseModel):
     prefix: str
     auth_token: str
+    term: str
+    year: int
