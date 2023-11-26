@@ -9,6 +9,10 @@ import Filters from './Filters';
 const SavedScheduleHub: React.FC = () => {
     const [savedSchedules, setSavedSchedules] = useState<SavedScheduleModel[]>([]);
 
+    const handleSuggestionsUpdate = (suggestions: SavedScheduleModel[]) => {
+        setSavedSchedules(suggestions);
+    };
+    
     const handleSearchSchedules = async (value: string) => {
         try {
             if (value !== "") {
@@ -80,7 +84,7 @@ const SavedScheduleHub: React.FC = () => {
 
     return (
         <div className="Saved-Schedule-Hub-container">
-            <SearchBar onSearch={handleSearchSchedules} />
+            <SearchBar onSearch={handleSearchSchedules} onSuggestionsUpdate={handleSuggestionsUpdate}/>
             <div className="grid grid-cols-5 gap-4 mx-4 mt-4">
                 <div className="col-span-1 ">
                     <div className="filters-container">

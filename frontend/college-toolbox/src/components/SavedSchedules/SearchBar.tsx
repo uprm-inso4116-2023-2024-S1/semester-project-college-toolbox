@@ -3,7 +3,7 @@ import { API_URL } from '../../app/constants';
 import type { SavedScheduleModel } from '../../types/entities';
 import { getCookie } from '../../lib/data';
 
-const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }) => {
+const SearchBar: React.FC<{ onSearch: (value: string) => void, onSuggestionsUpdate: (suggestions: SavedScheduleModel[]) => void  }> = ({ onSearch, onSuggestionsUpdate }) => {
     const searchRef = useRef<HTMLFormElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const [searchValue, setSearchValue] = useState<string>('');
@@ -76,6 +76,7 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
             }
 
             const data = await response.json();
+            onSuggestionsUpdate(data);
             setSuggestions(data);
         } catch (error) {
             if (error instanceof Error) {
