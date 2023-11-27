@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactTooltip from 'react-tooltip';
 import type { ResourcesModel } from '../../types/entities';
 import { Modal } from 'flowbite-react';
 
@@ -121,9 +122,14 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                             <div className="text-left font-bold text-lg">Description:</div>
                             <p className= 'p-2 text-justify'>{selectedApp.Description}</p>
 
-                            <div className="mb-2 text-left font-bold text-lg">Rating: {selectedApp.Rating}/5</div>
-                        
-                            <div
+														<div className="mb-2 font-bold text-lg">
+															<div className="flex justify-between">
+																<div className="text-left">Rating: {selectedApp.Rating}/5</div>
+																<div className="text-right">Price: ${selectedApp.BusinessModels[0].Price}</div>
+															</div>
+														</div>
+
+														<div
                                 className='grid grid-cols-2 gap-2 mb-2'
                                 >
                                 <div className='p-2 bg-green-600 bg-opacity-30 border border-green-600 rounded-lg'>
