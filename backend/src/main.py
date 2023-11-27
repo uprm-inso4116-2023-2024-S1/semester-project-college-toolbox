@@ -1,4 +1,5 @@
 # src/main.py
+import os
 from uuid import uuid4
 from sqlalchemy import Engine, and_
 from sqlalchemy.orm import Session
@@ -164,8 +165,10 @@ async def register_user(
         key="auth_token",
         value=permanent_token,
         max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None",  # Set SameSite attribute
-        secure=True,
+        samesite="None",
+        secure=False
+        if os.environ.get("CT_ENV") == "TEST"
+        else True,  # disable HTTPS requirement for tests
         path="/",
     )
 
@@ -204,8 +207,10 @@ async def login_user(
         key="auth_token",
         value=permanent_token,
         max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None",  # Set SameSite attribute
-        secure=True,
+        samesite="None",
+        secure=False
+        if os.environ.get("CT_ENV") == "TEST"
+        else True,  # disable HTTPS requirement for tests
         path="/",
     )
     return response
@@ -344,8 +349,11 @@ def validate_course_id_endpoint(
 
 @app.post("/save_schedule")
 def save_schedule_endpoint(
-    request: SaveScheduleRequest, engine: Engine = Depends(get_engine), auth_token: Annotated[str | None, Cookie()] = None
+    request: SaveScheduleRequest,
+    engine: Engine = Depends(get_engine),
+    auth_token: Annotated[str | None, Cookie()] = None,
 ) -> SaveScheduleResponse:
+    print(request, auth_token)
     if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
     user_id = get_user_id_from_token(auth_token)
@@ -375,7 +383,7 @@ async def filter_saved_schedules_by_prefix(
     request_data: SchedulePrefixFilterRequest,
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
-    auth_token: Annotated[str | None, Cookie()] = None
+    auth_token: Annotated[str | None, Cookie()] = None,
 ) -> list[getSavedScheduleResponse]:
     """Retrieve all schedules that start with a specific prefix."""
     if not auth_token:
@@ -425,7 +433,7 @@ async def filter_saved_schedules_by_prefix(
 def get_all_saved_schedules(
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
-    auth_token: Annotated[str | None, Cookie()] = None
+    auth_token: Annotated[str | None, Cookie()] = None,
 ) -> list[getSavedScheduleResponse]:
     if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
