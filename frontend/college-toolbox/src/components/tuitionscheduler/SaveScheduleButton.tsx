@@ -35,7 +35,6 @@ const SaveScheduleButton: React.FC<SaveScheduleButtonProps> = ({
 					name,
 					term,
 					year,
-					auth_token: getCookie('auth_token'),
 				}),
 				credentials: 'include',
 			});
