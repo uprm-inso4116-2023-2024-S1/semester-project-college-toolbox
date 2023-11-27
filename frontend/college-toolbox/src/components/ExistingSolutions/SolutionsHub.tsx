@@ -3,9 +3,10 @@ import SearchBar from './SearchBar';
 import Filters from './Filters'
 import SolutionsView from './SolutionsView';
 import { API_URL } from '../../app/constants';
+import type { ResourcesModel } from '../../types/entities';
 
 const SolutionsHub: React.FC = () => {
-    const [applications, setApplications] = useState<any[]>([]);
+    const [applications, setApplications] = useState<ResourcesModel[]>([]);
 
     // const displayAllApplications = async () => {
     //     try {

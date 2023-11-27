@@ -71,7 +71,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                 </div>
 
                                 <div>
-                                    <div className="mt-2 text-left font-bold text-gray-800 dark:text-gray-300 text-lg">Types:</div>
+                                    <div className="mt-2 text-left font-bold text-gray-800 dark:text-gray-300 text-lg">Category:</div>
 
                                     <div>
                                         {app.Type.map((type, index) => (

@@ -71,7 +71,7 @@ const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
 
                 {/* Filter type */}
                 <div id="type" className="border-gray-300 border-2 p-2 dark:border-gray-600">
-                    <h3 className="text-xl font-medium">Type:</h3>
+                    <h3 className="text-xl font-medium">Categories:</h3>
                     <div className="p-2">
                         {['Note-taking', 'Organizational', 'Study', 'Information', 'Proofreading', 'Budgetting', 'Other'].map((filterType) => (
                             <label htmlFor={filterType} className="flex items-center mt-1 font-medium hover:font-extrabold" key={filterType}>
