@@ -165,10 +165,11 @@ async def register_user(
         key="auth_token",
         value=permanent_token,
         max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None",
-        secure=False
-        if os.environ.get("CT_ENV") == "TEST"
-        else True,  # disable HTTPS requirement for tests
+        samesite="None"
+        if os.environ.get("CT_ENV") not in ["TEST", "ACTIONS"]
+        else "lax",
+        secure=os.environ.get("CT_ENV")
+        not in ["TEST", "ACTIONS"],  # disable HTTPS requirement for tests
         path="/",
     )
 
@@ -207,10 +208,11 @@ async def login_user(
         key="auth_token",
         value=permanent_token,
         max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None",
-        secure=False
-        if os.environ.get("CT_ENV") == "TEST"
-        else True,  # disable HTTPS requirement for tests
+        samesite="None"
+        if os.environ.get("CT_ENV") not in ["TEST", "ACTIONS"]
+        else "lax",
+        secure=os.environ.get("CT_ENV")
+        not in ["TEST", "ACTIONS"],  # disable HTTPS requirement for tests
         path="/",
     )
     return response
