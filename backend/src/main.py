@@ -371,7 +371,7 @@ def delete_saved_schedule(
 
 
 @app.post("/schedules/filter/prefix")
-async def filter_existing_applications_by_prefix(
+async def filter_saved_schedules_by_prefix(
     request_data: SchedulePrefixFilterRequest,
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),

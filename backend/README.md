@@ -8,7 +8,7 @@
  `%APPDATA%\pypoetry\venv\Scripts`
 3. cd into `backend/`
 4. Run `poetry install`
-5. Run `poetry run python src/run.py`
+5. Run `poetry run python src/run.py [-r/--refresh]`
 6. Make desired changes and visit `localhost:5670`
 
 ## Option B: Docker
@@ -24,15 +24,9 @@
 # Database Migrations
 
 ## Local Development 
-### To create a new revision locally:
-1. cd into the `backend/` directory
-2. Run `poetry run alembic -c src/alembic.ini -n dev revision --autogenerate -m "<insert description>"` 
-3. Revise and edit the newly created revision script if necessary
-4. Run `poetry run alembic -c src/alembic.ini -n dev upgrade head`
 
-### After pulling from the GitHub repository:
-1. cd into the `backend/` directory
-2. Run `poetry run alembic -c src/alembic.ini -n dev upgrade head`
+### Important Note:
+We no longer support dev database migrations. Developers keeping their local dev databases long-term are responsible for maintaining migrations in their local dev space.
 
 ## Production Deployments
 When changing a SQLAlchemy model for a table, you should generate migrations on the production database for it.
