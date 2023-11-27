@@ -101,13 +101,14 @@
 .filter-buttons {
 	display: flex; /* Make the buttons flex containers */
 	gap: 10px; /* Add spacing between buttons */
+	color: white;
 }
 
 .filter-button {
 	/* Style for individual filter buttons */
 	padding: 5px 10px;
-	background-color: #ccc;
-	border: none;
+	background-color: transparent;
+	border: 1px solid white;
 	cursor: pointer;
 }
 
@@ -131,3 +132,73 @@
 	gap: 10px; /* Adjust the gap between scholarship cards as needed */
 	width: 300%; /* Adjust the width as needed */
 }
+
+#calendarFactoryContainer {
+    border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+}
+
+#calendarFactoryContainer .day {
+    border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+}
+
+#calendarFactoryContainer .month {
+    border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+}
+
+.react-calendar {
+	border: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    background-color:transparent;
+    color: #333;
+	background: #0C2831;
+}
+
+.react-calendar__tile {
+	max-width: 100%;
+	text-align: center;
+	padding: 0.75em 0.5em;
+	background: none;
+	background-color: #0C2831;
+  }
+
+  .react-calendar__viewContainer {
+	background: transparent !important;
+  }
+
+  .react-calendar__month-view__days__day--weekend {
+	color: #d10000;
+  }
+  
+  .react-calendar__month-view__days__day--neighboringMonth {
+	color: #ccc !important;
+  }
+
+  .react-calendar__month-view__weekdays__weekday {
+	padding: 0.5em;
+	color: #ccc !important;
+  }
+
+  .react-calendar__month-view__weekNumbers .react-calendar__tile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font: inherit;
+	font-size: 0.75em;
+	font-weight: bold;
+	color: #ccc !important;
+  }
+
+
