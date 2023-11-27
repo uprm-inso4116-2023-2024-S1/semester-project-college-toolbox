@@ -258,7 +258,7 @@ async def get_all_existing_solutions(
         d.Type = d.Type.split(",") if d.Type else []
 
         # The datetime object is not JSON serializable, so we need to convert it to a string
-        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
+        last_updated_str = d.LastUpdated.strftime("%d-%B-%Y") if d.LastUpdated else ""
 
         business_models = [
             BusinessModelResponse(
@@ -269,9 +269,6 @@ async def get_all_existing_solutions(
             )
             for i in d.BusinessModels
         ]
-
-        
-        d.BusinessModels = business_models
 
         # Create an ExistingSolutionResponse instance from the dictionary
         response = ExistingSolutionResponse(
@@ -284,9 +281,10 @@ async def get_all_existing_solutions(
             RatingCount = d.RatingCount if d.RatingCount else 0,
             Pros = d.Pros,
             Cons = d.Cons,
-            LastUpdated = d.LastUpdated if d.LastUpdated else "",
+            LastUpdated = last_updated_str,
             HasMobile = d.HasMobile if d.HasMobile else False,
             HasWeb = d.HasWeb if d.HasWeb else False,
+            BusinessModels=business_models,  
         )
         responses.append(response)
 
@@ -420,7 +418,7 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
         d.Type = d.Type.split(",") if d.Type else []
 
         # The datetime object is not JSON serializable, so we need to convert it to a string
-        d.LastUpdated = d.LastUpdated.strftime("%Y-%m-%d") if d.LastUpdated else None
+        last_updated_str = d.LastUpdated.strftime("%d-%B-%Y") if d.LastUpdated else ""
 
         business_models = [
             BusinessModelResponse(
@@ -431,9 +429,6 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
             )
             for i in d.BusinessModels
         ]
-
-        
-        d.BusinessModels = business_models
 
         # Create an ExistingSolutionResponse instance from the dictionary
         response = ExistingSolutionResponse(
@@ -446,9 +441,10 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
             RatingCount = d.RatingCount if d.RatingCount else 0,
             Pros = d.Pros,
             Cons = d.Cons,
-            LastUpdated = d.LastUpdated if d.LastUpdated else "",
+            LastUpdated = last_updated_str,
             HasMobile = d.HasMobile if d.HasMobile else False,
             HasWeb = d.HasWeb if d.HasWeb else False,
+            BusinessModels=business_models,  
         )
         responses.append(response)
 
