@@ -384,6 +384,7 @@ const ScholarshipList = () => {
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					className="input-field"
+					style={{ background: 'transparent', border: 'transparent', borderBottom: '1px solid #ccc', margin: '5px 0' }}
 				/>
 			</div>
 			<div className="filter-section">
@@ -404,6 +405,13 @@ const ScholarshipList = () => {
 					value={selectedYearFilter}
 					onChange={(e) => setSelectedYearFilter(e.target.value)}
 					className="input-field"
+					style={{
+						padding: '8px',        // Add padding for better appearance
+						borderRadius: '5px',    // Add rounded corners
+						border: '1px solid #ccc', // Add a border
+						background: 'transparent',     // Set background color
+						color: '#fff',          // Set text color
+					}}
 				>
 					<option value="All">All</option>
 					<option value="Recent">Recent</option> {/* Add this line */}
