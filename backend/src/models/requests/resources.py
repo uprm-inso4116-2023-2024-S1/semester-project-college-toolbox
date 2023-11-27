@@ -7,10 +7,10 @@ class PrefixFilterRequest(BaseModel):
     prefix: str
 
 
-class applyAllFilterRequest(BaseModel):
-    type: list[str]
-    sort: list[str]
-    cost: list[str]
+class ExistingSolutionsFilterAllRequest(BaseModel):
+    solutionTypes: list[str]
+    sortBy: list[str]
+    priceRange: list[str]
 
 
 class SchedulePrefixFilterRequest(BaseModel):

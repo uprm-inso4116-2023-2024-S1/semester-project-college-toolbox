@@ -23,8 +23,8 @@ from src.ssh_scraper.enums import Term
 from src.utils.schedule import ScheduleUtils
 from src.utils.course import CourseQueryUtils
 from src.utils.ExistingSolution import (
-    filter_apps_by_prefix,
-    filter_apps_by_criteria,
+    filter_solutions_by_prefix,
+    filter_solutions_by_criteria,
 )
 from fastapi import (
     FastAPI,
@@ -56,7 +56,7 @@ from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.requests.resources import (
     PrefixFilterRequest,
     SchedulePrefixFilterRequest,
-    applyAllFilterRequest,
+    ExistingSolutionsFilterAllRequest,
 )
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
@@ -250,7 +250,7 @@ def fetch_user(
 
 
 # Get all Existing Solutions endpoint
-@app.get("/ExistingSolution/get/all")
+@app.get("/existing-solutions/get/all")
 async def get_all_existing_solutions(
     db: Session = Depends(get_db),
 ) -> list[ExistingSolutionResponse]:
@@ -286,24 +286,24 @@ async def get_all_existing_solutions(
     return responses
 
 
-@app.post("/ExistingApplication/filter/prefix")
+@app.post("/existing-solutions/filter/prefix")
 async def filter_existing_applications_by_prefix(
     request_data: PrefixFilterRequest, db: Session = Depends(get_db)
 ) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that start with a specific prefix."""
     all_apps = await get_all_existing_solutions(db)
-    filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
+    filtered_apps = filter_solutions_by_prefix(request_data.prefix, all_apps)
     return filtered_apps
 
 
-@app.post("/ExistingApplication/filter/applyAll")
-async def filter_existing_applications_by_criteria(
-    request_data: applyAllFilterRequest, db: Session = Depends(get_db)
+@app.post("/existing-solutions/filter/criteria")
+async def get_filtered_existing_solutions(
+    filter_request: ExistingSolutionsFilterAllRequest, db: Session = Depends(get_db)
 ) -> list[ExistingSolutionResponse]:
-    """Retrieve all applications that fit the given filters."""
-    all_apps = await get_all_existing_solutions(db)
-    filtered_apps = filter_apps_by_criteria(request_data, all_apps)
-    return filtered_apps
+    """Retrieve existing solutions for students filtered by specified criteria."""
+    all_solutions = await get_all_existing_solutions(db)
+    filtered_solutions = filter_solutions_by_criteria(filter_request, all_solutions)
+    return filtered_solutions
 
 
 # Create .ics calendar file
