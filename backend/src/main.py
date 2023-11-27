@@ -324,12 +324,6 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
             )
     # default sorting
     if not request_data.sort or request_data.sort.__contains__("A-Z"):
-        # data : list[ExistingSolution] = (
-        #     db.query(ExistingSolution)
-        #     .filter(or_(*conditions_list))
-        #     .order_by(asc(ExistingSolution.Name))
-        #     .all()
-        # )
         data: list[tuple] = (
             db.query(ExistingSolution, BusinessModel)
             .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
@@ -341,12 +335,6 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
         )
     if request_data.sort.__contains__("High to low"):
         if request_data.sort.__contains__("A-Z"):
-            # data : list[ExistingSolution] = (
-            #     db.query(ExistingSolution)
-            #     .filter(or_(*conditions_list))
-            #     .order_by(desc(ExistingSolution.Name))
-            #     .all()
-            # ) # query for when business model gets populated
             data: list[tuple] = (
                 db.query(ExistingSolution, BusinessModel)
                 .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
@@ -368,12 +356,6 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
             )
     else:
         if request_data.sort.__contains__("A-Z"):
-            # data : list[ExistingSolution] = (
-            #     db.query(ExistingSolution)
-            #     .filter(or_(*conditions_list))
-            #     .order_by(asc(ExistingSolution.Name))
-            #     .all()
-            # ) # query for when business model gets populated
             data: list[tuple] = (
                 db.query(ExistingSolution, BusinessModel)
                 .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
@@ -395,31 +377,8 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
             )      
         
     responses = []
-    # mapping for when the Business Model table gets populated
-    # for existing_solution, business_model_type in data:
-    #     # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
-    #     existing_solution.Pros = existing_solution.Pros.split(",") if existing_solution.Pros else existing_solution.Pros
-    #     existing_solution.Cons = existing_solution.Cons.split(",") if existing_solution.Cons else existing_solution.Cons
-    #     existing_solution.Type = existing_solution.Type.split(",") if existing_solution.Type else existing_solution.Type
-    #     # The datetime object is not JSON serializable, so we need to convert it to a string
-    #     existing_solution.LastUpdated = existing_solution.LastUpdated.strftime("%Y-%m-%d") if existing_solution.LastUpdated else None
-
-    #     business_models = [
-    #         BusinessModelResponse(
-    #             ExistingSolutionId=i.ExistingSolutionId,
-    #             BusinessModelType=business_model_type,
-    #             Price=i.Price,
-    #             Description=i.Description,
-    #         )
-    #         for i in existing_solution.BusinessModels
-    #     ]
-    # response_dict = {**existing_solution.__dict__}
     
     for d, e in data:
-        # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
-        # d.Pros = d.Pros.split(",") if d.Pros else []
-        # d.Cons = d.Cons.split(",") if d.Cons else []
-        # d.Type = d.Type.split(",") if d.Type else []
         pros_to_string = str(d.Pros).replace("[", "").replace("'", "").replace("]", "")
         cons_to_string = str(d.Cons).replace("[", "").replace("'", "").replace("]", "")
         type_to_string = str(d.Type).replace("[", "").replace("'", "").replace("]", "")
