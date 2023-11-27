@@ -56,7 +56,7 @@ from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.requests.resources import (
     PrefixFilterRequest,
     SchedulePrefixFilterRequest,
-    ExistingSolutionsFilterRequest,
+    ExistingSolutionsFilterAllRequest,
 )
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
@@ -298,7 +298,7 @@ async def filter_existing_applications_by_prefix(
 
 @app.post("/existing-solutions/filter/criteria")
 async def get_filtered_existing_solutions(
-    filter_request: ExistingSolutionsFilterRequest, db: Session = Depends(get_db)
+    filter_request: ExistingSolutionsFilterAllRequest, db: Session = Depends(get_db)
 ) -> list[ExistingSolutionResponse]:
     """Retrieve existing solutions for students filtered by specified criteria."""
     all_solutions = await get_all_existing_solutions(db)

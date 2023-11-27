@@ -7,7 +7,7 @@ class PrefixFilterRequest(BaseModel):
     prefix: str
 
 
-class ExistingSolutionsFilterRequest(BaseModel):
+class ExistingSolutionsFilterAllRequest(BaseModel):
     solutionTypes: list[str]
     sortBy: list[str]
     priceRange: list[str]

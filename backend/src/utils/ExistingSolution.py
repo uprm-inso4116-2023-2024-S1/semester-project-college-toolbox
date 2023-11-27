@@ -1,5 +1,5 @@
 from src.models.requests.resources import (
-    ExistingSolutionsFilterRequest,
+    ExistingSolutionsFilterAllRequest,
 )
 
 from src.models.responses.existing_solution import (
@@ -15,7 +15,7 @@ def filter_solutions_by_prefix(
 
 
 def filter_solutions_by_criteria(
-    filters: ExistingSolutionsFilterRequest, apps: list[ExistingSolutionResponse]
+    filters: ExistingSolutionsFilterAllRequest, apps: list[ExistingSolutionResponse]
 ) -> list[ExistingSolutionResponse]:
     """Filter out applications based on the given filters."""
     type_set = set(filter.lower() for filter in filters.solutionTypes)
