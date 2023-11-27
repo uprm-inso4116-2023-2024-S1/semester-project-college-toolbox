@@ -54,14 +54,12 @@ const SavedScheduleView: React.FC<{
 
 
 	const calculateTotalCost = (saved_schedule: SavedScheduleModel | undefined) => {
-		if (saved_schedule !== undefined) {
-			const totalCredits = saved_schedule.schedule.courses.reduce((acc, course) => acc + course.credits, 0);
-			if (Number.isNaN(costPerCredit)) {
-				return 0
-			}
-			return (totalCredits * costPerCredit).toFixed(2); 
+		if (!saved_schedule || Number.isNaN(costPerCredit)) {
+			return '0.00';
 		}
-		return
+		
+		const totalCredits = saved_schedule.schedule.courses.reduce((acc, course) => acc + course.credits, 0);
+		return (totalCredits * costPerCredit).toFixed(2);
 	};
 
 	return (
