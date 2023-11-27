@@ -1,5 +1,5 @@
 from src.models.requests.resources import (
-    applyAllFilterRequest,
+    ExistingSolutionsFilterRequest,
 )
 
 from src.models.responses.existing_solution import (
@@ -7,19 +7,19 @@ from src.models.responses.existing_solution import (
 )
 
 
-def filter_apps_by_prefix(
+def filter_solutions_by_prefix(
     search_prefix: str, apps: list[ExistingSolutionResponse]
 ) -> list[ExistingSolutionResponse]:
     """Filter out applications based on their name prefix."""
     return [app for app in apps if app.Name.lower().startswith(search_prefix.lower())]
 
 
-def filter_apps_by_criteria(
-    filters: applyAllFilterRequest, apps: list[ExistingSolutionResponse]
+def filter_solutions_by_criteria(
+    filters: ExistingSolutionsFilterRequest, apps: list[ExistingSolutionResponse]
 ) -> list[ExistingSolutionResponse]:
     """Filter out applications based on the given filters."""
-    type_set = set(filter.lower() for filter in filters.type)
-    sort_set = set(filter.lower() for filter in filters.sort)
+    type_set = set(filter.lower() for filter in filters.solutionTypes)
+    sort_set = set(filter.lower() for filter in filters.sortBy)
 
     filtered_apps = apps
 
