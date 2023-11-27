@@ -199,9 +199,26 @@ class TestScheduleFunctions:
         self.user_id = "1"
 
     def test_save_schedule(self):
-        schedule_id = self.su.save_schedule(
+        # Command Aspect: Save schedule
+        schedule_id = self.save_schedule_command()
+
+        # Query Aspect: Retrieve and assert information
+        self.assert_schedule_information(schedule_id)
+
+        # Command Aspect: Delete schedule
+        self.delete_schedule_command(schedule_id)
+
+        # Query Aspect: Verify deletion
+        self.verify_schedule_deletion(schedule_id)
+
+    def save_schedule_command(self):
+        # Command Aspect: Save schedule
+        return self.su.save_schedule(
             self.section_ids, self.name, self.term.value, self.year, self.user_id
         )
+
+    def assert_schedule_information(self, schedule_id):
+        # Query Aspect: Retrieve and assert information
         with Session(get_test_engine()) as session:
             schedule = session.get(Schedule, schedule_id)
             assert schedule is not None
@@ -213,7 +230,12 @@ class TestScheduleFunctions:
         section_ids = self.su.get_section_ids_from_schedule(schedule_id)
         assert section_ids == self.section_ids
 
+    def delete_schedule_command(self, schedule_id):
+        # Command Aspect: Delete schedule
         self.su.delete_schedule(schedule_id)
+
+    def verify_schedule_deletion(self, schedule_id):
+        # Query Aspect: Verify deletion
         with Session(get_test_engine()) as session:
             assert session.get(Schedule, schedule_id) is None
             assert (
