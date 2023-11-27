@@ -5,7 +5,7 @@ import uvicorn
 from src.config import environment
 
 
-def prepare_db(environment: str, refresh: bool):
+def prepare_db(environment: str, refresh: bool = False):
     # copy the prod db to the dev db if running locally
 
     if environment == "DEV":
