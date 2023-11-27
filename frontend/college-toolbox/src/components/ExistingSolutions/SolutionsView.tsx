@@ -52,7 +52,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                     {applications.map((app, index) => (
                         <button 
                             key={index} 
-                            className="flex items-center justify-between application-block relative bg-gray-300 dark:bg-gray-600 dark:border-gray-800 border-gray-400 border-2 rounded-xl hover:scale-105 dark:hover:border-blue-400 hover:border-blue-400 transition-transform"
+                            className="flex justify-between application-block relative bg-gray-300 dark:bg-gray-600 dark:border-gray-800 border-gray-400 border-2 rounded-xl hover:scale-105 dark:hover:border-blue-400 hover:border-blue-400 transition-transform"
                             onClick={() => openModal(app)} 
                             >
                             <div className="grid grid-cols-2 gap-1 ml-2">
@@ -62,6 +62,12 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                         alt={app.Name + " logo"} 
                                         className="object-cover rounded" 
                                     />
+                                    <div 
+                                        className="mb-2 mt-2 font-bold text-2xl" 
+                                        style={{ textShadow: '-5px 4px 4px rgba(0, 0, 0, 0.25)' }}
+                                        >
+                                            {app.Name}
+                                    </div>
                                 </div>
 
                                 <div>
@@ -77,21 +83,14 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
 
                                     <div className="text-left font-bold text-gray-800 dark:text-gray-300 text-lg">Business models:</div>
 
-                                    <div>
+                                    <div className='mb-2'>
                                         {app.BusinessModels.map((model, index) => (
-                                            <div key={index} className="items-center mr-1 mt-2 bg-gray-500 text-white text-xs py-1 px-2 rounded-md col-span-1 self-start">
-                                                    {`${model.BusinessModelType} - Price: ${model.Price}`} 
+                                            <div key={index} className="items-center mb-1 ml-2 mr-3 bg-gray-500 text-white text-xs py-1 px-2 rounded-md col-span-1 self-start">
+                                                    {`${model.BusinessModelType} - Price: $${model.Price}`} 
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-
-                                <span 
-                                    className="mb-2 font-bold text-2xl" 
-                                    style={{ textShadow: '-5px 4px 4px rgba(0, 0, 0, 0.25)' }}
-                                >
-                                    {app.Name}
-                                </span>
                             </div>
                         </button>
                     ))}
@@ -154,7 +153,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                 </a>
                             </div>
 
-                            <div className="text-right font-bold text-lg mr-2">Last updated: 21/May/2023{selectedApp.LastUpdated}</div>
+                            <div className="text-right font-bold text-lg mr-2">Last updated: {selectedApp.LastUpdated}</div>
 
                         </div>
                     </Modal.Body>
