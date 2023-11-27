@@ -51,8 +51,8 @@ const ScheduleHub: React.FC<ScheduleHubProps> = () => {
 					/>
 					<SaveScheduleButton
 						schedule={schedules[currentScheduleIdx]}
-						term={options.term}
-						year={options.year}
+						term={academicTermYear.term}
+						year={academicTermYear.year}
 					/>
 				</div>
 				{schedules && schedules.length > 0 && (

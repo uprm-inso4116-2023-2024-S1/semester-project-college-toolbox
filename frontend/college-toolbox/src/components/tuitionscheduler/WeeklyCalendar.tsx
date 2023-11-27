@@ -18,6 +18,7 @@ interface WeeklyCalendarProps {
 	schedule: GeneratedSchedule | undefined;
 	term: string;
 	year: string;
+	isInModal?: boolean;
 }
 
 function courseCodeToColor(
@@ -56,6 +57,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	schedule,
 	term,
 	year,
+	isInModal = false
 }) => {
 	const isDarkMode = useStore($isDarkMode);
 	const shortDaysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -119,16 +121,21 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							modalProps.setOpenModal('dismissible');
 						}}
 					>
-						{course.courseCode}-{course.sectionCode}
+						{course.courseCode}{!isInModal && `-${course.sectionCode}`}{isInModal && (
+																									<>
+																									<br />
+																									sec: {course.sectionCode}
+																									</>
+																								)}
 						<br />
-						Room: {block.room}
+						{!isInModal && `Room: ${block.room}`}
 					</div>
 				);
 			}
 			return (
 				<React.Fragment key={`block-fragment ${idx}`}>
 					<div
-						className="rounded-t-[5px] p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-20 !rounded-b-none"
+						className="rounded-t-[5px] p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer z-10 !rounded-b-none"
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow} / span ${hoursDuration}`,
@@ -140,12 +147,17 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 							modalProps.setOpenModal('dismissible');
 						}}
 					>
-						{course.courseCode}-{course.sectionCode}
+						{course.courseCode}{!isInModal && `-${course.sectionCode}`}{isInModal && (
+																									<>
+																									<br />
+																									sec: {course.sectionCode}
+																									</>
+																								)}
 						<br />
-						Room: {block.room}
+						{!isInModal && `Room: ${block.room}`}
 					</div>
 					<div
-						className={`z-10 p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]`}
+						className={`z-0 p-[5px] mr-[3px] ml-[3px] font-bold text-[70%] text-black dark:text-white hover:cursor-pointer !rounded-t-none rounded-b-[5px]`}
 						style={{
 							gridColumn: dayColumn,
 							gridRow: `${timeRow + hoursDuration} / span 1`,
@@ -164,12 +176,19 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 	};
 
 	return (
-		<div className="bg-white dark:bg-gray-800 box-border">
+		<div className="bg-white dark:bg-gray-800 box-border"
+			style={{
+				maxHeight: 
+					isInModal === true ? '60vh' : '',
+				overflow: 
+					isInModal === true ? 'auto' : '',
+			}}
+		>
 			<div className="flex-1 w-full grid grid-rows-[3em_3em_auto]">
-				<div className="bg-[#217346] text-center grid place-content-center text-white dark:text-gray-50 sticky top-0 z-10">
+				<div className="bg-[#217346] text-center grid place-content-center text-white dark:text-gray-50 sticky top-0 z-20">
 					{termEnumToString(term)} {year} Semester
 				</div>
-				<div className="bg-gray-100 dark:bg-gray-600 grid place-content-center text-center grid-cols-[4em_10px_repeat(7,1fr)] sticky top-12 z-10 border-b-2 border-gray-200 dark:border-gray-500 text-black dark:text-gray-50">
+				<div className="bg-gray-100 dark:bg-gray-600 grid place-content-center text-center grid-cols-[4em_10px_repeat(7,1fr)] sticky top-12 z-20 border-b-2 border-gray-200 dark:border-gray-500 text-black dark:text-gray-50">
 					<div />
 					<div />
 					{shortDaysOfWeek.map((day, index) => (
@@ -188,7 +207,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 						<div
 							key={`hours ${index + 1}`}
 							className="col-span-1 text-right self-end relative bottom-[-1ex] text-gray-800 dark:text-gray-200 text-xs pr-2"
-							style={{ gridRow: index + 1 }}
+							style={{ gridRow: index + 1}}
 						>
 							{index % 2 === 0
 								? convertToAmPm(
