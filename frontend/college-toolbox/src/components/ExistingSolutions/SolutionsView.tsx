@@ -81,12 +81,12 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                         ))}
                                     </div>
 
-                                    <div className="text-left font-bold text-gray-800 dark:text-gray-300 text-lg">Business models:</div>
+                                    <div className="text-left font-bold text-gray-800 dark:text-gray-300 text-lg">Payment Option:</div>
 
                                     <div className='mb-2'>
                                         {app.BusinessModels.map((model, index) => (
                                             <div key={index} className="items-center mb-1 ml-2 mr-3 bg-gray-500 text-white text-xs py-1 px-2 rounded-md col-span-1 self-start">
-                                                    {`${model.BusinessModelType} - Price: $${model.Price}`} 
+                                                    {`${model.BusinessModelType}: $${model.Price}`} 
                                             </div>
                                         ))}
                                     </div>

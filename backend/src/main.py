@@ -307,88 +307,92 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
     if request_data.type:
         for filter in request_data.type:
             # Specific scenario since for some reason "note-taking" does not yeild results
-            if filter.startswith("Note"):
-                conditions_list.append(
-                    or_(ExistingSolution.Type.like("%note%"))
-                )
-                continue
-            
             conditions_list.append(
-                ExistingSolution.Type == filter
-            ) 
+                and_(ExistingSolution.Type.like("%" + filter + "%"))
+            )
     # query for when business model gets populated
-    # if request_data.cost: # Will only have one option
-    #     # Specific scenario for One-time Buy
-    #     if request_data.cost[0].startswith("One"):
-    #         conditions_list.append(
-    #             or_(BusinessModel.BusinessModelType.like("%One%"))
-    #         )
-    #     else:
-    #         conditions_list.append(
-    #             BusinessModel.BusinessModelType == request_data.cost[0]
-    #         )
+    if request_data.cost:
+        if request_data.cost[0].startswith("Subscription"):
+            costFilter = "Paid"
+        else: costFilter = request_data.cost[0][:4]
+    # If its empty, place Free as a default value
+    else:
+        costFilter = "Free"
+
+    conditions_list.append(
+                and_(BusinessModel.BusinessModelType.like("%" + costFilter + "%"))
+            )
     # default sorting
     if not request_data.sort or request_data.sort.__contains__("A-Z"):
-        data : list[ExistingSolution] = (
-            db.query(ExistingSolution)
-            .filter(or_(*conditions_list))
+        # data : list[ExistingSolution] = (
+        #     db.query(ExistingSolution)
+        #     .filter(or_(*conditions_list))
+        #     .order_by(asc(ExistingSolution.Name))
+        #     .all()
+        # )
+        data: list[tuple] = (
+            db.query(ExistingSolution, BusinessModel)
+            .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
+            .filter(and_(*conditions_list))
+            .group_by(BusinessModel)
             .order_by(asc(ExistingSolution.Name))
+            .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
             .all()
         )
     if request_data.sort.__contains__("High to low"):
         if request_data.sort.__contains__("A-Z"):
-            data : list[ExistingSolution] = (
-                db.query(ExistingSolution)
-                .filter(or_(*conditions_list))
-                .order_by(desc(ExistingSolution.Name))
-                .all()
-            ) # query for when business model gets populated
-            # data: list[tuple] = (
-            #     db.query(ExistingSolution, BusinessModel.BusinessModelType)
-            #     .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
+            # data : list[ExistingSolution] = (
+            #     db.query(ExistingSolution)
             #     .filter(or_(*conditions_list))
-            #     .group_by(BusinessModel.BusinessModelType)
             #     .order_by(desc(ExistingSolution.Name))
-            #     .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
             #     .all()
-            # )
-        # elif request_data.sort.__contains__("Price"):
-        #     data: list[tuple] = (
-        #         db.query(ExistingSolution, BusinessModel.BusinessModelType)
-        #         .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
-        #         .filter(or_(*conditions_list))
-        #         .group_by(BusinessModel.BusinessModelType)
-        #         .order_by(desc(BusinessModel.Price))
-        #         .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
-        #         .all()
-        #     )
+            # ) # query for when business model gets populated
+            data: list[tuple] = (
+                db.query(ExistingSolution, BusinessModel)
+                .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
+                .filter(and_(*conditions_list))
+                .group_by(BusinessModel)
+                .order_by(desc(ExistingSolution.Name))
+                .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
+                .all()
+            )
+        elif request_data.sort.__contains__("Price"):
+            data: list[tuple] = (
+                db.query(ExistingSolution, BusinessModel)
+                .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
+                .filter(and_(*conditions_list))
+                .group_by(BusinessModel)
+                .order_by(desc(BusinessModel.Price))
+                .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
+                .all()
+            )
     else:
         if request_data.sort.__contains__("A-Z"):
-            data : list[ExistingSolution] = (
-                db.query(ExistingSolution)
-                .filter(or_(*conditions_list))
-                .order_by(asc(ExistingSolution.Name))
-                .all()
-            ) # query for when business model gets populated
-            # data: list[tuple] = (
-            #     db.query(ExistingSolution, BusinessModel.BusinessModelType)
-            #     .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
+            # data : list[ExistingSolution] = (
+            #     db.query(ExistingSolution)
             #     .filter(or_(*conditions_list))
-            #     .group_by(BusinessModel.BusinessModelType)
             #     .order_by(asc(ExistingSolution.Name))
-            #     .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
             #     .all()
-            # ) 
-        # elif request_data.sort.__contains__("Price"):
-        #     data: list[tuple] = (
-        #         db.query(ExistingSolution, BusinessModel.BusinessModelType)
-        #         .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
-        #         .filter(or_(*conditions_list))
-        #         .group_by(BusinessModel.BusinessModelType)
-        #         .order_by(asc(BusinessModel.Price))
-        #         .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
-        #         .all()
-        #     )      
+            # ) # query for when business model gets populated
+            data: list[tuple] = (
+                db.query(ExistingSolution, BusinessModel)
+                .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
+                .filter(and_(*conditions_list))
+                .group_by(BusinessModel)
+                .order_by(asc(ExistingSolution.Name))
+                .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
+                .all()
+            ) 
+        elif request_data.sort.__contains__("Price"):
+            data: list[tuple] = (
+                db.query(ExistingSolution, BusinessModel)
+                .join(BusinessModel, ExistingSolution.ExistingSolutionId == BusinessModel.ExistingSolutionId)
+                .filter(and_(*conditions_list))
+                .group_by(BusinessModel)
+                .order_by(asc(BusinessModel.Price))
+                .options(joinedload(ExistingSolution.BusinessModels))  # This is optional for eager loading related BusinessModels
+                .all()
+            )      
         
     responses = []
     # mapping for when the Business Model table gets populated
@@ -411,23 +415,28 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
     #     ]
     # response_dict = {**existing_solution.__dict__}
     
-    for d in data:
+    for d, e in data:
         # The Pros, Cons, and types are stored as a string in the database, so we need to convert them to a list
-        d.Pros = d.Pros.split(",") if d.Pros else []
-        d.Cons = d.Cons.split(",") if d.Cons else []
-        d.Type = d.Type.split(",") if d.Type else []
+        # d.Pros = d.Pros.split(",") if d.Pros else []
+        # d.Cons = d.Cons.split(",") if d.Cons else []
+        # d.Type = d.Type.split(",") if d.Type else []
+        pros_to_string = str(d.Pros).replace("[", "").replace("'", "").replace("]", "")
+        cons_to_string = str(d.Cons).replace("[", "").replace("'", "").replace("]", "")
+        type_to_string = str(d.Type).replace("[", "").replace("'", "").replace("]", "")
+        d.Pros = pros_to_string.split(",") if d.Pros else []
+        d.Cons = cons_to_string.split(",") if d.Cons else []
+        d.Type = type_to_string.split(",") if d.Type else []
 
         # The datetime object is not JSON serializable, so we need to convert it to a string
         last_updated_str = d.LastUpdated.strftime("%d-%B-%Y") if d.LastUpdated else ""
 
         business_models = [
             BusinessModelResponse(
-                ExistingSolutionId=i.ExistingSolutionId,
-                BusinessModelType=i.BusinessModelType,
-                Price=i.Price,
-                Description=i.Description,
+                ExistingSolutionId=e.ExistingSolutionId,
+                BusinessModelType=e.BusinessModelType,
+                Price=e.Price,
+                Description=e.Description,
             )
-            for i in d.BusinessModels
         ]
 
         # Create an ExistingSolutionResponse instance from the dictionary
