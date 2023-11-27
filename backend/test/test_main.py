@@ -174,10 +174,7 @@ def test_save_schedule(test_db):
     term = "1erSem"
     year = 2023
     request = SaveScheduleRequest(
-        course_section_ids=course_section_ids,
-        name=name,
-        term=term,
-        year=year
+        course_section_ids=course_section_ids, name=name, term=term, year=year
     ).model_dump()
 
     # Test the endpoint
