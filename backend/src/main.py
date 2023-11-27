@@ -311,19 +311,16 @@ async def filter_existing_applications_by_criteria(request_data: applyAllFilterR
                 and_(ExistingSolution.Type.like("%" + filter + "%"))
             )
     # query for when business model gets populated
-    if request_data.cost: # Will only have one option
-        # Specific scenario for One-time Buy
-        if request_data.cost[0].startswith("One"):
-            conditions_list.append(
-                and_(BusinessModel.BusinessModelType.like("%One%"))
-            )
-        elif request_data.cost[0].startswith("Subscription"):
-            conditions_list.append(
-                and_(BusinessModel.BusinessModelType.like("%Paid%"))
-            )
-        else:
-            conditions_list.append(
-                BusinessModel.BusinessModelType == request_data.cost[0]
+    if request_data.cost:
+        if request_data.cost[0].startswith("Subscription"):
+            costFilter = "Paid"
+        else: costFilter = request_data.cost[0][:4]
+    # If its empty, place Free as a default value
+    else:
+        costFilter = "Free"
+
+    conditions_list.append(
+                and_(BusinessModel.BusinessModelType.like("%" + costFilter + "%"))
             )
     # default sorting
     if not request_data.sort or request_data.sort.__contains__("A-Z"):
