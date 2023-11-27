@@ -125,7 +125,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
 														<div className="mb-2 font-bold text-lg">
 															<div className="flex justify-between">
 																<div className="text-left">Rating: {selectedApp.Rating}/5</div>
-																<div className="text-right">Price: ${selectedApp.BusinessModels[0].Price}</div>
+																<div className="text-right">Payment Plan: {selectedApp.BusinessModels[0].BusinessModelType}</div>
 															</div>
 														</div>
 
