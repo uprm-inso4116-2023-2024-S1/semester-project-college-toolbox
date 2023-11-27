@@ -169,11 +169,11 @@ const SearchBar: React.FC<{
 					</button>
 					{/* Dropdown Suggestions */}
 					{isActive && (
-						<div className="absolute w-full mt-2 ml-2 mr-2 border border-gray-300 rounded-lg bg-white shadow-lg z-10 bg-opacity-95 dark:bg-gray-800">
+						<div className="absolute w-full mt-2 ml-2 mr-2 border border-gray-600 rounded-lg bg-white shadow-lg z-10 bg-opacity-95 dark:bg-gray-800">
 							{suggestions.map((schedule, index) => (
 								<div
 									key={index}
-									className="flex items-center justify-between p-2 hover:bg-gray-200 cursor-pointer bg-opacity-80 dark:hover:bg-gray-700 dark:text-white"
+									className="flex items-center justify-between p-2 hover:bg-gray-200 cursor-pointer bg-opacity-90 dark:hover:bg-gray-700 dark:text-white"
 								>
 									<button
 										className="flex-grow flex items-center justify-start focus:outline-none"
