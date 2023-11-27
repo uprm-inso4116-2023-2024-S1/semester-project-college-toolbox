@@ -153,7 +153,7 @@ def test_existing_application_get_all_endpoint_no_business_models(test_db):
             session.commit()
 
     # Test the endpoint
-    response = client.get("/ExistingSolution/get/all")
+    response = client.get("/existing-solutions/get/all")
 
     assert response.status_code == 200
     assert len(response.json()) == len(expected_responses)
@@ -263,7 +263,7 @@ def test_existing_application_get_all_endpoint_with_business_models(test_db):
             session.commit()
 
     # Test the endpoint
-    response = client.get("/ExistingSolution/get/all")
+    response = client.get("/existing-solutions/get/all")
 
     assert response.status_code == 200
     assert len(response.json()) == len(expected_responses)
