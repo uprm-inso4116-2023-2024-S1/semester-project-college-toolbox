@@ -77,6 +77,7 @@ from src.security import (
     hash_password,
     generate_permanent_token,
     get_user_id_from_token,
+    check_token_expiration,
     TOKEN_EXPIRATION_SECONDS,
 )
 
@@ -219,7 +220,11 @@ async def login_user(
 
 
 # Fetch profile endpoint
-@app.get("/profile", response_model=LoginResponse)
+@app.get(
+    "/profile",
+    response_model=LoginResponse,
+    dependencies=[Depends(check_token_expiration)],
+)
 def fetch_user(
     db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
 ) -> LoginResponse:
@@ -349,7 +354,7 @@ def validate_course_id_endpoint(
     return {"is_valid": is_valid}
 
 
-@app.post("/save_schedule")
+@app.post("/save_schedule", dependencies=[Depends(check_token_expiration)])
 def save_schedule_endpoint(
     request: SaveScheduleRequest,
     engine: Engine = Depends(get_engine),
@@ -380,7 +385,7 @@ def delete_saved_schedule(
     return {"message": "Schedule deleted successfully."}
 
 
-@app.post("/schedules/filter/prefix")
+@app.post("/schedules/filter/prefix", dependencies=[Depends(check_token_expiration)])
 async def filter_saved_schedules_by_prefix(
     request_data: SchedulePrefixFilterRequest,
     db: Session = Depends(get_db),
@@ -431,7 +436,7 @@ async def filter_saved_schedules_by_prefix(
     return filtered_schedules
 
 
-@app.get("/get_all_save_schedules")
+@app.get("/get_all_save_schedules", dependencies=[Depends(check_token_expiration)])
 def get_all_saved_schedules(
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
