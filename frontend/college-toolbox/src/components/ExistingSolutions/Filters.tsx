@@ -73,7 +73,7 @@ const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
                 <div id="type" className="border-gray-300 border-2 p-2 dark:border-gray-600">
                     <h3 className="text-xl font-medium">Type:</h3>
                     <div className="p-2">
-                        {['Note-taking', 'Organizational', 'Study', 'Information', 'Proofreading', 'Budgetting', 'Other'].map((filterType) => (
+                        {['Note-taking', 'Technology', 'Social Media', 'Entertainment', 'Communication', 'Education', 'Productivity', 'Travel','Organizational', 'Study', 'Information', 'Proofreading', 'Budgetting', 'Other'].map((filterType) => (
                             <label htmlFor={filterType} className="flex items-center mt-1 font-medium hover:font-extrabold" key={filterType}>
                                 <input type="checkbox" id={filterType} value={filterType} onChange={(e) => {handleCheckboxChange(e, 'type')}} checked={typeFilters.has(filterType)} className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-500"/>
                                 <span className="ml-2 text-m text-gray-900 dark:text-gray-300">{filterType}</span>
