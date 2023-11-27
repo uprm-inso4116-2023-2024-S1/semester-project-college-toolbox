@@ -3,6 +3,7 @@ import os
 from typing import List
 from src.models.common.schedule import TimeBlock, WeekSchedule
 from src.models.requests.schedule import FilteredCourse, ScheduleGenerationOptions
+from src.models.responses.schedule import getSavedScheduleResponse
 from src.models.common.schedule import (
     CourseSectionSchedule,
     GeneratedSchedule,
@@ -529,7 +530,7 @@ class ScheduleUtils:
                 for day_char in room_schedule.days:
                     day_int = weekday_str_to_int[day_char]
                     time_block = SpaceTimeBlock(
-                        room=room_schedule.room,
+                        room="" if room_schedule.room is None else room_schedule.room,
                         building=building,
                         location=location,
                         day=day_int,
@@ -603,57 +604,30 @@ class ScheduleUtils:
             session.commit()
 
     def filter_schedules_by_prefix(
-        self, search_prefix: str, schedules: list[Schedule]
-    ) -> list[Schedule]:
+        self, search_prefix: str, schedules: list[getSavedScheduleResponse]
+    ) -> list[getSavedScheduleResponse]:
         """Filter out schedules based on their name prefix."""
-        return [
-            schedule
-            for schedule in schedules
-            if schedule.name.lower().startswith(search_prefix.lower())
-        ]
+        if search_prefix == "":
+            return schedules
 
-    def make_generated_schedule(
-        self, course_sections: List[CourseSection]
-    ) -> GeneratedSchedule:
-        course_section_schedules = []
-        weekday_str_to_int = {
-            day_str: day_int for day_int, day_str in enumerate("LMWJVSD")
-        }
+        filtered_schedules = []
+        for schedule in schedules:
+            if schedule.name.lower() == search_prefix.lower():
+                return [schedule]
+            if schedule.name.lower().startswith(search_prefix.lower()):
+                filtered_schedules.append(schedule)
+        return filtered_schedules
 
-        for course_section in course_sections:
-            # Fetch room schedules (time blocks) for the course section
-            room_schedules = self.get_room_schedules(course_section.id)
+    def filter_schedules_by_course_code(
+        self, course_code: str, schedules: list[getSavedScheduleResponse]
+    ) -> list[getSavedScheduleResponse]:
+        if course_code == "":
+            return schedules
 
-            # Convert room schedules to space time blocks
-            time_blocks = []
-            for room_schedule in room_schedules:
-                building, location = get_building_location(room_schedule.room)
-                for day_char in room_schedule.days:
-                    day_int = weekday_str_to_int[day_char]
-                    time_block = SpaceTimeBlock(
-                        room=room_schedule.room,
-                        building=building,
-                        location=location,
-                        day=day_int,
-                        startTime=room_schedule.start_time.strftime("%H:%M"),
-                        endTime=room_schedule.end_time.strftime("%H:%M"),
-                    )
-                    time_blocks.append(time_block)
-
-            # Create a CourseSectionSchedule
-            course_section_schedule = CourseSectionSchedule(
-                courseCode=course_section.course_id,
-                courseName=course_section.course_name,
-                professor=course_section.professor,
-                credits=course_section.credits,
-                sectionCode=course_section.section,
-                sectionId=course_section.id,
-                timeBlocks=time_blocks,
-            )
-
-            course_section_schedules.append(course_section_schedule)
-
-        # Create a GeneratedSchedule from the course section schedules
-        generated_schedule = GeneratedSchedule(courses=course_section_schedules)
-
-        return generated_schedule
+        filtered_schedules = []
+        course_code = course_code.upper()
+        for schedule in schedules:
+            for section in schedule.schedule.courses:
+                if section.courseCode.upper() == course_code:
+                    filtered_schedules.append(schedule)
+        return filtered_schedules

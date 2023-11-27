@@ -1,10 +1,11 @@
+import argparse
 import os
 import shutil
 import uvicorn
 from src.config import environment
 
 
-def prepare_db(environment: str):
+def prepare_db(environment: str, refresh: bool = False):
     # copy the prod db to the dev db if running locally
 
     if environment == "DEV":
@@ -12,9 +13,11 @@ def prepare_db(environment: str):
         dev_database_path = os.path.join("database", "dev", "ct-dev.db")
         prod_database_path = os.path.join("database", "prod", "ct-prod.db")
         os.makedirs(os.path.join("database", "test"), exist_ok=True)
-        # Check if the destination file exists and delete it if it does
-        if os.path.exists(dev_database_path):
-            os.remove(dev_database_path)
+        # Refresh dev environment if flag is set
+        if refresh:
+            # Check if the destination file exists and delete it if it does
+            if os.path.exists(dev_database_path):
+                os.remove(dev_database_path)
         # Copy the contents of the prod database to the dev database
         # Only copy if the developer doesn't already have a local dev db
         shutil.copy2(prod_database_path, dev_database_path)
@@ -31,7 +34,16 @@ def prepare_db(environment: str):
 
 
 if __name__ == "__main__":
-    env = prepare_db(environment)
+    parser = argparse.ArgumentParser(description="Run the Fast API application.")
+    parser.add_argument(
+        "-r",
+        "--refresh",
+        dest="refresh",
+        action="store_true",
+        help="Toggle dev database refresh.",
+    )
+    args = parser.parse_args()
+    env = prepare_db(environment, args.refresh)
     host = "localhost"
     port = 5670
     reload = env != "PROD"
