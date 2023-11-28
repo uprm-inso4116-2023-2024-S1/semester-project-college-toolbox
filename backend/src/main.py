@@ -77,9 +77,10 @@ from src.security import (
     hash_password,
     generate_permanent_token,
     get_user_id_from_token,
-    check_token_expiration,
     TOKEN_EXPIRATION_SECONDS,
 )
+
+from src.utils.security import check_token_expiration
 
 from src.repositories.JobApplication import JobRepository
 from src.repositories.ScholarshipApplication import ScholarshipRepository
