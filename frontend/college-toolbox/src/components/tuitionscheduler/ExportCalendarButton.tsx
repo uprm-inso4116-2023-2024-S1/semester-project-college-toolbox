@@ -1,7 +1,7 @@
 import React from 'react';
 import { API_URL } from '../../app/constants';
 import type { GeneratedSchedule } from '../../types/entities';
-
+import { $authToken } from '../../lib/profile';
 interface ExportButtonProps {
 	schedule: GeneratedSchedule | undefined;
 	term: string;
@@ -21,9 +21,9 @@ const ExportCalendarButton: React.FC<ExportButtonProps> = ({
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${$authToken.get()}`,
 				},
 				body: JSON.stringify({ schedule, term, year }),
-				credentials: 'include',
 			});
 
 			if (!response.ok) {

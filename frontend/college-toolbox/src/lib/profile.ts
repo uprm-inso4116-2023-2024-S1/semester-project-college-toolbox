@@ -9,4 +9,4 @@ export const $storedProfile = persistentMap<Profile>('profile:', EMPTY_PROFILE, 
 	decode: JSON.parse,
 });
 
-export const $authToken = persistentAtom<string>('token:', "");
+export const $authToken = persistentAtom<string | null>('token:', null);

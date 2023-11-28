@@ -6,7 +6,7 @@ import type {
 } from '../../types/entities';
 import { $selectedTermYear, $storedCourses } from '../../lib/courses';
 import { useStore } from '@nanostores/react';
-
+import { $authToken } from '../../lib/profile';
 const SearchBar: React.FC<{
 	onSearch: (value: string) => void;
 	onSuggestionsUpdate: (suggestions: SavedScheduleModel[]) => void;
@@ -98,9 +98,9 @@ const SearchBar: React.FC<{
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${$authToken.get()}`,
 				},
 				body: JSON.stringify(requestBody),
-                credentials: 'include',
 			});
 
 			if (!response.ok) {

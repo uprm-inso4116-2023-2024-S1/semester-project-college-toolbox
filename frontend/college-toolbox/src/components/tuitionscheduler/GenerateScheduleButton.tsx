@@ -6,7 +6,7 @@ import type {
 	ScheduleGenerationOptions,
 } from '../../types/entities';
 import { convertCourseInformationToTextFilter } from '../../lib/data';
-
+import { $authToken } from '../../lib/profile';
 interface GenerateScheduleButtonProps {
 	setSchedules: React.Dispatch<React.SetStateAction<GeneratedSchedule[]>>;
 	options: ScheduleGenerationOptions;
@@ -35,6 +35,7 @@ const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${$authToken.get()}`,
 				},
 				body: JSON.stringify({
 					options,
@@ -42,7 +43,6 @@ const GenerateScheduleButton: React.FC<GenerateScheduleButtonProps> = ({
 					term,
 					year,
 				}),
-				credentials: 'include',
 			});
 
 			if (!response.ok) {

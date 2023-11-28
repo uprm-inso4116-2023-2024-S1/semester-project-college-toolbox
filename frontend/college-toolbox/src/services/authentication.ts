@@ -5,7 +5,7 @@ import { $storedProfile, $isLoggedIn, $authToken } from '../lib/profile';
 export function logout() {
 	$isLoggedIn.set('false');
 	$storedProfile.set(EMPTY_PROFILE);
-	$authToken.set("");
+	$authToken.set(null);
 }
 
 export async function register(profile: NewProfile): Promise<Profile | null> {

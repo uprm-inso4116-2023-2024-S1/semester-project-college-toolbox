@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
 import type { GeneratedSchedule } from '../../types/entities';
-import { $isLoggedIn } from '../../lib/profile';
+import { $isLoggedIn, $authToken } from '../../lib/profile';
 import { Modal } from 'flowbite-react';
-import { getCookie, url } from '../../lib/data';
-
+import { url } from '../../lib/data';
 interface SaveScheduleButtonProps {
 	schedule: GeneratedSchedule | undefined;
 	term: string;
@@ -29,6 +28,7 @@ const SaveScheduleButton: React.FC<SaveScheduleButtonProps> = ({
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${$authToken.get()}`,
 				},
 				body: JSON.stringify({
 					course_section_ids: section_ids,
@@ -36,7 +36,6 @@ const SaveScheduleButton: React.FC<SaveScheduleButtonProps> = ({
 					term,
 					year,
 				}),
-				credentials: 'include',
 			});
 
 			if (!response.ok) {
