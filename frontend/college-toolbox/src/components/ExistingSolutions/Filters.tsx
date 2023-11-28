@@ -7,7 +7,7 @@ interface FiltersProps {
 
 const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
 	const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set());
-	const [sortFilters, setSortFilters] = useState<Set<string>>(new Set());
+	const [sortFilters, setSortFilters] = useState<Set<string>>(new Set(['A-Z']));
 	const [costFilters, setCostFilters] = useState<Set<string>>(new Set(['Free']));
 
 	const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>,  category: 'type' | 'sort' | 'cost') => {
@@ -21,7 +21,9 @@ const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
                     setSortFilters(prevFilters => toggleFilter(prevFilters, value, checked));
                     break;
                 }
-				setSortFilters(prevFilters => toggleFilter(prevFilters, value, checked, ['A-Z', 'Price']));
+                if(checked){
+				    setSortFilters(prevFilters => toggleFilter(prevFilters, value, checked, ['A-Z', 'Price']));
+                }
 				break;
 			case 'cost':
 				if(checked){ // to avoid unchecking all of them
@@ -57,12 +59,12 @@ const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
 
 	const handleReset = () => {
 		setTypeFilters(new Set());
-		setSortFilters(new Set());
+		setSortFilters(new Set(['A-Z']));
 		setCostFilters(new Set(['Free']));
 		onFiltered({
 			type: [],
-			sort: [],
-			cost: [],
+			sort: ['A-Z'],
+			cost: ['Free'],
 		});
 	};
 

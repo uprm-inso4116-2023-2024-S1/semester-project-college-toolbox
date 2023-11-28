@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ReactTooltip from 'react-tooltip';
 import type { ResourcesModel } from '../../types/entities';
 import { Modal } from 'flowbite-react';
 
@@ -61,7 +60,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                     <img 
                                         src={app.Icon} 
                                         alt={app.Name + " logo"} 
-                                        className="object-cover rounded" 
+                                        className="object-cover rounded-lg" 
                                     />
                                     <div 
                                         className="mb-2 mt-2 font-bold text-2xl" 
@@ -87,7 +86,8 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                     <div className='mb-2'>
                                         {app.BusinessModels.map((model, index) => (
                                             <div key={index} className="items-center mb-1 ml-2 mr-3 bg-gray-500 text-white text-xs py-1 px-2 rounded-md col-span-1 self-start">
-                                                    {`${model.BusinessModelType}: $${model.Price}`} 
+                                                {model.BusinessModelType} 
+                                                {model.BusinessModelType !== 'Free' ? `: $${model.Price}` : ''}
                                             </div>
                                         ))}
                                     </div>
@@ -103,7 +103,7 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                     dismissible
                     show={isModalOpen}
                     onClose={closeModal}
-                >
+                    >
                     <Modal.Header className ='bg-gray-200 dark:bg-gray-700 rounded-t-lg mb-0.5'>
                         <div className='flex items-center justify-between relative'>
                             <img 
@@ -122,23 +122,20 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                             <div className="text-left font-bold text-lg">Description:</div>
                             <p className= 'p-2 text-justify'>{selectedApp.Description}</p>
 
-														<div className="mb-2 font-bold text-lg">
-															<div className="flex justify-between">
-																<div className="text-left">Rating: {selectedApp.Rating}/5</div>
-																<div className="text-right">Payment Plan: {selectedApp.BusinessModels[0].BusinessModelType}</div>
-															</div>
-														</div>
+                            <div className="mb-2 font-bold text-lg">
+                                <div className="flex justify-between">
+                                    <div className="text-left">Rating: {selectedApp.Rating}/5</div>
+                                </div>
+                            </div>
 
-														<div
-                                className='grid grid-cols-2 gap-2 mb-2'
-                                >
-                                <div className='p-2 bg-green-600 bg-opacity-30 border border-green-600 rounded-lg'>
+                            <div className='grid grid-cols-2 gap-2 mb-2'>
+                                <div className='p-3 bg-green-600 bg-opacity-30 border border-green-600 rounded-lg'>
                                     <div className="text-left font-bold text-lg">Pros:</div>
                                     {selectedApp.Pros.map((pro, index) => (
                                         <div key={index} className='ml-2'>• {pro}</div>
                                     ))}
                                 </div>
-                                <div className='p-2 bg-red-600 bg-opacity-30 border border-red-600 rounded-lg'>
+                                <div className='p-3 bg-red-600 bg-opacity-30 border border-red-600 rounded-lg'>
                                     <div className="text-left font-bold  text-lg">Cons:</div>
                                     {selectedApp.Cons.map((con, index) => (
                                         <div key={index} className='ml-2'>• {con}</div>
@@ -146,20 +143,35 @@ const SolutionsView: React.FC<{ applications: ResourcesModel[] }> = ({ applicati
                                 </div>
                             </div>
                             
-                            <div className='flex items-center text-lg'>
+                            <div className="text-left font-bold text-lg">Payment Plans:</div>
+                            <div className="overflow-auto" style={{ maxHeight: 'calc(1.5em * 8)' }}> {/* 1.5em approximates the line height for one line of text */}
+                                {selectedApp.BusinessModels.map((model, index) => (
+                                    <div key={index} className='ml-2 p-2 border border-gray-400 dark:border-gray-600 rounded'>
+                                    <div className="font-bold">
+                                        {model.BusinessModelType !== 'Free' ? `$${model.Price} ` : ''}
+                                        {model.BusinessModelType === 'Paid (Monthly)' ? `/ month` : ''} 
+                                        {model.BusinessModelType === 'Paid (Yearly)' ? `/ year` : ''}
+                                        {model.BusinessModelType === 'Free' ? `Free` : ''}
+                                    </div>
+                                    <p className='p-2 text-justify'>{model.Description}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className='flex items-center text-lg mt-2'>
                                 <div className="text-left font-bold">Available on:</div>
                                 {getDeviceAvailabity("Mobile", selectedApp.HasMobile)} 
                                 {getDeviceAvailabity("Desktop", selectedApp.HasWeb)}
                             </div>
 
-                            <div className='flex items-center'>
+                            <div className='flex items-center mt-2'>
                                 <div className="text-left font-bold text-lg mr-2">For more information:</div>
                                 <a href={`https://${selectedApp.URL}`} className="text-lg text-blue-600 hover:text-blue-800 underline-blue-800 visited:text-purple-600 visited:underline-purple-600 " target="_blank" rel="noopener noreferrer">
                                     {selectedApp.URL}
                                 </a>
                             </div>
 
-                            <div className="text-right font-bold text-lg mr-2">Last updated: {selectedApp.LastUpdated}</div>
+                            <div className="text-right font-bold text-lg mt-2 mr-2">Last updated: {selectedApp.LastUpdated}</div>
 
                         </div>
                     </Modal.Body>
