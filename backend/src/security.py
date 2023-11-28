@@ -10,6 +10,7 @@ from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
 
+
 class SecurityConfig:
     _instance = None
 
@@ -41,7 +42,7 @@ class SecurityConfig:
 # Generate permanent token for user session
 def generate_permanent_token(user_id: str) -> str:
     expiration = datetime.utcnow() + timedelta(hours=3)
-    payload = {"sub": user_id, "exp": expiration}   
+    payload = {"sub": user_id, "exp": expiration}
     token = jwt.encode(
         payload=payload,
         key=SecurityConfig.get_secret_key(),

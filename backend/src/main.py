@@ -32,7 +32,6 @@ from fastapi import (
     Request,
     HTTPException,
     Depends,
-    Cookie,
     Header,
     BackgroundTasks,
 )
@@ -79,8 +78,6 @@ from src.security import (
     get_user_id_from_token,
     SecurityConfig,
 )
-
-from src.utils.validation import check_token_expiration
 
 from src.repositories.JobApplication import JobRepository
 from src.repositories.ScholarshipApplication import ScholarshipRepository
@@ -163,12 +160,11 @@ async def register_user(
         email=user.Email,
         profileImageUrl=user.ProfileImageUrl,
     )
-    
+
     # Create the response with the user's profile and JWT token
     response = RegisterResponse(profile=profile, token=jwt_token)
 
     return response
-
 
 
 # Login endpoint
