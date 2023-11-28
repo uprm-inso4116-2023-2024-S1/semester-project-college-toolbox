@@ -8,9 +8,9 @@ class PrefixFilterRequest(BaseModel):
 
 
 class ExistingSolutionsFilterAllRequest(BaseModel):
-    solutionTypes: list[str]
-    sortBy: list[str]
-    priceRange: list[str]
+    type: list[str]
+    sort: list[str]
+    cost: list[str]
 
 
 class SchedulePrefixFilterRequest(BaseModel):

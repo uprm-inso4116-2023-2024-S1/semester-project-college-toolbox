@@ -7,8 +7,8 @@ interface FiltersProps {
 
 const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
 	const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set());
-	const [sortFilters, setSortFilters] = useState<Set<string>>(new Set());
-	const [costFilters, setCostFilters] = useState<Set<string>>(new Set());
+	const [sortFilters, setSortFilters] = useState<Set<string>>(new Set(['A-Z']));
+	const [costFilters, setCostFilters] = useState<Set<string>>(new Set(['Free']));
 
 	const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>,  category: 'type' | 'sort' | 'cost') => {
         const { value, checked } = event.target;
@@ -21,10 +21,14 @@ const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
                     setSortFilters(prevFilters => toggleFilter(prevFilters, value, checked));
                     break;
                 }
-				setSortFilters(prevFilters => toggleFilter(prevFilters, value, checked, ['A-Z', 'Price']));
+                if(checked){
+				    setSortFilters(prevFilters => toggleFilter(prevFilters, value, checked, ['A-Z', 'Price']));
+                }
 				break;
 			case 'cost':
-				setCostFilters(prevFilters => toggleFilter(prevFilters, value, checked, ['Free', 'One-Time Buy', 'Subscription']));
+				if(checked){ // to avoid unchecking all of them
+					setCostFilters(prevFilters => toggleFilter(prevFilters, value, checked, ['Free', 'One-Time Buy', 'Subscription']));
+				}
 				break;
 			default:
 				break;
@@ -55,25 +59,25 @@ const Filters: React.FC<FiltersProps> = ({onFiltered}) => {
 
 	const handleReset = () => {
 		setTypeFilters(new Set());
-		setSortFilters(new Set());
-		setCostFilters(new Set());
+		setSortFilters(new Set(['A-Z']));
+		setCostFilters(new Set(['Free']));
 		onFiltered({
 			type: [],
-			sort: [],
-			cost: [],
+			sort: ['A-Z'],
+			cost: ['Free'],
 		});
 	};
 
     return (
         <div className="bg-gray-200 rounded-lg p-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <h2 className="text-2xl font-extrabold mb-2">Filters</h2>
-            <div className="h-132 overflow-y-auto">
+            <div className="overflow-y-auto">
 
                 {/* Filter type */}
                 <div id="type" className="border-gray-300 border-2 p-2 dark:border-gray-600">
-                    <h3 className="text-xl font-medium">Type:</h3>
+                    <h3 className="text-xl font-medium">Categories:</h3>
                     <div className="p-2">
-                        {['Note-taking', 'Organizational', 'Study', 'Information', 'Proofreading', 'Budgetting', 'Other'].map((filterType) => (
+                        {['Note-taking', 'Technology', 'Social Media', 'Entertainment', 'Communication', 'Education', 'Productivity', 'Travel','Organizational', 'Study', 'Information', 'Proofreading', 'Budgetting', 'Other'].map((filterType) => (
                             <label htmlFor={filterType} className="flex items-center mt-1 font-medium hover:font-extrabold" key={filterType}>
                                 <input type="checkbox" id={filterType} value={filterType} onChange={(e) => {handleCheckboxChange(e, 'type')}} checked={typeFilters.has(filterType)} className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-500"/>
                                 <span className="ml-2 text-m text-gray-900 dark:text-gray-300">{filterType}</span>

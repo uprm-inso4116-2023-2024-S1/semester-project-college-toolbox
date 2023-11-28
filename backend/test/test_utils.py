@@ -23,7 +23,7 @@ def existing_solution_model_to_existing_solution_response(model, business_models
         RatingCount=model.RatingCount,
         Pros=model.Pros.split(","),
         Cons=model.Cons.split(","),
-        LastUpdated=model.LastUpdated.strftime("%Y-%m-%d"),
+        LastUpdated=model.LastUpdated.strftime("%d-%B-%Y"),
         HasMobile=model.HasMobile,
         HasWeb=model.HasWeb,
         BusinessModels=[

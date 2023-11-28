@@ -86,14 +86,27 @@ export interface CourseFilters {
 	professor?: string;
 }
 
+export interface BusinessModel {
+	ExistingSolutionId: number;
+	BusinessModelType: string;
+	Price: number; 
+	Description: string;
+}
+
 export interface ResourcesModel {
 	Name: string;
 	Description: string;
 	URL: string;
 	Icon: string;
-	Type: string;
+	Type: string[];
 	Rating: number;
 	RatingCount: number;
+	Pros: string[];
+	Cons: string[];
+	LastUpdated: string;
+	HasMobile: boolean;
+	HasWeb: boolean; 
+	BusinessModels: BusinessModel[];
 }
 
 interface CourseSearchSchedule {
