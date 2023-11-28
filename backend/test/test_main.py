@@ -9,7 +9,10 @@ from src.models.tables import BusinessModel, ExistingSolution, User
 from sqlalchemy.orm import Session
 from src.utils.validation import check_token_expiration
 import test
-from .test_utils import existing_solution_model_to_existing_solution_response, mock_check_token_expiration
+from .test_utils import (
+    existing_solution_model_to_existing_solution_response,
+    mock_check_token_expiration,
+)
 from .test_config import test_db, get_test_db
 from src.main import app, get_db
 from src.models.requests.schedule import SaveScheduleRequest
