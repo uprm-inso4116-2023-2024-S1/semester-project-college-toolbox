@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ScholarshipApplicationFactory from './ScholarshipFactory';
+import { $authToken } from '../lib/profile';
 import { API_URL } from '../app/constants';
 import './ScholarshipCard.css'; // Import the CSS file directly
 // const applicationFactory = new ScholarshipApplicationFactory();
@@ -58,8 +59,11 @@ const ScholarshipCard = ({
 
 		fetch(`${API_URL}/createResume`, {
 			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${$authToken.get()}`,
+			},
 			body: formData,
-			credentials: 'include',
 		})
 			.then((response) => {
 				if (response.ok) {

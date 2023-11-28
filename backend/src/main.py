@@ -32,8 +32,7 @@ from fastapi import (
     Request,
     HTTPException,
     Depends,
-    Cookie,
-    UploadFile,
+    Header,
     BackgroundTasks,
 )
 from fastapi.encoders import jsonable_encoder
@@ -77,10 +76,8 @@ from src.security import (
     hash_password,
     generate_permanent_token,
     get_user_id_from_token,
-    TOKEN_EXPIRATION_SECONDS,
+    SecurityConfig,
 )
-
-from src.utils.validation import check_token_expiration
 
 from src.repositories.JobApplication import JobRepository
 from src.repositories.ScholarshipApplication import ScholarshipRepository
@@ -152,7 +149,8 @@ async def register_user(
     db.commit()
     db.refresh(user)
 
-    permanent_token = generate_permanent_token(user.UserId)
+    # Generate the JWT token
+    jwt_token = generate_permanent_token(user.UserId)
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -162,18 +160,9 @@ async def register_user(
         email=user.Email,
         profileImageUrl=user.ProfileImageUrl,
     )
-    response = JSONResponse(content=jsonable_encoder(RegisterResponse(profile=profile)))
-    response.set_cookie(
-        key="auth_token",
-        value=permanent_token,
-        max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None"
-        if os.environ.get("CT_ENV") not in ["TEST", "ACTIONS"]
-        else "lax",
-        secure=os.environ.get("CT_ENV")
-        not in ["TEST", "ACTIONS"],  # disable HTTPS requirement for tests
-        path="/",
-    )
+
+    # Create the response with the user's profile and JWT token
+    response = RegisterResponse(profile=profile, token=jwt_token)
 
     return response
 
@@ -195,7 +184,8 @@ async def login_user(
     if user.EncryptedPassword != hash_password(user_request.password, user.Salt):
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
-    permanent_token = generate_permanent_token(user.UserId)
+    # Generate the JWT token
+    jwt_token = generate_permanent_token(user.UserId)
 
     profile = UserProfile(
         firstName=user.FirstName,
@@ -205,29 +195,13 @@ async def login_user(
         email=user.Email,
         profileImageUrl=user.ProfileImageUrl,
     )
-    response = JSONResponse(content=jsonable_encoder(LoginResponse(profile=profile)))
-    response.set_cookie(
-        key="auth_token",
-        value=permanent_token,
-        max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None"
-        if os.environ.get("CT_ENV") not in ["TEST", "ACTIONS"]
-        else "lax",
-        secure=os.environ.get("CT_ENV")
-        not in ["TEST", "ACTIONS"],  # disable HTTPS requirement for tests
-        path="/",
-    )
-    return response
+    return LoginResponse(profile=profile, token=jwt_token)
 
 
-# Fetch profile endpoint
-@app.get(
-    "/profile",
-    response_model=LoginResponse,
-    dependencies=[Depends(check_token_expiration)],
-)
+@app.get("/profile", response_model=LoginResponse)
 def fetch_user(
-    db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
+    db: Session = Depends(get_db),
+    auth_token: str = Header(None, alias="Authorization"),
 ) -> LoginResponse:
     """
     Returns the profile of a user given a valid auth token.
@@ -235,9 +209,13 @@ def fetch_user(
     - **db**: Database to be utilized (prod or test).
     - **auth_token**: The authentication token obtained during login.
     """
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(auth_token)
+    if not auth_token or not auth_token.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid auth token, login first."
+        )
+    jwt_token = auth_token.split("Bearer ")[1]  # Extract the JWT from the header
+
+    user_id = get_user_id_from_token(jwt_token)
     user = db.query(User).filter(User.UserId == user_id).first()
     if not user:
         raise HTTPException(
@@ -505,16 +483,19 @@ def validate_course_id_endpoint(
     return {"is_valid": is_valid}
 
 
-@app.post("/save_schedule", dependencies=[Depends(check_token_expiration)])
+@app.post("/save_schedule")
 def save_schedule_endpoint(
     request: SaveScheduleRequest,
     engine: Engine = Depends(get_engine),
-    auth_token: Annotated[str | None, Cookie()] = None,
+    auth_token: str = Header(None, alias="Authorization"),
 ) -> SaveScheduleResponse:
-    print(request, auth_token)
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(auth_token)
+    if not auth_token or not auth_token.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid auth token, login first."
+        )
+    jwt_token = auth_token.split("Bearer ")[1]  # Extract the JWT from the header
+
+    user_id = get_user_id_from_token(jwt_token)
     su = ScheduleUtils(engine)
     schedule_id = su.save_schedule(
         course_section_ids=request.course_section_ids,
@@ -536,17 +517,21 @@ def delete_saved_schedule(
     return {"message": "Schedule deleted successfully."}
 
 
-@app.post("/schedules/filter/prefix", dependencies=[Depends(check_token_expiration)])
+@app.post("/schedules/filter/prefix")
 async def filter_saved_schedules_by_prefix(
     request_data: SchedulePrefixFilterRequest,
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
-    auth_token: Annotated[str | None, Cookie()] = None,
+    auth_token: str = Header(None, alias="Authorization"),
 ) -> list[getSavedScheduleResponse]:
     """Retrieve all schedules that start with a specific prefix."""
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(auth_token)
+    if not auth_token or not auth_token.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid auth token, login first."
+        )
+    jwt_token = auth_token.split("Bearer ")[1]  # Extract the JWT from the header
+
+    user_id = get_user_id_from_token(jwt_token)
     all_schedules = (
         db.query(Schedule)
         .filter(
@@ -587,16 +572,19 @@ async def filter_saved_schedules_by_prefix(
     return filtered_schedules
 
 
-@app.get("/get_all_save_schedules", dependencies=[Depends(check_token_expiration)])
+@app.get("/get_all_save_schedules")
 def get_all_saved_schedules(
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
-    auth_token: Annotated[str | None, Cookie()] = None,
+    auth_token: str = Header(None, alias="Authorization"),
 ) -> list[getSavedScheduleResponse]:
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    if not auth_token or not auth_token.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid auth token, login first."
+        )
+    jwt_token = auth_token.split("Bearer ")[1]  # Extract the JWT from the header
 
-    user_id = get_user_id_from_token(auth_token)
+    user_id = get_user_id_from_token(jwt_token)
     all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
 
     full_saved_schedules = []

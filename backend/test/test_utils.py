@@ -31,16 +31,3 @@ def existing_solution_model_to_existing_solution_response(model, business_models
             for business_model in business_models
         ],
     )
-
-
-def mock_check_token_expiration():
-    # Return a dummy user object for testing purposes
-    return User(
-        FirstName="Test",
-        Initial="",
-        FirstLastName="User",
-        SecondLastName="",
-        Email="test@example.com",
-        Password="foo",
-        ProfileImageUrl="",
-    )

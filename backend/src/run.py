@@ -46,5 +46,4 @@ if __name__ == "__main__":
     env = prepare_db(environment, args.refresh)
     host = "localhost"
     port = 5670
-    reload = env != "PROD"
-    uvicorn.run("src.main:app", host=host, port=port, reload=reload)
+    uvicorn.run("src.main:app", host=host, port=port)

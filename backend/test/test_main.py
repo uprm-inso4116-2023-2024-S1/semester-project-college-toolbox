@@ -7,12 +7,8 @@ from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from src.models.tables import BusinessModel, ExistingSolution, User
 from sqlalchemy.orm import Session
-from src.utils.validation import check_token_expiration
 import test
-from .test_utils import (
-    existing_solution_model_to_existing_solution_response,
-    mock_check_token_expiration,
-)
+from .test_utils import existing_solution_model_to_existing_solution_response
 from .test_config import test_db, get_test_db
 from src.main import app, get_db
 from src.models.requests.schedule import SaveScheduleRequest
@@ -21,7 +17,6 @@ from src.models.responses.existing_solution import ExistingSolutionResponse
 
 # Override db
 app.dependency_overrides[get_db] = get_test_db
-app.dependency_overrides[check_token_expiration] = mock_check_token_expiration
 # Create a test client
 client = TestClient(app)
 
@@ -58,11 +53,9 @@ def test_register_user(test_db):
     # Test successful registration
     response_register = client.post("/register", json=register_data)
     assert response_register.status_code == 200
-    assert (
-        "auth_token" in response_register.cookies
-    )  # Make sure the cookie contains the auth token
     data = response_register.json()
     assert "profile" in data  # Make sure the response contains the user profile
+    assert "token" in data  # Make sure the response contains the auth token
 
     # Test duplicate registration (should fail)
     response_duplicate = client.post("/register", json=register_data)
@@ -83,12 +76,9 @@ def test_login_user(test_db):
     # Test successful login
     response_login = client.post("/login", json=login_data)
     assert response_login.status_code == 200
-    assert (
-        "auth_token" in response_login.cookies
-    )  # Make sure the cookie contains the auth token
     data = response_login.json()
     assert "profile" in data  # Make sure the response contains the user profile
-
+    assert "token" in data  # Make sure the response contains the auth token
     # Test user not found (should fail)
     user_not_found_data = {
         "email": "notfoobar@example.com",
@@ -173,6 +163,8 @@ def test_save_schedule(test_db):
     # Register the user first (assuming registration works)
     response_register = client.post("/register", json=register_data)
     assert response_register.status_code == 200
+    data = response_register.json()
+    assert "token" in data
 
     course_section_ids = [1, 2, 3, 4]
     name = "TestSchedule"
@@ -183,8 +175,8 @@ def test_save_schedule(test_db):
     ).model_dump()
 
     # Test the endpoint
-    client.cookies.update(response_register.cookies)
-    response = client.post("/save_schedule", json=request)
+    headers = {"Authorization": f"Bearer {data.get('token')}"}
+    response = client.post("/save_schedule", json=request, headers=headers)
     assert response.status_code == 200
     assert "schedule_id" in response.json()
 

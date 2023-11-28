@@ -5,6 +5,7 @@ import type { SavedScheduleModel } from '../../types/entities';
 import SavedScheduleView from './SavedScheduleView';
 import { $selectedTermYear } from '../../lib/courses';
 import { useStore } from '@nanostores/react';
+import { $authToken } from '../../lib/profile';
 
 const SavedScheduleHub: React.FC = () => {
 	const [savedSchedules, setSavedSchedules] = useState<SavedScheduleModel[]>(
@@ -36,9 +37,9 @@ const SavedScheduleHub: React.FC = () => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${$authToken.get()}`,
 				},
 				body: JSON.stringify(requestBody),
-				credentials: 'include',
 			});
 
 			if (!response.ok) {
