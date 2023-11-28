@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react'; // Import React if it's not already imported
 import ToggleSwitch from './ToggleSwitch.jsx';
 import { asset, url } from '../lib/data.js';
-import { storedProfile, isLoggedIn } from '../lib/profile';
+import { $storedProfile, $isLoggedIn } from '../lib/profile';
 import { useStore } from '@nanostores/react';
 
 const UserSettings = () => {
-	const $storedProfile = useStore(storedProfile);
+	const storedProfile = useStore($storedProfile);
 	const [hasCourseNotifications, setCourseNotifications] = useState(false);
 	const [profileForm, setProfileForm] = useState({
-		firstName: storedProfile.get().firstName,
-		initial: storedProfile.get().initial,
-		firstLastName: storedProfile.get().firstLastName,
-		secondLastName: storedProfile.get().secondLastName,
-		profileImageUrl: storedProfile.get().profileImageUrl,
-		email: storedProfile.get().email,
+		firstName: $storedProfile.get().firstName,
+		initial: $storedProfile.get().initial,
+		firstLastName: $storedProfile.get().firstLastName,
+		secondLastName: $storedProfile.get().secondLastName,
+		profileImageUrl: $storedProfile.get().profileImageUrl,
+		email: $storedProfile.get().email,
 	});
 	const [passwordForm, setPasswordForm] = useState({
 		currentPassword: '',
@@ -26,14 +26,14 @@ const UserSettings = () => {
 	};
 
 	useEffect(() => {
-		if (isLoggedIn.get()) {
+		if ($isLoggedIn.get()) {
 			setProfileForm({
-				firstName: $storedProfile.firstName,
-				initial: $storedProfile.initial,
-				firstLastName: $storedProfile.firstLastName,
-				secondLastName: $storedProfile.secondLastName,
-				profileImageUrl: $storedProfile.profileImageUrl,
-				email: $storedProfile.email,
+				firstName: storedProfile.firstName,
+				initial: storedProfile.initial,
+				firstLastName: storedProfile.firstLastName,
+				secondLastName: storedProfile.secondLastName,
+				profileImageUrl: storedProfile.profileImageUrl,
+				email: storedProfile.email,
 			});
 		}
 	}, [$storedProfile]);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { API_URL } from '../../app/constants';
 import type { GeneratedSchedule } from '../../types/entities';
-import { isLoggedIn } from '../../lib/profile';
+import { $isLoggedIn } from '../../lib/profile';
 import { Modal } from 'flowbite-react';
 import { getCookie, url } from '../../lib/data';
 
@@ -60,7 +60,7 @@ const SaveScheduleButton: React.FC<SaveScheduleButtonProps> = ({
 				type="button"
 				className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 disabled:bg-gray-400 disabled:dark:bg-gray-500"
 				onClick={() => {
-					if (isLoggedIn.get() == 'false') {
+					if ($isLoggedIn.get() == 'false') {
 						window.location.href = url('authentication/sign-in');
 					} else {
 						setOpenModal('dismissible');

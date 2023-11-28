@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { url } from '../lib/data';
 import { fetchProfile, hasToken, logout } from '../services/authentication';
-import { storedProfile, isLoggedIn } from '../lib/profile';
+import { $storedProfile, $isLoggedIn } from '../lib/profile';
 
 const UserDropdown = () => {
-	const $profileData = useStore(storedProfile);
-	const $isLoggedIn = useStore(isLoggedIn);
+	const profileData = useStore($storedProfile);
+	const isLoggedIn = useStore($isLoggedIn);
 	const [initialRenderComplete, setInitialRenderComplete] =
 		React.useState(false);
 
@@ -26,13 +26,13 @@ const UserDropdown = () => {
 				data-dropdown-toggle="dropdown-2"
 			>
 				<span className="sr-only">Open user menu</span>
-				{$profileData.profileImageUrl != '' && initialRenderComplete ? (
+				{profileData.profileImageUrl != '' && initialRenderComplete ? (
 					<div
 						className="w-40 h-40 rounded-full"
 						style={{ maxWidth: '40px', maxHeight: '40px' }}
 					>
 						<img
-							src={$profileData.profileImageUrl}
+							src={profileData.profileImageUrl}
 							alt="Profile Picture"
 							className="object-cover w-full h-full rounded-full"
 						/>
@@ -60,18 +60,18 @@ const UserDropdown = () => {
 				className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
 				id="dropdown-2"
 			>
-				{$isLoggedIn == 'true' && initialRenderComplete && (
+				{isLoggedIn == 'true' && initialRenderComplete && (
 					<div className="px-4 py-3" role="none">
 						<p className="text-sm text-gray-900 dark:text-white" role="none">
-							{$profileData.firstName}{' '}
-							{$profileData?.initial && $profileData?.initial + '.'}{' '}
-							{$profileData.firstLastName} {$profileData.secondLastName}
+							{profileData.firstName}{' '}
+							{profileData?.initial && profileData?.initial + '.'}{' '}
+							{profileData.firstLastName} {profileData.secondLastName}
 						</p>
 						<p
 							className="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
 							role="none"
 						>
-							{$profileData.email}
+							{profileData.email}
 						</p>
 					</div>
 				)}
@@ -85,7 +85,7 @@ const UserDropdown = () => {
 							Settings
 						</a>
 					</li>
-					{$isLoggedIn == 'true' && initialRenderComplete ? (
+					{isLoggedIn == 'true' && initialRenderComplete ? (
 						<li>
 							<a
 								href={url('')}
