@@ -25,10 +25,10 @@ import JobApplicationList from '../../components/JobApplicationList.jsx';
 
 <script >
 import { url } from "../../lib/data";
-import { isLoggedIn } from '../../lib/profile';
+import { $isLoggedIn } from '../../lib/profile';
 
     // If the "auth_token" cookie is not found, redirect to the sign-in page
-	if (isLoggedIn.get() == "false") {
+	if ($isLoggedIn.get() == "false") {
 		window.location.href = url('authentication/sign-in');
 	}
 
