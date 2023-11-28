@@ -80,7 +80,7 @@ from src.security import (
     TOKEN_EXPIRATION_SECONDS,
 )
 
-from src.utils.security import check_token_expiration
+from src.utils.validation import check_token_expiration
 
 from src.repositories.JobApplication import JobRepository
 from src.repositories.ScholarshipApplication import ScholarshipRepository
