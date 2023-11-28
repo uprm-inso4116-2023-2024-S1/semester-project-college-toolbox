@@ -8,22 +8,6 @@ import type { ResourcesModel } from '../../types/entities';
 const SolutionsHub: React.FC = () => {
     const [applications, setApplications] = useState<ResourcesModel[]>([]);
 
-    // const displayAllApplications = async () => {
-    //     try {
-    //         const response = await fetch(`${API_URL}/ExistingApplication/get/all`);
-    //         if (response.ok) {
-    //             const data: any[] = await response.json();
-    //             setApplications(data); // Set the applications state with the fetched data
-    //         } else {
-    //             console.error("Error fetching applications:", await response.text());
-    //         }
-    //     } catch (error) {
-    //         if (error instanceof Error) {
-    //             console.error("Error fetching applications:", error.message);
-    //         }
-    //     }
-    // };
-
     const handleSearchResources = async (value: string) => {
         try {
             if (value !== "") {
@@ -31,7 +15,7 @@ const SolutionsHub: React.FC = () => {
                     prefix: value
                 };
             
-                const response = await fetch(`${API_URL}/ExistingApplication/filter/prefix`, {
+                const response = await fetch(`${API_URL}/existing-solutions/filter/prefix`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -62,7 +46,7 @@ const SolutionsHub: React.FC = () => {
                 cost : filters.cost,
             };
         
-            const response = await fetch(`${API_URL}/ExistingApplication/filter/applyAll`, {
+            const response = await fetch(`${API_URL}/existing-solutions/filter/applyAll`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

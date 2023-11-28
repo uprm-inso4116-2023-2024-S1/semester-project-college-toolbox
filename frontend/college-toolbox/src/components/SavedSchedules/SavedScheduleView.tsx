@@ -11,6 +11,7 @@ const SavedScheduleView: React.FC<{
 	const [openModal, setOpenModal] = useState<string | undefined>();
 	const [schedule, setSchedule] = useState<SavedScheduleModel | undefined>();
 	const modalProps = { openModal, setOpenModal, schedule, setSchedule };
+	const [costPerCredit, setCostPerCredit] = useState<number>(0);
 
 	const deleteSchedule = async (schedule_id: number | undefined) => {
 		if (!schedule_id) {
@@ -51,9 +52,37 @@ const SavedScheduleView: React.FC<{
 		return (conversions as Record<string, string>)[term] ?? '';
 	}
 
+
+	const calculateTotalCost = (saved_schedule: SavedScheduleModel | undefined) => {
+		if (!saved_schedule || Number.isNaN(costPerCredit)) {
+			return '0.00';
+		}
+		
+		const totalCredits = saved_schedule.schedule.courses.reduce((acc, course) => acc + course.credits, 0);
+		return (totalCredits * costPerCredit).toFixed(2);
+	};
+
 	return (
 		<div className="bg-gray-200 rounded-lg p-4 dark:bg-gray-700 dark:text-white">
-			<h2 className="text-2xl font-extrabold mb-2">Saved Schedules</h2>
+			
+			<div className="flex flex-wrap items-center justify-between mb-4">
+				<h2 className="text-2xl font-extrabold">Saved Schedules</h2>
+				<div className="flex items-center">
+					{/* Input for cost per credit hour */}
+					<label htmlFor="costPerCredit" className="mr-2 text-lg font-medium text-gray-900 dark:text-white">
+						Cost per Credit Hour:
+					</label>
+					<input
+						type="number"
+						id="costPerCredit"
+						value={costPerCredit}
+						onChange={(e) => setCostPerCredit(parseFloat(e.target.value))}
+						className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+						placeholder="Enter cost per credit"
+						style={{ maxWidth: '200px' }} // Set a max-width to prevent the input from stretching too far
+					/>
+				</div>
+			</div>
 
 			<div className="self-stretch border-t-2 border-gray-400 dak:border-gray-500 mb-1 my-1 w-full" />
 
@@ -87,6 +116,9 @@ const SavedScheduleView: React.FC<{
 									{course.courseCode} - {course.sectionCode}
 								</div>
 							))}
+							<div className="text-lg font-bold">
+								Tuition cost: ${calculateTotalCost(saved_schedule)}
+							</div>
 						</button>
 					))}
 				</div>
@@ -95,7 +127,7 @@ const SavedScheduleView: React.FC<{
 					show={modalProps.openModal === 'dismissible'}
 					onClose={() => setOpenModal(undefined)}
 				>
-					<Modal.Header>{modalProps.schedule?.name}</Modal.Header>
+					<Modal.Header>{modalProps.schedule?.name} | Total Cost: ${calculateTotalCost(modalProps.schedule)}</Modal.Header>
 					<Modal.Body>
 						<div className="space-y-2">
 							{/* Table to display course information */}
@@ -149,14 +181,15 @@ const SavedScheduleView: React.FC<{
 									isInModal={true}
 								/>
 							</div>
+							
 							<button
 								className="bg-red-700 border-2 border-red-700 rounded-lg py-1 px-2 text-white hover:bg-red-800"
 								onClick={() => {
-									if (modalProps.schedule) {
-										deleteSchedule(modalProps.schedule.id);
-									}
+								if (modalProps.schedule) {
+									deleteSchedule(modalProps.schedule.id);
+								}
 								}}
-							>
+								>
 								Delete
 							</button>
 						</div>

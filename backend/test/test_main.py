@@ -7,8 +7,12 @@ from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from src.models.tables import BusinessModel, ExistingSolution, User
 from sqlalchemy.orm import Session
+from src.utils.validation import check_token_expiration
 import test
-from .test_utils import existing_solution_model_to_existing_solution_response
+from .test_utils import (
+    existing_solution_model_to_existing_solution_response,
+    mock_check_token_expiration,
+)
 from .test_config import test_db, get_test_db
 from src.main import app, get_db
 from src.models.requests.schedule import SaveScheduleRequest
@@ -17,6 +21,7 @@ from src.models.responses.existing_solution import ExistingSolutionResponse
 
 # Override db
 app.dependency_overrides[get_db] = get_test_db
+app.dependency_overrides[check_token_expiration] = mock_check_token_expiration
 # Create a test client
 client = TestClient(app)
 
@@ -153,7 +158,7 @@ def test_existing_application_get_all_endpoint_no_business_models(test_db):
             session.commit()
 
     # Test the endpoint
-    response = client.get("/ExistingSolution/get/all")
+    response = client.get("/existing-solutions/get/all")
 
     assert response.status_code == 200
     assert len(response.json()) == len(expected_responses)
@@ -173,16 +178,12 @@ def test_save_schedule(test_db):
     name = "TestSchedule"
     term = "1erSem"
     year = 2023
-    auth_token = response_register.cookies["auth_token"]
     request = SaveScheduleRequest(
-        course_section_ids=course_section_ids,
-        name=name,
-        term=term,
-        year=year,
-        auth_token=auth_token,
+        course_section_ids=course_section_ids, name=name, term=term, year=year
     ).model_dump()
 
     # Test the endpoint
+    client.cookies.update(response_register.cookies)
     response = client.post("/save_schedule", json=request)
     assert response.status_code == 200
     assert "schedule_id" in response.json()
@@ -267,7 +268,7 @@ def test_existing_application_get_all_endpoint_with_business_models(test_db):
             session.commit()
 
     # Test the endpoint
-    response = client.get("/ExistingSolution/get/all")
+    response = client.get("/existing-solutions/get/all")
 
     assert response.status_code == 200
     assert len(response.json()) == len(expected_responses)

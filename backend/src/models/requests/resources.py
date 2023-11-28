@@ -7,7 +7,7 @@ class PrefixFilterRequest(BaseModel):
     prefix: str
 
 
-class applyAllFilterRequest(BaseModel):
+class ExistingSolutionsFilterAllRequest(BaseModel):
     type: list[str]
     sort: list[str]
     cost: list[str]
@@ -15,6 +15,5 @@ class applyAllFilterRequest(BaseModel):
 
 class SchedulePrefixFilterRequest(BaseModel):
     prefix: str
-    auth_token: str
     term: str
     year: int

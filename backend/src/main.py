@@ -1,4 +1,5 @@
 # src/main.py
+import os
 from uuid import uuid4
 from sqlalchemy import Engine, asc, or_, desc, and_
 from sqlalchemy.orm import Session, joinedload
@@ -8,7 +9,6 @@ from src.models.requests.schedule import (
     GenerateSchedulesRequest,
     ValidateCourseIDRequest,
     SaveScheduleRequest,
-    getSavedSchedulesRequest,
     CourseSearchRequest,
     DeleteScheduleRequest,
 )
@@ -23,8 +23,8 @@ from src.ssh_scraper.enums import Term
 from src.utils.schedule import ScheduleUtils
 from src.utils.course import CourseQueryUtils
 from src.utils.ExistingSolution import (
-    filter_apps_by_prefix,
-    filter_apps_by_criteria,
+    filter_solutions_by_prefix,
+    filter_solutions_by_criteria,
 )
 from fastapi import (
     FastAPI,
@@ -56,7 +56,7 @@ from src.models.responses.existing_solution import ExistingSolutionResponse
 from src.models.requests.resources import (
     PrefixFilterRequest,
     SchedulePrefixFilterRequest,
-    applyAllFilterRequest,
+    ExistingSolutionsFilterAllRequest,
 )
 from src.models.responses.login import LoginResponse, UserProfile
 from src.models.responses.register import RegisterResponse
@@ -79,6 +79,8 @@ from src.security import (
     get_user_id_from_token,
     TOKEN_EXPIRATION_SECONDS,
 )
+
+from src.utils.validation import check_token_expiration
 
 from src.repositories.JobApplication import JobRepository
 from src.repositories.ScholarshipApplication import ScholarshipRepository
@@ -165,8 +167,11 @@ async def register_user(
         key="auth_token",
         value=permanent_token,
         max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None",  # Set SameSite attribute
-        secure=True,
+        samesite="None"
+        if os.environ.get("CT_ENV") not in ["TEST", "ACTIONS"]
+        else "lax",
+        secure=os.environ.get("CT_ENV")
+        not in ["TEST", "ACTIONS"],  # disable HTTPS requirement for tests
         path="/",
     )
 
@@ -205,15 +210,22 @@ async def login_user(
         key="auth_token",
         value=permanent_token,
         max_age=TOKEN_EXPIRATION_SECONDS,
-        samesite="None",  # Set SameSite attribute
-        secure=True,
+        samesite="None"
+        if os.environ.get("CT_ENV") not in ["TEST", "ACTIONS"]
+        else "lax",
+        secure=os.environ.get("CT_ENV")
+        not in ["TEST", "ACTIONS"],  # disable HTTPS requirement for tests
         path="/",
     )
     return response
 
 
 # Fetch profile endpoint
-@app.get("/profile", response_model=LoginResponse)
+@app.get(
+    "/profile",
+    response_model=LoginResponse,
+    dependencies=[Depends(check_token_expiration)],
+)
 def fetch_user(
     db: Session = Depends(get_db), auth_token: Annotated[str | None, Cookie()] = None
 ) -> LoginResponse:
@@ -244,7 +256,7 @@ def fetch_user(
 
 
 # Get all Existing Solutions endpoint
-@app.get("/ExistingSolution/get/all")
+@app.get("/existing-solutions/get/all")
 async def get_all_existing_solutions(
     db: Session = Depends(get_db),
 ) -> list[ExistingSolutionResponse]:
@@ -291,17 +303,17 @@ async def get_all_existing_solutions(
     return responses
 
 
-@app.post("/ExistingApplication/filter/prefix")
+@app.post("/existing-solutions/filter/prefix")
 async def filter_existing_applications_by_prefix(
     request_data: PrefixFilterRequest, db: Session = Depends(get_db)
 ) -> list[ExistingSolutionResponse]:
     """Retrieve all applications that start with a specific prefix."""
     all_apps = await get_all_existing_solutions(db)
-    filtered_apps = filter_apps_by_prefix(request_data.prefix, all_apps)
+    filtered_apps = filter_solutions_by_prefix(request_data.prefix, all_apps)
     return filtered_apps
 
-@app.post("/ExistingApplication/filter/applyAll")
-async def filter_existing_applications_by_criteria(request_data: applyAllFilterRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
+@app.post("/existing-solutions/filter/applyAll")
+async def filter_existing_applications_by_criteria(request_data: ExistingSolutionsFilterAllRequest, db: Session = Depends(get_db)) -> list[ExistingSolutionResponse]:
     data : list[ExistingSolution] = []
     conditions_list = []
     if request_data.type:
@@ -473,13 +485,16 @@ def validate_course_id_endpoint(
     return {"is_valid": is_valid}
 
 
-@app.post("/save_schedule")
+@app.post("/save_schedule", dependencies=[Depends(check_token_expiration)])
 def save_schedule_endpoint(
-    request: SaveScheduleRequest, engine: Engine = Depends(get_engine)
+    request: SaveScheduleRequest,
+    engine: Engine = Depends(get_engine),
+    auth_token: Annotated[str | None, Cookie()] = None,
 ) -> SaveScheduleResponse:
-    if not request.auth_token:
+    print(request, auth_token)
+    if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(request.auth_token)
+    user_id = get_user_id_from_token(auth_token)
     su = ScheduleUtils(engine)
     schedule_id = su.save_schedule(
         course_section_ids=request.course_section_ids,
@@ -501,16 +516,17 @@ def delete_saved_schedule(
     return {"message": "Schedule deleted successfully."}
 
 
-@app.post("/schedules/filter/prefix")
-async def filter_existing_applications_by_prefix(
+@app.post("/schedules/filter/prefix", dependencies=[Depends(check_token_expiration)])
+async def filter_saved_schedules_by_prefix(
     request_data: SchedulePrefixFilterRequest,
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
+    auth_token: Annotated[str | None, Cookie()] = None,
 ) -> list[getSavedScheduleResponse]:
     """Retrieve all schedules that start with a specific prefix."""
-    if not request_data.auth_token:
+    if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(request_data.auth_token)
+    user_id = get_user_id_from_token(auth_token)
     all_schedules = (
         db.query(Schedule)
         .filter(
@@ -551,16 +567,16 @@ async def filter_existing_applications_by_prefix(
     return filtered_schedules
 
 
-@app.post("/get_all_save_schedules")
+@app.get("/get_all_save_schedules", dependencies=[Depends(check_token_expiration)])
 def get_all_saved_schedules(
-    request: getSavedSchedulesRequest,
     db: Session = Depends(get_db),
     engine: Engine = Depends(get_engine),
+    auth_token: Annotated[str | None, Cookie()] = None,
 ) -> list[getSavedScheduleResponse]:
-    if not request.auth_token:
+    if not auth_token:
         raise HTTPException(status_code=401, detail="Missing auth token, login first.")
 
-    user_id = get_user_id_from_token(request.auth_token)
+    user_id = get_user_id_from_token(auth_token)
     all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
 
     full_saved_schedules = []

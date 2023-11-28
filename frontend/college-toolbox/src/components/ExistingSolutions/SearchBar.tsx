@@ -61,7 +61,7 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
         };
 
         try {
-            const response = await fetch(`${API_URL}/ExistingApplication/filter/prefix`, {
+            const response = await fetch(`${API_URL}/existing-solutions/filter/prefix`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
