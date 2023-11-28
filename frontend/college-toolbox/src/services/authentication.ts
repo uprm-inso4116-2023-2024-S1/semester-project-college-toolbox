@@ -1,20 +1,11 @@
 import { API_URL, EMPTY_PROFILE } from '../app/constants';
 import type { NewProfile, Profile } from '../types/entities';
-import { storedProfile, isLoggedIn } from '../lib/profile';
-
-// authentication.ts
+import { $storedProfile, $isLoggedIn, $authToken } from '../lib/profile';
 
 export function logout() {
-	const regex = /(^|;\s*)auth_token=([^;]*)/;
-	const match = document.cookie.match(regex);
-
-	if (match) {
-		// Set the matched cookie to expire in the past to remove it
-		document.cookie =
-			'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-	}
-	isLoggedIn.set('false');
-	storedProfile.set(EMPTY_PROFILE);
+	$isLoggedIn.set('false');
+	$storedProfile.set(EMPTY_PROFILE);
+	$authToken.set("");
 }
 
 export async function register(profile: NewProfile): Promise<Profile | null> {
@@ -31,12 +22,13 @@ export async function register(profile: NewProfile): Promise<Profile | null> {
 			throw new Error('Registration failed');
 		}
 
-		const data = (await response.json()) as { profile: Profile };
-		isLoggedIn.set('true');
-		storedProfile.set(data.profile);
+		const data = (await response.json()) as { profile: Profile, token: string };
+		$isLoggedIn.set('true');
+		$storedProfile.set(data.profile);
+		$authToken.set(data.token);
 		return data.profile;
 	} catch (error) {
-		logout(); // wipe token and reset profile and login status
+		logout(); // Reset profile and login status
 		console.error('Registration error:', error);
 		return null;
 	}
@@ -52,19 +44,19 @@ export async function login(
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			credentials: 'include',
 			body: JSON.stringify({ email, password }),
 		});
 
 		if (!response.ok) {
 			throw new Error('Login failed');
 		}
-		const data = (await response.json()) as { profile: Profile };
-		isLoggedIn.set('true');
-		storedProfile.set(data.profile);
+		const data = (await response.json()) as { profile: Profile, token: string };
+		$isLoggedIn.set('true');
+		$storedProfile.set(data.profile);
+		$authToken.set(data.token);
 		return data.profile;
 	} catch (error) {
-		logout(); // wipe token and reset profile and login status
+		logout(); // Reset profile and login status
 		console.error('Login error:', error);
 		return null;
 	}
@@ -76,8 +68,9 @@ export async function fetchProfile(): Promise<Profile | null> {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
+				// Include the JWT token in the Authorization header
+				'Authorization': `Bearer ${$authToken.get()}`,
 			},
-			credentials: 'include',
 		});
 
 		if (!response.ok) {
@@ -85,18 +78,17 @@ export async function fetchProfile(): Promise<Profile | null> {
 		}
 
 		const responseData = (await response.json()) as { profile: Profile };
-		isLoggedIn.set('true');
-		storedProfile.set(responseData.profile);
+		$isLoggedIn.set('true');
+		$storedProfile.set(responseData.profile);
 		return responseData.profile;
 	} catch (error) {
-		logout(); // wipe token and reset profile and login status
+		logout(); // Reset profile and login status
 		console.error('Failed to fetch:', error);
 		return null;
 	}
 }
 
 export function hasToken() {
-	const regex = /(^|;\s*)auth_token=([^;]*)/;
-	const match = document.cookie.match(regex);
-	return match != null;
+	// You should have the JWT token stored securely after successful login
+	return $authToken.get() != "";
 }
