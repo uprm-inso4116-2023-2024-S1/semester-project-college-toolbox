@@ -6,11 +6,15 @@ import secrets
 
 from datetime import datetime, timedelta
 from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
 
 SECRET_KEY = secrets.token_hex(32)
 ALGORITHM = "HS256"
-TOKEN_EXPIRATION_SECONDS = 60 * 60 * 24 * 5  # Five days
+TOKEN_EXPIRATION_SECONDS = 60 * 60 * 3  # Three hours
+
+# OAuth2 password bearer instance
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 # Generate salt to add to password for encryption
