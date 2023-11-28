@@ -61,7 +61,7 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
         };
 
         try {
-            const response = await fetch(`${API_URL}/ExistingApplication/filter/prefix`, {
+            const response = await fetch(`${API_URL}/existing-solutions/filter/prefix`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const SearchBar: React.FC<{ onSearch: (value: string) => void }> = ({ onSearch }
                                     className="flex-grow flex items-center justify-start focus:outline-none"
                                     onClick={(e) => handleSuggestionSearch(e, app.Name)}
                                 >
-                                    <div className="rounded-full bg-white w-8 h-8 mr-2"> 
+                                    <div className="w-8 h-8 mr-2"> 
                                         <img 
                                             src={app.Icon} 
                                             alt={app.Name + " logo"} 
