@@ -1,7 +1,8 @@
 # src/utils/security.py
+from fastapi.security import OAuth2PasswordBearer
 import jwt
 
-from src.security import ALGORITHM, SECRET_KEY, oauth2_scheme
+from src.security import SecurityConfig
 
 from datetime import datetime
 from fastapi import HTTPException, Depends
@@ -10,6 +11,8 @@ from sqlalchemy.orm import Session
 from src.models.tables import User
 from src.utils.db import get_db
 
+# OAuth2 password bearer instance
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def check_token_expiration(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
@@ -18,7 +21,7 @@ def check_token_expiration(
         status_code=401, detail="Could not validate credentials."
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SecurityConfig.get_secret_key(), algorithms=[SecurityConfig.get_algorithm()])
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
