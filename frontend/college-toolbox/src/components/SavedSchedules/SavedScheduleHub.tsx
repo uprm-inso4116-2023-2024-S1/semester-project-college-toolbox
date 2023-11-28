@@ -5,7 +5,7 @@ import type { SavedScheduleModel } from '../../types/entities';
 import SavedScheduleView from './SavedScheduleView';
 import { $selectedTermYear } from '../../lib/courses';
 import { useStore } from '@nanostores/react';
-import { $authToken } from '../lib/profile';
+import { $authToken } from '../../lib/profile';
 
 const SavedScheduleHub: React.FC = () => {
 	const [savedSchedules, setSavedSchedules] = useState<SavedScheduleModel[]>(

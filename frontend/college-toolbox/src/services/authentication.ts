@@ -68,7 +68,6 @@ export async function fetchProfile(): Promise<Profile | null> {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				// Include the JWT token in the Authorization header
 				'Authorization': `Bearer ${$authToken.get()}`,
 			},
 		});

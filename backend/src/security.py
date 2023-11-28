@@ -40,10 +40,15 @@ class SecurityConfig:
 
 # Generate permanent token for user session
 def generate_permanent_token(user_id: str) -> str:
-    expiration = datetime.utcnow() + timedelta(seconds=SecurityConfig.get_token_expiration_seconds())
-    payload = {"sub": user_id, "exp": expiration}
-    token = jwt.encode(payload, SecurityConfig.get_secret_key(), algorithm=SecurityConfig.get_algorithm())
+    expiration = datetime.utcnow() + timedelta(hours=3)
+    payload = {"sub": user_id, "exp": expiration}   
+    token = jwt.encode(
+        payload=payload,
+        key=SecurityConfig.get_secret_key(),
+        algorithm=SecurityConfig.get_algorithm(),
+    )
     return token
+
 
 # Generate salt to add to password for encryption
 def generate_salt():
@@ -57,11 +62,14 @@ def hash_password(password, salt):
     return hash_obj.hexdigest()
 
 
-
 # Token validation and user_id extraction
 def get_user_id_from_token(token: str) -> Optional[str]:
     try:
-        payload = jwt.decode(token, SecurityConfig.get_secret_key(), algorithms=[SecurityConfig.get_algorithm()])
+        payload = jwt.decode(
+            jwt=token,
+            key=SecurityConfig.get_secret_key(),
+            algorithms=[SecurityConfig.get_algorithm()],
+        )
         user_id = payload.get("sub")
         return user_id
     except Exception as e:

@@ -343,9 +343,13 @@ def save_schedule_endpoint(
     engine: Engine = Depends(get_engine),
     auth_token: str = Header(None, alias="Authorization"),
 ) -> SaveScheduleResponse:
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(auth_token)
+    if not auth_token or not auth_token.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid auth token, login first."
+        )
+    jwt_token = auth_token.split("Bearer ")[1]  # Extract the JWT from the header
+
+    user_id = get_user_id_from_token(jwt_token)
     su = ScheduleUtils(engine)
     schedule_id = su.save_schedule(
         course_section_ids=request.course_section_ids,
@@ -375,9 +379,13 @@ async def filter_saved_schedules_by_prefix(
     auth_token: str = Header(None, alias="Authorization"),
 ) -> list[getSavedScheduleResponse]:
     """Retrieve all schedules that start with a specific prefix."""
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
-    user_id = get_user_id_from_token(auth_token)
+    if not auth_token or not auth_token.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid auth token, login first."
+        )
+    jwt_token = auth_token.split("Bearer ")[1]  # Extract the JWT from the header
+
+    user_id = get_user_id_from_token(jwt_token)
     all_schedules = (
         db.query(Schedule)
         .filter(
@@ -424,10 +432,13 @@ def get_all_saved_schedules(
     engine: Engine = Depends(get_engine),
     auth_token: str = Header(None, alias="Authorization"),
 ) -> list[getSavedScheduleResponse]:
-    if not auth_token:
-        raise HTTPException(status_code=401, detail="Missing auth token, login first.")
+    if not auth_token or not auth_token.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401, detail="Missing or invalid auth token, login first."
+        )
+    jwt_token = auth_token.split("Bearer ")[1]  # Extract the JWT from the header
 
-    user_id = get_user_id_from_token(auth_token)
+    user_id = get_user_id_from_token(jwt_token)
     all_schedules = db.query(Schedule).filter(Schedule.user_id == user_id).all()
 
     full_saved_schedules = []
