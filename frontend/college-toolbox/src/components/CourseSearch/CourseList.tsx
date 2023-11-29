@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CourseSearchSection } from '../../types/entities';
 import { convertToAmPm } from '../../lib/data';
 import { useStore } from '@nanostores/react';
@@ -45,7 +45,7 @@ const CourseList: React.FC<CourseListProps> = ({ courses }) => {
 		}
 		const newCourses = [...selectedCourses];
 		const prevIdx = newCourses.findIndex(
-			(course) => course.code.split('-')[0] == course.code,
+			(c) => c.code.split('-')[0] == course.courseCode,
 		);
 		if (prevIdx != -1) {
 			newCourses[prevIdx] = { code: courseString };
@@ -55,11 +55,57 @@ const CourseList: React.FC<CourseListProps> = ({ courses }) => {
 		// Save courses to local storage
 		$storedCourses.set(newCourses);
 	}
+
 	function isCourseSelected(course: CourseSearchSection) {
-    return selectedCourses.some(
-      selectedCourse => selectedCourse.code === course.courseCode + '-' + course.sectionCode
-    );
-  }
+		return selectedCourses.some(
+			(selectedCourse) =>
+				selectedCourse.code === `${course.courseCode}-${course.sectionCode}`,
+		);
+	}
+	const [renderedCourses, setRenderedCourses] = useState<JSX.Element[]>([]);
+
+	useEffect(() => {
+		// When selectedCourses changes, update the renderedCourses state
+		const updatedRenderedCourses = courses.map((course, index) => (
+			<tr
+				key={`${course.courseCode}-${course.sectionCode}-${index}`}
+				className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+			>
+				<th
+					scope="row"
+					className="px-4 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
+				>
+					{course.courseCode}
+				</th>
+				<td className="px-4 py-4 dark:text-white">{course.courseName}</td>
+				<td className="px-4 py-4 dark:text-white">{course.sectionCode}</td>
+				<td className="px-4 py-4 dark:text-white">{course.professor}</td>
+				<td className="px-4 py-4 dark:text-white">{course.credits}</td>
+				<td className="px-4 py-4 dark:text-white">
+					{getRooms(course).join(', ')}
+				</td>
+				<td className="px-4 py-4 dark:text-white">{getDaysString(course)}</td>
+				<td className="px-4 py-4 dark:text-white">
+					{getTimes(course).join(', ')}
+				</td>
+				<td className="px-0 py-4 text-right">
+					<button
+						type="button"
+						onClick={() => addCourse(course)}
+						disabled={isCourseSelected(course)}
+						className={`text-white font-medium rounded-full text-sm px-4 py-2.5 text-center mr-2 mb-2 ${
+							isCourseSelected(course)
+								? 'bg-gray-400 cursor-not-allowed'
+								: 'bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
+						}`}
+					>
+						{isCourseSelected(course) ? 'Added' : 'Add to Schedule'}
+					</button>
+				</td>
+			</tr>
+		));
+		setRenderedCourses(updatedRenderedCourses);
+	}, [courses, selectedCourses]);
 
 	return (
 		<div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -95,50 +141,7 @@ const CourseList: React.FC<CourseListProps> = ({ courses }) => {
 						</th>
 					</tr>
 				</thead>
-				<tbody>
-					{courses.map((course, index) => (
-						<tr
-							key={`${course.courseCode}-${course.sectionCode}-${index}`}
-							className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-						>
-							<th
-								scope="row"
-								className="px-4 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
-							>
-								{course.courseCode}
-							</th>
-							<td className="px-4 py-4 dark:text-white">{course.courseName}</td>
-							<td className="px-4 py-4 dark:text-white">
-								{course.sectionCode}
-							</td>
-							<td className="px-4 py-4 dark:text-white">{course.professor}</td>
-							<td className="px-4 py-4 dark:text-white">{course.credits}</td>
-							<td className="px-4 py-4 dark:text-white">
-								{getRooms(course).join(', ')}
-							</td>
-							<td className="px-4 py-4 dark:text-white">
-								{getDaysString(course)}
-							</td>
-							<td className="px-4 py-4 dark:text-white">
-								{getTimes(course).join(', ')}
-							</td>
-							<td className="px-0 py-4 text-right">
-								<button
-									type="button"
-									onClick={() => addCourse(course)}
-									disabled={isCourseSelected(course)}
-									className={`text-white font-medium rounded-full text-sm px-4 py-2.5 text-center mr-2 mb-2 ${
-										isCourseSelected(course)
-											? 'bg-gray-400 cursor-not-allowed'
-											: 'bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
-									}`}
-								>
-									{isCourseSelected(course) ? 'Added' : 'Add to Schedule'}
-								</button>
-							</td>
-						</tr>
-					))}
-				</tbody>
+				<tbody>{renderedCourses}</tbody>
 			</table>
 		</div>
 	);
