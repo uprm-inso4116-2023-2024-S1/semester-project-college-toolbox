@@ -45,6 +45,10 @@ const CourseSearchHome: React.FC = () => {
 		} finally {
 		}
 	};
+	useEffect(()=>{
+		setCourses([]);
+	},[academicTermYear]);
+
 	const [isClient, setIsClient] = useState(false);
 	useEffect(() => {
 		setIsClient(true);
