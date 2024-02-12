@@ -2,33 +2,36 @@ name: Daily Project Metrics Generation
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *" # Runs at 00:00 UTC every day
   workflow_dispatch: # Allows manual trigger from the GitHub UI
 
 jobs:
   generate_and_commit_metrics:
     runs-on: ubuntu-latest
     permissions:
-        # Give the default GITHUB_TOKEN write permission to commit and push the
-        # added or changed files to the repository.
-        contents: write
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-      
-    - name: INSO Project Metrics Generator
-      uses: Poggecci/inso-gh-query-action@v1
-      with:
-        gh-api-token: ${{ secrets.GH_API_TOKEN }}
-        # If you have a specific config file path, specify it here. Otherwise, it will use the default.
-        # config-file: 'path/to/your/config.json'
+      - name: INSO Project Metrics Generator
+        uses: Poggecci/inso-gh-query-action@v1
+        with:
+          gh-api-token: ${{ secrets.GH_API_TOKEN }}
+          organization-name: "uprm-inso4116-2023-2024-S1"
+          managers: '["Poggecci", "T4G"]'
+          team-name: "College Toolbox"
+          milestone-name: "Milestone #1"
+          milestone-grade: 100
+          milestone-start: "2024-01-20"
+          milestone-end: "2024-02-31"
+          lecture-topic-task-quota: 4
 
-    - name: Auto Commit Results
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: Automated metrics update
-        branch: ${{ github.ref }}
-        file_pattern: . # Adjust if you want to specify paths to commit
-        commit_user_name: GitHub Action
-        commit_user_email: action@github.com
-        commit_author: GitHub Action <action@github.com>
+      - name: Auto Commit Results
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Automated metrics update
+          branch: ${{ github.ref }}
+          file_pattern: . # Adjust if you want to specify paths to commit
+          commit_user_name: GitHub Action
+          commit_user_email: action@github.com
+          commit_author: GitHub Action <action@github.com>
