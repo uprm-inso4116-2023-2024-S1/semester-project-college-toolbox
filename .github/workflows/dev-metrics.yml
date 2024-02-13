@@ -33,7 +33,7 @@ jobs:
         env:
           GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
       - name: Move Generated Metrics to src repo
-        run: mv **/*.csv ./
+        run: find . -name '*.csv' -exec mv {} ./ \
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
