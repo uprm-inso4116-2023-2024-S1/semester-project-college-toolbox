@@ -26,7 +26,7 @@ jobs:
         run: pip install requests
         shell: bash
       - name: Run metrics generator
-        run: python inso-gh-query-metrics/exportMetricsForCourseMilestone.py gh_metrics_config.json
+        run: python inso-gh-query-metrics/exportMetricsForCourseMilestone.py ${{ github.workspace}}/gh_metrics_config.json
         shell: bash
       - name: Move Generated Metrics to src repo
         run: mv **/*.csv ./
