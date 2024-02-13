@@ -13,19 +13,23 @@ jobs:
       # added or changed files to the repository.
       contents: write
     steps:
-      - name: INSO Project Metrics Generator
-        uses: Poggecci/inso-gh-query-action@v1
+      - name: Checkout INSO GH Metrics code
+        uses: actions/checkout@v4
         with:
-          gh-api-token: ${{ secrets.GH_API_TOKEN }}
-          organization-name: "uprm-inso4116-2023-2024-S1"
-          managers: '["Poggecci", "T4G"]'
-          team-name: "College Toolbox"
-          milestone-name: "Milestone #1"
-          milestone-grade: 100
-          milestone-start: "2024-01-20"
-          milestone-end: "2024-02-31"
-          lecture-topic-task-quota: 4
-
+          repository: Poggecci/INSO-GH-API-QUERY
+          path: inso-gh-query-metrics
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install requests
+        shell: bash
+      - name: Run metrics generator
+        run: python /inso-gh-query-metrics/exportMetricsForCourseMilestone.py gh_metrics_config.json
+        shell: bash
+      - name: Move Generated Metrics to src repo
+        run: mv **/*.csv ./
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
