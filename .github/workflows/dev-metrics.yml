@@ -33,7 +33,10 @@ jobs:
         env:
           GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
       - name: Move Generated Metrics to src repo
-        run: find . -name '*.csv' -exec mv {} ./ \
+        run: |
+          mkdir ./metrics
+          find . -name "*.zip" -exec mv "{}" ./zipfiles
+        shell: bash
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
