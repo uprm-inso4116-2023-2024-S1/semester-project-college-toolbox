@@ -23,9 +23,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-      - name: Move to Metrics Directory
-        run: cd inso-gh-query-metrics
-        shell: bash
       - name: Install poetry
         uses: abatilo/actions-poetry@v2
       - name: Setup a local virtual environment (if no poetry.toml file)
@@ -38,17 +35,18 @@ jobs:
           path: ./.venv
           key: venv-${{ hashFiles('poetry.lock') }}
       - name: Install the project dependencies
-        run: poetry install
+        run: |
+          cd inso-gh-query-metrics
+          poetry install
         shell: bash
       - name: Run metrics generator
-        run: poetry run python exportMetricsForCourseMilestone.py ${{ github.workspace }}/gh_metrics_config.json
+        run: poetry run python inso-gh-query-metrics/exportMetricsForCourseMilestone.py ${{ github.workspace }}/gh_metrics_config.json
         shell: bash
         env:
           GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
           ORGANIZATION: ${{ github.repository_owner }}
       - name: Move Generated Metrics to Source Repo
         run: |
-          cd ..
           mkdir ./metrics
           find . -name "inso-gh-query-metrics/*.md" -exec mv "{}" ./metrics \;
         shell: bash
