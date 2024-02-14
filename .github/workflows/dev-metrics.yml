@@ -43,7 +43,6 @@ jobs:
         run: |
           cd inso-gh-query-metrics
           poetry run python generateMilestoneMetricsForActions.py ${{ github.workspace }}/gh_metrics_config.json
-          ls
         shell: bash
         env:
           GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
@@ -51,7 +50,7 @@ jobs:
       - name: Move Generated Metrics to Source Repo
         run: |
           mkdir ./metrics
-          find . -name "inso-gh-query-metrics/*.md" -exec mv "{}" ./metrics \;
+          find . -name "inso-gh-query-metrics/**${{ github.repository_owner }}.md" -exec mv "{}" ./metrics \;
         shell: bash
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
