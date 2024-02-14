@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: write # Give the default GITHUB_TOKEN write permission to commit and push the added or changed files to the repository.
       pull-requests: write
+      repository-projects: write
     steps:
       - name: Checkout Local Repo
         uses: actions/checkout@v4
@@ -45,7 +46,7 @@ jobs:
           poetry run python generateMilestoneMetricsForActions.py ${{ github.workspace }}/gh_metrics_config.json
         shell: bash
         env:
-          GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
+          GITHUB_API_TOKEN: ${{ github.token }}
           ORGANIZATION: ${{ github.repository_owner }}
       - name: Move Generated Metrics to Source Repo
         run: |
