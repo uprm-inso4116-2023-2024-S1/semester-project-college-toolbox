@@ -55,16 +55,10 @@ jobs:
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: Automated metrics update
+          commit_message: "[Automated] Milestone Metrics Update"
           branch: metrics
           create_branch: true
-          file_pattern: metrics/*.csv # Adjust if you want to specify paths to commit
+          file_pattern: metrics/*.md # Adjust if you want to specify paths to commit
           commit_user_name: GitHub Action
           commit_user_email: action@github.com
           commit_author: GitHub Action <action@github.com>
-      - name: Create Pull Request for Metrics
-        uses: peter-evans/create-pull-request@v6
-        with:
-          base: metrics
-          branch: main
-          title: "[Automated] Daily Generated Developer Metrics"
