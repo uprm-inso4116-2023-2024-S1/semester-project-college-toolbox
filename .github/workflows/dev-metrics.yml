@@ -49,7 +49,7 @@ jobs:
           ORGANIZATION: ${{ github.repository_owner }}
       - name: Move Generated Metrics to Source Repo
         run: |
-          git checkout inso-metrics || echo "No existing metrics to preserve."
+          git checkout origin/inso-metrics || echo "No existing metrics to preserve."
           mkdir -p ./metrics
           mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
           git checkout main
