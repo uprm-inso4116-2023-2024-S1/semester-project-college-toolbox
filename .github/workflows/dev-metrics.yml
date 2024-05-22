@@ -47,11 +47,6 @@ jobs:
         env:
           GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
           ORGANIZATION: ${{ github.repository_owner }}
-      - name: Move Generated Metrics to Source Repo
-        run: |
-            mkdir ./metrics
-            mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
-        shell: bash
       - name: Fetch and Checkout INSO Metrics Branch
         run: |
             git fetch origin inso-metrics:refs/remotes/origin/inso-metrics
@@ -62,7 +57,10 @@ jobs:
             git config pull.rebase true
             git pull origin inso-metrics
             mkdir -p metrics
-            mv -n metrics/* ../metrics/ || true
+        shell: bash
+      - name: Move Generated Metrics to Source Repo
+        run: |
+            mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
         shell: bash
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
