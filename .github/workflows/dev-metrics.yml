@@ -57,6 +57,7 @@ jobs:
             git config pull.rebase true
             git pull origin inso-metrics
             mkdir -p metrics
+            git checkout main
         shell: bash
       - name: Move Generated Metrics to Source Repo
         run: |
