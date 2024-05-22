@@ -59,6 +59,7 @@ jobs:
         shell: bash
       - name: Preserve Previous Metrics
         run: |
+            git config pull.rebase true
             git pull origin inso-metrics
             mkdir -p metrics
             mv -n metrics/* ../metrics/ || true
