@@ -49,8 +49,8 @@ jobs:
           ORGANIZATION: ${{ github.repository_owner }}
       - name: Switch to Generated Metrics Branch
         run: |
-          git branch metrics -t || echo "Branch likely already created, proceeding to checkout."
-          git checkout metrics
+          git branch inso-metrics -t || echo "Branch likely already created, proceeding to checkout."
+          git checkout inso-metrics
           git pull
         shell: bash
       - name: Move Generated Metrics to Source Repo and Commit
