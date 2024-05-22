@@ -58,7 +58,7 @@ jobs:
           mkdir -p ./metrics
           mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
           git add metrics/*${{ github.repository_owner }}.md
-          git commit -c user.name="GitHub Action" -c user.email="action@github.com" -m "[Automated] Milestone Metrics Update"
+          git -c user.name="GitHub Action" -c user.email="action@github.com"  commit -m "[Automated] Milestone Metrics Update" --author="GitHub Action <action@github.com>"
           git push
         shell: bash
       - name: Create Pull Request
