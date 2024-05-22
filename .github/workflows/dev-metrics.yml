@@ -59,7 +59,7 @@ jobs:
           mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
           git add metrics/*${{ github.repository_owner }}.md
           git -c user.name="GitHub Action" -c user.email="action@github.com"  commit -m "[Automated] Milestone Metrics Update" --author="GitHub Action <action@github.com>"
-          git push
+          git push . HEAD
         shell: bash
       - name: Create Pull Request
         run: |
