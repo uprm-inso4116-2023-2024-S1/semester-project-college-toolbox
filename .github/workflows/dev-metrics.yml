@@ -49,11 +49,18 @@ jobs:
           ORGANIZATION: ${{ github.repository_owner }}
       - name: Move Generated Metrics to Source Repo
         run: |
-          git checkout origin/inso-metrics || echo "No existing metrics to preserve."
-          mkdir -p ./metrics
-          mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
-          git checkout main
-        shell: bash
+            mkdir ./metrics
+            mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
+            shell: bash
+      - name: Fetch and Checkout INSO Metrics Branch
+        run: |
+            git fetch origin inso-metrics:refs/remotes/origin/inso-metrics
+            git checkout -B inso-metrics --track origin/inso-metrics || git checkout -b inso-metrics
+      - name: Preserve Previous Metrics
+        run: |
+            git pull origin inso-metrics
+            mkdir -p metrics
+            mv -n metrics/* ../metrics/ || true
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
