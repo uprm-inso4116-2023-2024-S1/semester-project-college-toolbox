@@ -49,8 +49,7 @@ jobs:
           ORGANIZATION: ${{ github.repository_owner }}
       - name: Switch to Generated Metrics Branch
         run: |
-          git -c user.name="GitHub Action" -c user.email="action@github.com"
-          git branch metrics -t
+          git branch metrics -t || echo "Branch likely already created, proceeding to checkout."
           git checkout metrics
           git pull
         shell: bash
@@ -59,7 +58,7 @@ jobs:
           mkdir -p ./metrics
           mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
           git add metrics/*${{ github.repository_owner }}.md
-          git commit -m "[Automated] Milestone Metrics Update"
+          git commit -c user.name="GitHub Action" -c user.email="action@github.com" -m "[Automated] Milestone Metrics Update"
           git push
         shell: bash
       - name: Create Pull Request
