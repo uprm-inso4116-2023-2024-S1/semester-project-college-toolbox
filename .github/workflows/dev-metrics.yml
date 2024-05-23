@@ -50,7 +50,6 @@ jobs:
       - name: Checkout Past Metrics
         uses: actions/checkout@v4
         with:
-          sparse-checkout: 'metrics'
           ref: inso-metrics
           path: old-metrics
       - name: Move Generated Metrics to Source Repo
