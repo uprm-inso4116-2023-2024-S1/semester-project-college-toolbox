@@ -1,7 +1,18 @@
 {
-  "projectName": "College Toolbox",
-  "managers": ["Ryan8702"],
-  "milestoneName": "Milestone #3",
-  "projectedMilestoneGroupGrade": 100.0,
-  "lectureTopicTaskQuota": 4
-}
+    "projectName": "College Toolbox",
+    "managers": ["EdwinC1339", "Ryan8702"],
+    "milestones": {
+      "Milestone #1":{
+          "projectedGroupGrade": 100.0
+      }, 
+      "Milestone #2":{
+          "projectedGroupGrade": 100.0
+      },
+      "Milestone #3":{
+          "projectedGroupGrade": 100.0
+      }
+    },
+    "lectureTopicTaskQuota": 4,
+    "countOpenIssues": false
+  }
+  

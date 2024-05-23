@@ -47,19 +47,10 @@ jobs:
         env:
           GITHUB_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
           ORGANIZATION: ${{ github.repository_owner }}
-      - name: Checkout Past Metrics
-        uses: actions/checkout@v4
-        with:
-          ref: inso-metrics
-          path: old-metrics
       - name: Move Generated Metrics to Source Repo
         run: |
-            mkdir -p ./old-metrics/metrics
-            mv ./inso-gh-query-metrics/*${{ github.repository_owner }}.md ./old-metrics/metrics
-            mkdir -p ./metrics
-            ls old-metrics/metrics
-            mv ./old-metrics/metrics/*${{ github.repository_owner }}.md  ./metrics
-            ls ./metrics
+          mkdir -p ./metrics
+          mv inso-gh-query-metrics/*${{ github.repository_owner }}.md metrics/
         shell: bash
       - name: Auto Commit Results
         uses: stefanzweifel/git-auto-commit-action@v4
